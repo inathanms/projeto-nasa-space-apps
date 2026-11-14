@@ -210,4 +210,8 @@ export const metadados = {
   titulo: "Duas fotos. Uma descoberta histórica.",
   descricao:
     "Compare imagens reais do telescópio SPHEREx em épocas diferentes e descubra estrelas que andam e mudam de brilho. NASA Space Apps Challenge 2026.",
+  compartilhamento: {
+    titulo: "Explore o céu com o SPHEREye",
+    descricao: "Compare imagens do telescópio SPHEREx e veja o que mudou entre duas épocas.",
+  },
 };

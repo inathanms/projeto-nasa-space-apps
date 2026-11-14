@@ -13,7 +13,12 @@ const geist = localFont({
   display: "swap",
 });
 
+const deployHostname = process.env.VERCEL_ENV === "preview"
+  ? process.env.VERCEL_BRANCH_URL ?? process.env.VERCEL_URL
+  : process.env.VERCEL_PROJECT_PRODUCTION_URL;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(deployHostname ? `https://${deployHostname}` : "http://localhost:3000"),
   title: { default: "SPHEREye", template: "%s · SPHEREye" },
   description: metadados.descricao,
   icons: { icon: marca.logoMark },

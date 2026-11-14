@@ -12,7 +12,13 @@ import { metadados } from "../content/landing";
 export const metadata: Metadata = {
   title: metadados.titulo,
   description: metadados.descricao,
-  openGraph: { title: metadados.titulo, description: metadados.descricao, type: "website", locale: "pt_BR", siteName: "SPHEREye" },
+  openGraph: {
+    title: metadados.compartilhamento.titulo,
+    description: metadados.compartilhamento.descricao,
+    type: "website",
+    locale: "pt_BR",
+    siteName: "SPHEREye",
+  },
 };
 
 export default function Home() {
