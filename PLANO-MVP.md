@@ -18,17 +18,15 @@ No início, combinem quem assume cada papel e registrem a hora de início. **H0*
 
 Para o repasse inicial dos dados, P3 entrega a P4 os URLs dos produtos e dos recortes, identificadores, datas de observação e os FITS. P4 entrega a P2 e P5 os dois PNGs e o manifesto. P5 abre a versão publicada e verifica que os arquivos aparecem na ordem correta, com datas e fonte.
 
-
-
 ## 1. Escopo e stack
 
-| Camada | Escolha | O que a equipe entrega |
-|---|---|---|
-| Página inicial `/` | Next.js App Router, TypeScript e CSS | Explicação curta do desafio, um recorte real da demo, créditos e botão **Explorar o céu**. |
-| Explorador `/explorar` | React no mesmo Next.js, exportação estática | Formulário RA/Dec em graus ICRS, preset de um alvo confirmado, alternância manual e reprodução automática, datas UTC, comprimento de onda, origem e estados de carregamento, ausência de dados e falha. |
-| API | FastAPI, Pydantic, Uvicorn e Requests | Validação de coordenadas, busca e download no IRSA, resposta JSON documentada em OpenAPI e `GET /health`. |
-| Processamento | Astropy, reproject, NumPy e Pillow | Leitura de VOTable/FITS, seleção dos quadros, máscara, reprojeção, contraste compartilhado e exportação de PNG. |
-| Dados do MVP | JSON e PNG versionados, cache limitado em RAM | O exemplo abre direto do frontend. A API guarda resultados pequenos por tempo limitado. |
+| Camada                 | Escolha                                       | O que a equipe entrega                                                                                                                                                                                  |
+| ---------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Página inicial `/`     | Next.js App Router, TypeScript e CSS          | Explicação curta do desafio, um recorte real da demo, créditos e botão **Explorar o céu**.                                                                                                              |
+| Explorador `/explorar` | React no mesmo Next.js, exportação estática   | Formulário RA/Dec em graus ICRS, preset de um alvo confirmado, alternância manual e reprodução automática, datas UTC, comprimento de onda, origem e estados de carregamento, ausência de dados e falha. |
+| API                    | FastAPI, Pydantic, Uvicorn e Requests         | Validação de coordenadas, busca e download no IRSA, resposta JSON documentada em OpenAPI e `GET /health`.                                                                                               |
+| Processamento          | Astropy, reproject, NumPy e Pillow            | Leitura de VOTable/FITS, seleção dos quadros, máscara, reprojeção, contraste compartilhado e exportação de PNG.                                                                                         |
+| Dados do MVP           | JSON e PNG versionados, cache limitado em RAM | O exemplo abre direto do frontend. A API guarda resultados pequenos por tempo limitado.                                                                                                                 |
 
 O campo de visão é fixo em **6′ × 6′**. Para ganhar tempo, a primeira versão exibe **dois quadros**, usa um único grupo espectral comparável por comparação e aceita graus decimais. A landing e o explorador compartilham layout e estilos. Filtros livres, campo de visão variável, sobreposições Gaia/WISE, subtração, espectros e detecção automática ficam para depois da demo. A experiência principal cabe em uma tela e deve funcionar no celular e com teclado. [Enunciado](https://www.spaceappschallenge.org/2026/challenges/planet-x-and-spherex/?tab=details) · [Export estático do Next.js](https://nextjs.org/docs/app/guides/static-exports)
 
@@ -184,3 +182,6 @@ curl -fsS --max-time 20 -G 'https://irsa.ipac.caltech.edu/SIA' \
 ```
 
 **Validação concluída até H4** quando a equipe consegue rastrear dois produtos de épocas distintas da VOTable às URLs oficiais, baixar dois FITS válidos, comprovar compatibilidade espectral e gerar dois PNGs do mesmo campo em uma grade alinhada. O manifesto registra as datas de observação, detector, comprimento de onda e procedência. Em paralelo, P5 confirma que o Render alcança o IRSA a partir do serviço publicado. O teste de M101 confirma a integração e o teste do alvo do desafio confirma a utilidade visual para a demo. [Coordenadas e recortes de M101 no IRSA](https://caltech-ipac.github.io/irsa-tutorials/spherex-cutouts/)
+
+
+Ajustar.
