@@ -1,0 +1,49 @@
+{
+  "sequence_id": "exemplo-sintetico-rw-aur",
+  "ra_deg": 76.9564,
+  "dec_deg": 30.4014,
+  "fov_arcmin": 6,
+  "collections": [
+    "teste_sintetico"
+  ],
+  "fetched_at_utc": "2026-11-14T00:00:00Z",
+  "generated_at_utc": "2026-11-14T00:00:00Z",
+  "processing_version": "sintetico-0",
+  "is_synthetic": true,
+  "frames": [
+    {
+      "frame_id": "sintetico-rw-aur-1",
+      "observed_at_utc": "2025-03-19T06:44:18Z",
+      "collection": "teste_sintetico",
+      "detector": 2,
+      "wavelength_um": 1.65,
+      "bandwidth_um": 0.04,
+      "calibration_version": "n/a",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": 1,
+      "image_src": "frame-1.svg",
+      "marker": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "frame_id": "sintetico-rw-aur-2",
+      "observed_at_utc": "2025-09-13T02:15:37Z",
+      "collection": "teste_sintetico",
+      "detector": 2,
+      "wavelength_um": 1.65,
+      "bandwidth_um": 0.04,
+      "calibration_version": "n/a",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": 1,
+      "image_src": "frame-2.svg",
+      "marker": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+:root {
+  --night: #0b1f22;
+  --night2: #0d2527;
+  --card: #0f2a2c;
+  --card-border: #1f4a47;
+  --teal: #2b7a6b;
+  --teal-l: #5fb3a1;
+  --orange: #e0703a;
+  --rust: #c75636;
+  --sun: #eaa83a;
+  --cream: #f7e1c9;
+  --text-muted-dark: #a9c6bd;
+  --text-soft-dark: #cfe3dc;
+  --text-on-cream: #1d3b37;
+  --text-muted-cream: #4d6b64;
+
+  --radius-card: 18px;
+  --radius-pill: 999px;
+  --radius-cta: 28px;
+  --pad-x: 64px;
+  --pad-y: 96px;
+  --max-w: 1440px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-inter), Arial, sans-serif;
+  background: var(--night);
+  color: var(--cream);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Fundo "universo" do /explorar. */
+.bg-universo {
+  background-color: #07071a;
+  /* blocos de estrelas com tamanhos primos entre si para não parecer grade (scripts/gerar-estrelas.mjs) */
+  background-image:
+    url("/fundo/estrelas-1.svg"),
+    url("/fundo/estrelas-2.svg"),
+    radial-gradient(ellipse 45% 35% at 82% 22%, rgba(139, 92, 246, 0.22) 0%, transparent 70%),
+    radial-gradient(ellipse 35% 30% at 90% 70%, rgba(236, 72, 153, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 60% at 10% 50%, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+  background-size: 997px 997px, 613px 613px, 100% 100%, 100% 100%, 100% 100%;
+  background-position: 0 0, 211px 137px, 0 0, 0 0, 0 0;
+  background-attachment: fixed;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --pad-x: 32px;
+    --pad-y: 72px;
+  }
+}
+
+@media (max-width: 560px) {
+  :root {
+    --pad-x: 20px;
+    --pad-y: 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

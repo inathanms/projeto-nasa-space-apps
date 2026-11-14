@@ -1,0 +1,124 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+:root{--night:#0b1f22;--night2:#10302f;--teal:#2b7a6b;--tealL:#5fb3a1;--orange:#e0703a;--rust:#c75636;--sun:#eaa83a;--cream:#f7e1c9}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1440px;font-family:Inter,Arial,sans-serif;background:var(--night);color:var(--cream)}
+nav{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:22px 64px;z-index:5}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:22px}.brand img{width:46px;height:46px;border-radius:50%}
+.brand .t{color:var(--orange);font-weight:400}.brand small{display:block;font-size:11px;color:#9fbfb6;font-weight:500;letter-spacing:.08em}
+nav ul{display:flex;gap:30px;list-style:none;font-size:14px;color:#cfe3dc}
+.btn{display:inline-block;padding:14px 26px;border-radius:999px;font-weight:700;font-size:15px}
+.btn.p{background:var(--orange);color:#1b0f08}.btn.g{border:1.5px solid var(--tealL);color:var(--cream)}
+.hero{position:relative;height:860px;overflow:hidden;background:radial-gradient(ellipse at 70% 20%,#17403f 0%,var(--night) 60%)}
+.hero svg.sky{position:absolute;inset:0}
+.hc{position:absolute;left:64px;top:150px;width:640px}
+.tag{display:inline-block;font-size:12px;letter-spacing:.12em;color:var(--sun);border:1px solid #6b5520;padding:6px 12px;border-radius:999px;margin-bottom:24px}
+h1{font-size:64px;line-height:1.05;font-weight:800;letter-spacing:-.02em}h1 em{font-style:normal;color:var(--orange)}
+.hc p{margin:22px 0 34px;font-size:19px;line-height:1.55;color:#cfe3dc}
+.hc .cta{display:flex;gap:14px}
+.stats{display:flex;gap:40px;margin-top:46px}.stats b{display:block;font-size:28px;color:var(--sun)}.stats span{font-size:13px;color:#9fbfb6}
+section{padding:96px 64px}
+.kick{font-size:12px;letter-spacing:.14em;color:var(--orange);font-weight:700;margin-bottom:12px}
+h2{font-size:40px;font-weight:800;letter-spacing:-.01em;margin-bottom:14px}
+.lead{font-size:17px;color:#b9d2ca;max-width:720px;line-height:1.55;margin-bottom:44px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.card{background:#0f2a2c;border:1px solid #1f4a47;border-radius:18px;padding:26px}
+.card h3{font-size:18px;margin:14px 0 8px}.card p{font-size:14px;color:#a9c6bd;line-height:1.5}
+.ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:#173d3a;color:var(--sun)}
+.cream{background:var(--cream);color:#1d3b37}.cream .lead{color:#4d6b64}.cream .card{background:#fff6ea;border-color:#ecd2b5}.cream .card p{color:#5d736c}
+.step{display:flex;gap:18px;align-items:flex-start}.num{flex:none;width:46px;height:46px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-weight:800;font-size:18px}
+.targets .t{border-radius:18px;overflow:hidden;background:#0f2a2c;border:1px solid #1f4a47}
+.targets .img{height:170px;position:relative;background:radial-gradient(circle at 50% 50%,#1a3a3d,#071416)}
+.targets .b{padding:18px 20px}.targets .b h3{font-size:17px}.targets .b p{font-size:13px;color:#a9c6bd;margin-top:6px}
+.pill{display:inline-block;margin-top:12px;font-size:11px;padding:4px 10px;border-radius:999px;background:#173d3a;color:var(--tealL)}
+.data{display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center}
+.flow{display:flex;align-items:center;gap:10px;font-size:13px}.flow div{flex:1;background:#0f2a2c;border:1px solid #1f4a47;border-radius:14px;padding:16px;text-align:center}.flow i{color:var(--orange);font-style:normal}
+.about{display:grid;grid-template-columns:320px 1fr;gap:56px;align-items:center}
+.about img{width:300px;height:300px;border-radius:50%;box-shadow:0 0 0 10px #ecd2b5}
+.ctaband{margin:0 64px 80px;border-radius:28px;padding:56px;background:linear-gradient(110deg,var(--teal),#1d5a51 55%,var(--rust));display:flex;justify-content:space-between;align-items:center}
+footer{padding:36px 64px;border-top:1px solid #1f4a47;font-size:12px;color:#86a69d;display:flex;justify-content:space-between}
+</style></head><body>
+<div style="position:relative">
+<nav><div class="brand"><img src="assets/logo-oxentech-mark.png"><div>Oxen<span class="t">Tech</span><small>CÉU DO SERTÃO · SPHEREx</small></div></div>
+<ul><li>Por que aqui</li><li>Como funciona</li><li>Alvos</li><li>Dados</li><li>Quem somos</li></ul>
+<a class="btn p" style="padding:11px 22px;font-size:14px">Explorar o céu →</a></nav>
+<div class="hero"><svg class="sky" width="1440" height="860" viewBox="0 0 1440 860">
+<defs><radialGradient id="sg"><stop offset="0" stop-color="#fff3c4"/><stop offset=".4" stop-color="#eaa83a" stop-opacity=".6"/><stop offset="1" stop-color="#eaa83a" stop-opacity="0"/></radialGradient></defs>
+<g fill="#f7e1c9" id="stars"></g>
+<!-- Taurus / boi constellation -->
+<g stroke="#5fb3a1" stroke-width="1.5" fill="#f7e1c9" opacity=".9" transform="translate(40,0)">
+<polyline fill="none" points="900,170 945,250 1010,300 1080,300 1145,250 1190,170"/>
+<polyline fill="none" points="945,250 975,330 1010,300"/><polyline fill="none" points="1145,250 1115,330 1080,300"/>
+<polyline fill="none" points="975,330 1000,400 1045,430 1090,400 1115,330"/>
+<circle cx="900" cy="170" r="4"/><circle cx="945" cy="250" r="3"/><circle cx="1010" cy="300" r="3"/><circle cx="1080" cy="300" r="3"/><circle cx="1145" cy="250" r="3"/><circle cx="1190" cy="170" r="4"/><circle cx="975" cy="330" r="3"/><circle cx="1115" cy="330" r="3"/><circle cx="1000" cy="400" r="3"/><circle cx="1090" cy="400" r="3"/><circle cx="1045" cy="430" r="3"/>
+<circle cx="1000" cy="400" r="14" fill="url(#sg)"/>
+</g>
+<text x="1085" y="465" fill="#5fb3a1" font-size="12" text-anchor="middle" letter-spacing="2">CONSTELAÇÃO DO TOURO</text>
+<!-- orbit + satellite -->
+<ellipse cx="1040" cy="330" rx="330" ry="90" transform="rotate(-14 1040 330)" fill="none" stroke="#eaa83a" stroke-width="1.5" stroke-dasharray="5 7" opacity=".7"/>
+<g transform="translate(760,390) rotate(-14)"><rect x="-8" y="-8" width="16" height="16" rx="3" fill="#f7e1c9"/><path d="M-6 -8 L-12 -22 L12 -22 L6 -8Z" fill="#cfe3dc"/><rect x="-30" y="-3" width="18" height="7" fill="#5fb3a1"/><rect x="12" y="-3" width="18" height="7" fill="#5fb3a1"/></g>
+<text x="740" y="430" fill="#eaa83a" font-size="12">SPHEREx</text>
+<!-- moving star demo -->
+<circle cx="1320" cy="400" r="20" fill="url(#sg)" opacity=".35"/><circle cx="1350" cy="388" r="20" fill="url(#sg)"/>
+<line x1="1320" y1="400" x2="1350" y2="388" stroke="#e0703a" stroke-dasharray="3 3"/>
+<circle cx="1350" cy="388" r="30" fill="none" stroke="#e0703a"/>
+<text x="1350" y="440" fill="#e0703a" font-size="12" text-anchor="middle">ela se moveu!</text>
+<!-- dunes -->
+<path d="M0 770 C200 730 380 740 560 770 S900 800 1100 750 S1360 720 1440 730 L1440 860 L0 860Z" fill="#c75636"/>
+<path d="M0 805 C240 775 420 790 620 810 S1000 825 1200 790 S1400 785 1440 790 L1440 860 L0 860Z" fill="#e0703a"/>
+<path d="M0 835 C300 815 600 830 900 815 S1300 800 1440 810 L1440 860 L0 860Z" fill="#eb8c3e"/>
+<!-- cactus silhouette -->
+<g fill="#2b7a6b" transform="translate(1180,540)">
+<rect x="40" y="0" width="56" height="260" rx="28"/><rect x="0" y="70" width="34" height="110" rx="17"/><rect x="0" y="150" width="60" height="30" rx="15"/>
+<rect x="102" y="40" width="34" height="110" rx="17"/><rect x="80" y="120" width="56" height="30" rx="15"/>
+<g stroke="#0e2e2b" stroke-width="2" fill="none"><path d="M68 30 V120 L56 132 V230"/><path d="M80 60 V100"/><circle cx="68" cy="30" r="4"/><circle cx="80" cy="60" r="4"/></g>
+</g>
+</svg>
+<div class="hc"><span class="tag">NASA SPACE APPS 2026 · PLANET X AND SPHEREx</span>
+<h1>Do sertão,<br>veja o céu <em>se mover.</em></h1>
+<p>Compare imagens reais do telescópio SPHEREx, da NASA, e descubra estrelas que andam, piscam e se escondem no infravermelho. Sem instalar nada. Sem precisar saber astronomia.</p>
+<div class="cta"><a class="btn p">Explorar o céu →</a><a class="btn g">Ver um exemplo</a></div>
+<div class="stats"><div><b>102</b><span>cores do infravermelho</span></div><div><b>2×/ano</b><span>o céu inteiro mapeado</span></div><div><b>100%</b><span>dados públicos da NASA</span></div></div>
+</div></div></div>
+
+<section id="por-que"><div class="kick">POR QUE AQUI</div><h2>O céu que seus olhos não veem</h2>
+<p class="lead">O SPHEREx fotografa o universo em luz infravermelha. A gente transforma esses dados em algo que qualquer curioso consegue explorar.</p>
+<div class="grid4">
+<div class="card"><div class="ic">◐</div><h3>Veja o invisível</h3><p>Imagens infravermelhas reais, de estrelas frias e poeira que nenhum telescópio comum mostra.</p></div>
+<div class="card"><div class="ic">⇄</div><h3>Compare épocas</h3><p>Alterne entre fotos do mesmo ponto do céu com meses de diferença e veja o que mudou.</p></div>
+<div class="card"><div class="ic">✦</div><h3>Histórias prontas</h3><p>Comece pela estrela mais rápida do céu ou pela anã marrom mais fria já encontrada.</p></div>
+<div class="card"><div class="ic">⌕</div><h3>Ciência cidadã</h3><p>Plutão foi achado comparando fotos. O próximo planeta pode ser achado por você.</p></div>
+</div></section>
+
+<section class="cream" id="como"><div class="kick">COMO FUNCIONA</div><h2>Três passos, nenhum telescópio</h2>
+<p class="lead">Você escolhe um ponto do céu, a gente busca as fotos no arquivo da NASA e alinha tudo para você comparar.</p>
+<div class="grid3">
+<div class="card step"><div class="num">1</div><div><h3 style="margin-top:4px">Escolha um alvo</h3><p>Clique num astro em destaque, busque pelo nome ou digite as coordenadas.</p></div></div>
+<div class="card step"><div class="num">2</div><div><h3 style="margin-top:4px">Compare as épocas</h3><p>Aperte play e alterne entre fotos tiradas com meses de diferença.</p></div></div>
+<div class="card step"><div class="num">3</div><div><h3 style="margin-top:4px">Descubra</h3><p>O que pulou de lugar está se movendo. O que mudou de brilho está pulsando.</p></div></div>
+</div></section>
+
+<section class="targets" id="alvos"><div class="kick">ALVOS EM DESTAQUE</div><h2>Comece por aqui</h2>
+<p class="lead">Os alvos escolhidos pelo desafio da NASA, cada um com algo para você perceber.</p>
+<div class="grid4">
+<div class="t"><div class="img"><svg width="100%" height="170"><circle cx="45%" cy="50%" r="16" fill="#eaa83a" opacity=".35"/><circle cx="55%" cy="44%" r="16" fill="#fff3c4"/><circle cx="20%" cy="25%" r="2" fill="#fff"/><circle cx="80%" cy="75%" r="2" fill="#fff"/></svg></div><div class="b"><h3>Estrela de Barnard</h3><p>A estrela que mais anda no nosso céu.</p><span class="pill">movimento</span></div></div>
+<div class="t"><div class="img"><svg width="100%" height="170"><circle cx="50%" cy="50%" r="11" fill="#e0703a"/><circle cx="30%" cy="30%" r="2" fill="#fff"/><circle cx="75%" cy="65%" r="2" fill="#fff"/></svg></div><div class="b"><h3>WISE 0855</h3><p>A anã marrom mais fria conhecida, mais fria que o Polo Norte.</p><span class="pill">movimento</span></div></div>
+<div class="t"><div class="img"><svg width="100%" height="170"><circle cx="46%" cy="50%" r="8" fill="#e0703a"/><circle cx="54%" cy="52%" r="7" fill="#c75636"/><circle cx="25%" cy="70%" r="2" fill="#fff"/></svg></div><div class="b"><h3>Epsilon Indi B</h3><p>Duas "estrelas fracassadas" dançando juntas.</p><span class="pill">movimento</span></div></div>
+<div class="t"><div class="img"><svg width="100%" height="170"><circle cx="50%" cy="50%" r="22" fill="#c75636" opacity=".5"/><circle cx="50%" cy="50%" r="12" fill="#eaa83a"/><circle cx="20%" cy="35%" r="2" fill="#fff"/></svg></div><div class="b"><h3>R Draconis</h3><p>Uma estrela que pisca ao longo dos meses.</p><span class="pill" style="color:#eaa83a">brilho</span></div></div>
+</div></section>
+
+<section id="dados" style="background:#0d2527"><div class="data"><div>
+<div class="kick">DE ONDE VÊM OS DADOS</div><h2>Direto do arquivo da NASA</h2>
+<p class="lead">Cada imagem vem do arquivo público do SPHEREx no NASA/IPAC IRSA, com data, detector, comprimento de onda e link para o original. Nada é simulado.</p>
+<p style="font-size:13px;color:#86a69d">SPHEREx: NASA / JPL-Caltech / IPAC · IRSA DOI 10.26131/IRSA678 · 10.26131/IRSA662</p></div>
+<div class="flow"><div>🛰️<br><b>SPHEREx</b><br>órbita a 700 km</div><i>→</i><div>🗄️<br><b>IRSA</b><br>arquivo NASA</div><i>→</i><div>🌵<br><b>OxenTech</b><br>alinha e mostra</div></div>
+</div></section>
+
+<section class="cream" id="sobre"><div class="about"><img src="assets/logo-oxentech-mark.png">
+<div><div class="kick">QUEM SOMOS</div><h2>OxenTech</h2>
+<p class="lead" style="margin-bottom:18px">Somos uma equipe de Aracaju, Sergipe. O nome mistura o "oxente" do nordeste com tecnologia, e o boi do nosso logo é a constelação do Touro, que brilha no céu do sertão.</p>
+<p class="lead" style="margin-bottom:0">Acreditamos que olhar para o céu não depende de onde você está, só da curiosidade.</p></div></div></section>
+
+<div style="background:var(--cream);padding-top:1px"><div class="ctaband"><div><h2 style="color:#fff;margin-bottom:8px">Pronto para olhar para cima?</h2><p style="color:#e6f2ee">Escolha uma estrela e veja o que mudou.</p></div><a class="btn" style="background:var(--cream);color:#1d3b37">Explorar o céu →</a></div></div>
+<footer><span>© 2026 OxenTech · NASA Space Apps Challenge 2026</span><span>Dados: NASA/JPL-Caltech/IPAC via IRSA · Projeto independente, sem endosso da NASA</span></footer>
+<script>const g=document.getElementById('stars');for(let i=0;i<160;i++){const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',Math.random()*1440);c.setAttribute('cy',Math.random()*640);c.setAttribute('r',Math.random()*1.4+.3);c.setAttribute('opacity',Math.random()*.7+.2);g.appendChild(c)}</script>
+</body></html>
