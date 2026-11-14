@@ -1,0 +1,41 @@
+{
+  "sequence_id": "exemplo-sintetico-wise0855",
+  "ra_deg": 133.7951,
+  "dec_deg": -7.2451,
+  "fov_arcmin": 6,
+  "collections": [
+    "Simulação"
+  ],
+  "fetched_at_utc": null,
+  "generated_at_utc": "2026-11-14T00:00:00Z",
+  "processing_version": "sintetico-0",
+  "is_synthetic": true,
+  "frames": [
+    {
+      "frame_id": "sintetico-wise0855-1",
+      "observed_at_utc": "2025-04-28T10:05:11Z",
+      "collection": "Simulação",
+      "detector": 2,
+      "wavelength_um": 1.65,
+      "bandwidth_um": 0.04,
+      "calibration_version": "n/a",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": 1,
+      "image_src": "/examples/wise0855/frame-1.svg"
+    },
+    {
+      "frame_id": "sintetico-wise0855-2",
+      "observed_at_utc": "2025-10-24T08:31:52Z",
+      "collection": "Simulação",
+      "detector": 2,
+      "wavelength_um": 1.65,
+      "bandwidth_um": 0.04,
+      "calibration_version": "n/a",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": 1,
+      "image_src": "/examples/wise0855/frame-2.svg"
+    }
+  ]
+}

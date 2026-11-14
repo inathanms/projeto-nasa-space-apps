@@ -1,0 +1,41 @@
+{
+  "sequence_id": "prototipo",
+  "ra_deg": 210.80227,
+  "dec_deg": 54.34895,
+  "fov_arcmin": 6,
+  "collections": [
+    "Simulação"
+  ],
+  "fetched_at_utc": null,
+  "generated_at_utc": null,
+  "processing_version": "synthetic-v1",
+  "frames": [
+    {
+      "frame_id": "simulado-1",
+      "observed_at_utc": "2025-04-01T00:00:00Z",
+      "collection": "Simulação",
+      "detector": "Exemplo",
+      "wavelength_um": 2.14,
+      "bandwidth_um": 0.06,
+      "calibration_version": "Simulação",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": 1,
+      "image_src": "/examples/prototipo/epoca-1.png"
+    },
+    {
+      "frame_id": "simulado-2",
+      "observed_at_utc": "2025-10-01T00:00:00Z",
+      "collection": "Simulação",
+      "detector": "Exemplo",
+      "wavelength_um": 2.14,
+      "bandwidth_um": 0.06,
+      "calibration_version": "Simulação",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": 1,
+      "image_src": "/examples/prototipo/epoca-2.png"
+    }
+  ],
+  "is_synthetic": true
+}
