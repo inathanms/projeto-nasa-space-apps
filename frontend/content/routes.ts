@@ -13,10 +13,6 @@ export const routes = {
     title: "Laboratório de apontamento",
     description: "Gire o globo e incline a linha de visão do telescópio. Use as coordenadas resultantes para buscar um campo no explorador.",
   },
-  entregas: {
-    title: "Entregas",
-    description: "Experimente o projeto à medida que ele avança, da primeira interface à consulta por coordenadas.",
-  },
 };
 
 export function metadataFor({ title, description }: typeof routes[keyof typeof routes]): Metadata {

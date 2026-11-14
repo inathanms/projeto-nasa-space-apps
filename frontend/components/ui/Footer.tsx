@@ -6,7 +6,7 @@ export default function Footer() {
     <footer className="site-footer" id="rodape">
       <div className="shell site-footer-inner">
         <p>{footer.esquerda}</p>
-        <nav aria-label="Ferramentas e entregas">
+        <nav aria-label="Ferramentas">
           {nav.ferramentas.map(({ href, label }) => <Link href={href} key={href}>{label}</Link>)}
         </nav>
         <p>{footer.direita}</p>

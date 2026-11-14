@@ -34,7 +34,6 @@ export const nav = {
     { href: "/explorar/", label: "Explorador" },
     { href: "/observatorio/", label: "Observatório" },
     { href: "/laboratorio/", label: "Laboratório" },
-    { href: "/entregas/", label: "Entregas" },
   ],
   cta: { href: "/explorar/", label: "Explorar o céu" },
 };
