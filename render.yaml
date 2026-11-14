@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+services:
+  - type: web
+    name: planet-x-spherex-api
+    runtime: python
+    plan: free
+    branch: poc-backend
+    rootDir: backend
+    buildCommand: python -m pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.16"
+      - key: CORS_ORIGINS
+        sync: false
