@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(deployHostname ? `https://${deployHostname}` : "http://localhost:3000"),
   title: { default: "SPHEREye", template: "%s · SPHEREye" },
   description: metadados.descricao,
-  icons: { icon: marca.logoMark },
+  icons: { icon: marca.logoIcon },
   other: { "page-type": "software", "site-kind": "software" },
 };
 

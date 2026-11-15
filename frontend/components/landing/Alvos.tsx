@@ -15,7 +15,7 @@ export default function Alvos() {
             <li key={slug}>
               <Link href={alvosSecao.hrefBase + slug} className={styles.target}>
                 <div className={styles.targetImage}>
-                  <Image src={`/alvos/${slug}.jpg`} alt={alvosSecao.fotoAlt(nome)} width={600} height={425} loading="eager" fetchPriority="low" />
+                  <Image src={`/alvos/${slug}.jpg`} alt={alvosSecao.fotoAlt(nome)} width={600} height={425} />
                 </div>
                 <div className={styles.targetBody}>
                   <h3>{nome}</h3>

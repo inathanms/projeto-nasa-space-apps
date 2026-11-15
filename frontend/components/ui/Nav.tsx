@@ -8,7 +8,7 @@ export default function Nav() {
     <header className="site-header">
       <div className="shell site-header-inner">
         <Link className="site-brand" href="/">
-          <Image src={marca.logoMark} alt="" width={44} height={44} />
+          <Image src={marca.logoIcon} alt="" width={44} height={44} loading="eager" />
           <span>
             <strong>{marca.nome}<span>{marca.nomeDestaque}</span></strong>
             <small>{marca.subtitulo}</small>

@@ -17,6 +17,8 @@ function direction(ra: number, dec = 0): Vec {
 const forward = direction(48, 23);
 const right = direction(138);
 const up = direction(228, 67);
+const equator = Array.from({ length: 121 }, (_, index) => scale(direction(index * 3), 1.42));
+const nearEquator = Array.from({ length: 61 }, (_, index) => scale(direction(-42 + index * 3), 1.42));
 
 function prepareRaster(ctx: CanvasRenderingContext2D, radius: number): Raster {
   const size = radius * 2;
@@ -68,10 +70,10 @@ export function makeScene(canvas: HTMLCanvasElement, layout: "lab" | "orbital" =
   function draw(width: number, height: number, ra: number, dec: number, time = 0) {
     if (!ctx || !layerCtx || width < 1 || height < 1) return;
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
-    if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
-      canvas.width = Math.round(width * ratio);
-      canvas.height = Math.round(height * ratio);
-    }
+    const pixelWidth = Math.round(width * ratio);
+    const pixelHeight = Math.round(height * ratio);
+    if (canvas.width !== pixelWidth) canvas.width = pixelWidth;
+    if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.fillStyle = "#071619";
     ctx.fillRect(0, 0, width, height);
@@ -105,7 +107,6 @@ export function makeScene(canvas: HTMLCanvasElement, layout: "lab" | "orbital" =
       ctx.setLineDash([]);
     }
 
-    const equator = Array.from({ length: 121 }, (_, index) => scale(direction(index * 3), 1.42));
     if (!orbital) {
       line(equator, "#657c71", true);
       line([[0, -1.57, 0], [0, 1.65, 0]], "#82988a", true);
@@ -169,7 +170,6 @@ export function makeScene(canvas: HTMLCanvasElement, layout: "lab" | "orbital" =
         ctx.fill();
       }
     } else {
-      const nearEquator = Array.from({ length: 61 }, (_, i) => scale(direction(-42 + i * 3), 1.42));
       line(nearEquator, "#9eafa6");
       const arc = Array.from({ length: 121 }, (_, i) => scale(direction(ra * i / 120), 1.42));
       line(arc, "#eaa83a", false, 2);

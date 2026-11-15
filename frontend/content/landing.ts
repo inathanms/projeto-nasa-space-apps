@@ -17,6 +17,7 @@ export const marca = {
   nomeDestaque: "Tech",
   subtitulo: "CÉU DO SERTÃO · SPHEREx",
   logoMark: "/brand/logo-oxentech-mark.png",
+  logoIcon: "/brand/logo-oxentech-icon.png",
   logoAlt: "Logo da OxenTech: cacto e boi-constelação sob o céu do sertão",
 };
 

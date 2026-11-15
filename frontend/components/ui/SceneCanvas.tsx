@@ -12,7 +12,7 @@ type Props = ComponentProps<"canvas"> & {
 
 export default function SceneCanvas({ ra, dec, time, variant = "lab", ...props }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
-  const drawRef = useRef<() => void>(undefined);
+  const scheduleDrawRef = useRef<() => void>(undefined);
   const angles = useRef({ ra, dec, time });
   const [failed, setFailed] = useState(false);
 
@@ -24,30 +24,36 @@ export default function SceneCanvas({ ra, dec, time, variant = "lab", ...props }
       setFailed(true);
       return;
     }
-    const draw = () => {
-      const { ra, dec, time } = angles.current;
-      scene.draw(element.clientWidth, element.clientHeight, ra, dec, time);
+    let frame: number | undefined;
+    const scheduleDraw = () => {
+      if (frame !== undefined) return;
+      frame = requestAnimationFrame(() => {
+        frame = undefined;
+        const { ra, dec, time } = angles.current;
+        scene.draw(element.clientWidth, element.clientHeight, ra, dec, time);
+      });
     };
-    drawRef.current = draw;
-    const resize = new ResizeObserver(draw);
+    scheduleDrawRef.current = scheduleDraw;
+    const resize = new ResizeObserver(scheduleDraw);
     resize.observe(element);
     const texture = new window.Image();
     texture.onload = () => {
       scene.setTexture(texture);
-      draw();
+      scheduleDraw();
     };
     texture.src = "/laboratorio/blue-marble.jpg";
-    draw();
+    scheduleDraw();
     return () => {
       resize.disconnect();
       texture.onload = null;
-      drawRef.current = undefined;
+      if (frame !== undefined) cancelAnimationFrame(frame);
+      scheduleDrawRef.current = undefined;
     };
   }, [variant]);
 
   useEffect(() => {
     angles.current = { ra, dec, time };
-    drawRef.current?.();
+    scheduleDrawRef.current?.();
   }, [ra, dec, time]);
 
   return (

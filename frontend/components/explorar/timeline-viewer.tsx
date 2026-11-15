@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { formatDate, isFrame, isRecord, sourceLink, type Frame } from "../../lib/sequence";
 import type { CatalogExposure, Timeline } from "../../lib/timeline";
 import { apiErrorDetail } from "../../lib/api-error";
@@ -15,39 +15,53 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
   timeline: Timeline; api?: string; savedFrames: Frame[]; onClose: () => void;
 }) {
   const exposures = timeline.exposures;
-  const days = new Map<string, typeof exposures>();
-  for (const exposure of exposures) {
-    const day = exposure.observed_at_utc.slice(0, 10);
-    const group = days.get(day);
-    if (group) group.push(exposure);
-    else days.set(day, [exposure]);
-  }
-  const initial = exposures.find((item) => item.frame_id === savedFrames[0]?.frame_id);
-  const [selected, setSelected] = useState(initial ?? exposures[0]);
-  const [frame, setFrame] = useState<Frame | undefined>(initial ? savedFrames[0] : undefined);
+  const { days, dayOptions, indexById, byDetector } = useMemo(() => {
+    const days = new Map<string, CatalogExposure[]>();
+    const indexById = new Map<string, number>();
+    const byDetector = new Map<string, CatalogExposure[]>();
+
+    exposures.forEach((exposure, index) => {
+      indexById.set(exposure.image_id, index);
+      const day = exposure.observed_at_utc.slice(0, 10);
+      const dailyGroup = days.get(day);
+      if (dailyGroup) dailyGroup.push(exposure);
+      else days.set(day, [exposure]);
+
+      const detectorGroup = byDetector.get(exposure.detector);
+      if (detectorGroup) detectorGroup.push(exposure);
+      else byDetector.set(exposure.detector, [exposure]);
+    });
+
+    const dayOptions = Array.from(days, ([day, items]) =>
+      <option key={day} value={day}>{formatDate(items[0].observed_at_utc)} · {items.length} imagens</option>,
+    );
+    return { days, dayOptions, indexById, byDetector };
+  }, [exposures]);
+  const [{ selected, frame }, setCurrent] = useState<{ selected?: CatalogExposure; frame?: Frame }>(() => {
+    const initial = exposures.find((item) => item.frame_id === savedFrames[0]?.frame_id);
+    return { selected: initial ?? exposures[0], frame: initial ? savedFrames[0] : undefined };
+  });
   const [busy, setBusy] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [message, setMessage] = useState("");
   const [reference, setReference] = useState<string>();
   const pending = useRef<AbortController | null>(null);
   const day = selected?.observed_at_utc.slice(0, 10) ?? "";
-  const index = selected ? exposures.indexOf(selected) : -1;
-  const playable = selected && api && frame && exposures.some(
-    (item) => item.image_id !== selected.image_id && item.detector === selected.detector &&
-      item.observed_at_utc !== selected.observed_at_utc,
+  const index = selected ? indexById.get(selected.image_id) ?? -1 : -1;
+  const playable = selected && api && frame && byDetector.get(selected.detector)?.some(
+    (item) => item.observed_at_utc !== selected.observed_at_utc,
   );
 
   useEffect(() => () => pending.current?.abort(), []);
 
-  async function load(id: string, signal: AbortSignal, anchor?: string): Promise<Frame | null> {
-    const item = exposures.find((exposure) => exposure.image_id === id);
-    const local = savedFrames.find((image) => image.frame_id === item?.frame_id);
+  async function load(item: CatalogExposure, signal: AbortSignal, anchor?: string): Promise<Frame | null> {
     if (!api) {
+      const local = savedFrames.find((image) => image.frame_id === item.frame_id);
       if (local) return local;
       throw new Error("Abra o FITS no IRSA. A prévia deste recorte precisa da API.");
     }
     const params = new URLSearchParams({
-      ra_deg: String(timeline.ra_deg), dec_deg: String(timeline.dec_deg), image_id: id,
+      ra_deg: String(timeline.ra_deg), dec_deg: String(timeline.dec_deg), image_id: item.image_id,
     });
     if (anchor) params.set("reference_id", anchor);
     const response = await fetch(`${api}/api/v1/timeline/frame?${params}`, {
@@ -56,7 +70,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
     const data: unknown = await response.json().catch(() => null);
     const detail = apiErrorDetail(data);
     const error = isRecord(detail) ? detail : undefined;
-    if (anchor && anchor !== id && (
+    if (anchor && anchor !== item.image_id && (
       response.status === 409 || response.status === 404 ||
       error?.code === "archive_unavailable" || response.status === 504
     )) return null;
@@ -76,18 +90,17 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
 
   async function choose(item: CatalogExposure, reuseSaved = false) {
     pause();
-    setSelected(item);
     setReference(undefined);
     setMessage("");
-    const local = reuseSaved && savedFrames.find((image) => image.frame_id === item.frame_id);
-    setFrame(local || undefined);
+    const local = reuseSaved ? savedFrames.find((image) => image.frame_id === item.frame_id) : undefined;
+    setCurrent({ selected: item, frame: local });
     if (local) return;
     const controller = new AbortController();
     pending.current = controller;
     setBusy(true);
     try {
-      const image = await load(item.image_id, controller.signal);
-      if (!controller.signal.aborted && image) setFrame(image);
+      const image = await load(item, controller.signal);
+      if (!controller.signal.aborted && image) setCurrent({ selected: item, frame: image });
     } catch (error) {
       if (!controller.signal.aborted) setMessage(error instanceof Error ? error.message : "Não foi possível carregar.");
     } finally {
@@ -100,8 +113,9 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
 
   async function play() {
     if (!selected || !playable || busy || pending.current) return;
-    const anchor = exposures.find((item) => item.image_id === reference) ?? selected;
-    const pool = exposures.filter((item) => item.detector === anchor.detector);
+    const anchorIndex = reference ? indexById.get(reference) : undefined;
+    const anchor = anchorIndex === undefined ? selected : exposures[anchorIndex];
+    const pool = byDetector.get(anchor.detector) ?? [];
     const controller = new AbortController();
     pending.current = controller;
     setPlaying(true);
@@ -109,7 +123,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
     setMessage("");
     setReference(anchor.image_id);
     try {
-      const initialFrame = await load(anchor.image_id, controller.signal, anchor.image_id);
+      const initialFrame = await load(anchor, controller.signal, anchor.image_id);
       if (controller.signal.aborted) return;
       if (!initialFrame) throw new Error("A referência está indisponível.");
       setBusy(false);
@@ -121,7 +135,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
         if (seen.has(item.observed_at_utc)) continue;
         const [image] = await Promise.all([
           item === anchor ? Promise.resolve(initialFrame) :
-          load(item.image_id, controller.signal, anchor.image_id),
+          load(item, controller.signal, anchor.image_id),
           new Promise<void>((resolve) => window.setTimeout(resolve, played ? 900 : 0)),
         ]);
         if (controller.signal.aborted) return;
@@ -130,8 +144,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
           continue;
         }
         seen.add(item.observed_at_utc);
-        setFrame(image);
-        setSelected(item);
+        setCurrent({ selected: item, frame: image });
         played++;
       }
       if (!controller.signal.aborted) {
@@ -196,13 +209,13 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
               const item = days.get(event.target.value)?.[0];
               if (item) void choose(item, true);
             }}>
-              {[...days].map(([date, items]) => <option key={date} value={date}>{formatDate(items[0].observed_at_utc)} · {items.length} imagens</option>)}
+              {dayOptions}
             </select>
           </label>
           <label>Horário UTC e detector
             <select className="control-field" value={selected.image_id} disabled={busy || playing} onChange={(event) => {
-              const item = exposures.find((exposure) => exposure.image_id === event.target.value);
-              if (item) void choose(item, true);
+              const index = indexById.get(event.target.value);
+              if (index !== undefined) void choose(exposures[index], true);
             }}>
               {days.get(day)?.map((item) => <option key={item.image_id} value={item.image_id}>
                 {timeUTC.format(new Date(item.observed_at_utc))} · {item.detector} · {item.collection.replace("spherex_", "").toUpperCase()}
