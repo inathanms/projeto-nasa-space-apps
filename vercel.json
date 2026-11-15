@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/spherex-dev/epochs",
+      "destination": "https://api.dev.sphereye.earth/epochs"
+    },
+    {
+      "source": "/api/spherex-dev/image",
+      "destination": "https://api.dev.sphereye.earth/image"
+    }
+  ]
+}
