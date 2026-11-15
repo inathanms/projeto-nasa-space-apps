@@ -1,4 +1,4 @@
-import { backendLicenses, externalCredits, fontLicenses, frontendLicenses, type PackageLicense } from "../../content/licenses";
+import { backendLicenses, externalCredits, fontLicenses, frontendLicenses, runtimeLicenses, type PackageLicense } from "../../content/licenses";
 import { translators, type Locale } from "../../lib/i18n";
 import "./licenses.css";
 
@@ -66,6 +66,15 @@ export default function LicensesPage({ locale }: { locale: Locale }) {
           <p>{t("Ambiente de referência: Python 3.12 no Linux, conforme o build do backend.")}</p>
           <PackageTable packages={backendLicenses} locale={locale} label={backend} />
         </details>
+      </section>
+
+      <section aria-labelledby="licenses-runtime">
+        <h2 id="licenses-runtime">{t("Ambiente de execução e build")}</h2>
+        <ul className="license-credits">
+          {runtimeLicenses.map(({ name, license, href }) => (
+            <li key={name}><a href={href}>{name}</a><span>{license}</span></li>
+          ))}
+        </ul>
       </section>
 
       <section aria-labelledby="licenses-credits">

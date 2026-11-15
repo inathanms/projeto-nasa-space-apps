@@ -326,6 +326,7 @@ export const englishMessages = {
   "Baixar avisos de terceiros": "Download third-party notices",
   "Fontes tipográficas": "Fonts",
   "Dependências": "Dependencies",
+  "Ambiente de execução e build": "Runtime and build environment",
   "Frontend e ferramentas de build": "Frontend and build tools",
   "Backend e ferramentas de desenvolvimento": "Backend and development tools",
   "As versões vêm dos arquivos de dependências do projeto. Os links levam à distribuição correspondente, onde ficam os avisos de componentes empacotados e variações de plataforma.": "Versions come from the project’s dependency locks. Release links lead to the corresponding distribution and its notices for bundled components and platform variants.",

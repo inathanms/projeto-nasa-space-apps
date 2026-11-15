@@ -32,6 +32,12 @@ export const fontLicenses = [
   { name: "Atkinson Hyperlegible", license: "OFL-1.1", href: "https://github.com/google/fonts/blob/main/ofl/atkinsonhyperlegible/OFL.txt" },
 ];
 
+export const runtimeLicenses = [
+  { name: "Node.js", license: "MIT", href: "https://github.com/nodejs/node/blob/main/LICENSE" },
+  { name: "CPython 3.12", license: "PSF-2.0", href: "https://docs.python.org/3.12/license.html" },
+  { name: "uv", license: "MIT OR Apache-2.0", href: "https://github.com/astral-sh/uv#license" },
+];
+
 export const externalCredits = [
   { name: "SPHEREx DR1 · NASA/JPL-Caltech/IPAC · IRSA", href: "https://www.ipac.caltech.edu/doi/10.26131/IRSA678" },
   { name: "SPHEREx QR3 · NASA/JPL-Caltech/IPAC · IRSA", href: "https://www.ipac.caltech.edu/doi/10.26131/IRSA662" },
