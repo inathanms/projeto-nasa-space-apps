@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/api/spherex-dev/health",
+      "destination": "https://api.dev.sphereye.earth/health"
+    },
+    {
       "source": "/api/spherex-dev/epochs",
       "destination": "https://api.dev.sphereye.earth/epochs"
     },

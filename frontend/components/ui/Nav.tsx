@@ -5,6 +5,7 @@ import { localizedHref, translators, type Locale } from "../../lib/i18n";
 import LanguageSwitch from "./LanguageSwitch";
 import Menu from "./Menu";
 import ToolLinks from "./ToolLinks";
+import HeaderCta from "./HeaderCta";
 import TutorialButton from "../tour/TutorialButton";
 import AccessibilityMenu from "../a11y/AccessibilityMenu";
 
@@ -33,9 +34,7 @@ export default function Nav({ locale }: { locale: Locale }) {
             {nav.links.map(({ href, label }) => <Link href={localizedHref(locale, href)} key={href} className="landing-links">{label}</Link>)}
           </nav>
         </Menu>
-        <Link className="button primary header-cta" href={localizedHref(locale, nav.cta.href)}>
-          {nav.cta.label} <span aria-hidden="true">→</span>
-        </Link>
+        <HeaderCta href={nav.cta.href} label={nav.cta.label} />
         <div className="site-header-tools">
           <TutorialButton />
           <AccessibilityMenu />

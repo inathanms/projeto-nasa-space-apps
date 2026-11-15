@@ -4,12 +4,12 @@ import { useLocale } from "../ui/LocaleProvider";
 import { forLocales } from "../../lib/i18n";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useEffect, useEffectEvent, useRef, useState, type PointerEvent } from "react";
 import { axisHint, CAPTURE_RADIUS, clamp, nearestTarget, scanPath, wrap, type Target } from "../../lib/pointing";
 import SceneLoading from "../ui/SceneLoading";
 import TargetSheet from "./target-sheet";
-import { setDiscoveryField } from "../../lib/discovery";
+import PointingPreview from "./pointing-preview";
+import { targetInfo } from "../../content/target-info";
 
 const SceneCanvas = dynamic(() => import("../ui/SceneCanvas"), { ssr: false, loading: SceneLoading });
 
@@ -27,7 +27,7 @@ const LOGBOOK_KEY = "spherex:observatory:discoveries:v1";
 const angleLabels = forLocales((language) => new Intl.NumberFormat(language, { maximumFractionDigits: 2 }));
 const exactAngles = forLocales((language) => new Intl.NumberFormat(language, { maximumFractionDigits: 6 }));
 
-export default function Observatory({ targets }: { targets: Target[] }) {
+export default function Observatory({ targets, api }: { targets: Target[]; api?: string }) {
   const { t, locale, href } = useLocale();
   const angleLabel = angleLabels[locale];
   const exactAngle = exactAngles[locale];
@@ -46,12 +46,13 @@ export default function Observatory({ targets }: { targets: Target[] }) {
   const [mjdDraft, setMjdDraft] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [sheet, setSheet] = useState<{ target: Target; focusOnOpen: boolean } | null>(null);
+  const [factIndex, setFactIndex] = useState(0);
+  // História e curiosidades do alvo sob a mira (escolhido no seletor ou descoberto), no próprio card do diário.
+  const featured = lockedTarget ?? lastDiscovery;
+  const discoveryInfo = featured ? targetInfo[locale][featured.slug.replace(/^preset-/, "")] : undefined;
+  const facts = discoveryInfo?.curiosidades ?? [];
+  useEffect(() => setFactIndex(0), [featured?.slug]);
 
-  // Informa ao widget de descoberta para onde a mira aponta e em que instante.
-  useEffect(() => {
-    setDiscoveryField({ name: lockedTarget?.name, ra, dec, times: [new Date(time).toISOString()] });
-  }, [ra, dec, time, lockedTarget]);
-  useEffect(() => () => setDiscoveryField(null), []);
   const pointer = useRef<{ id: number; x: number; y: number } | null>(null);
   const holdUntil = useRef(0);
   const holdTimer = useRef<number | undefined>(undefined);
@@ -162,8 +163,9 @@ export default function Observatory({ targets }: { targets: Target[] }) {
     ra_deg: String(Number(ra.toFixed(6)) % 360),
     dec_deg: String(Number(dec.toFixed(6))),
   });
-  if (lockedTarget && ra === lockedTarget.ra && dec === lockedTarget.dec) {
-    query.set("exemplo", lockedTarget.slug);
+  const aimedTarget = lockedTarget && ra === lockedTarget.ra && dec === lockedTarget.dec ? lockedTarget : null;
+  if (aimedTarget) {
+    query.set("exemplo", aimedTarget.slug);
   } else {
     query.set("modo", "consultar");
   }
@@ -246,7 +248,6 @@ export default function Observatory({ targets }: { targets: Target[] }) {
                 if (next !== Math.round(dec * 10) / 10) setAngles(ra, next);
               }} />
             <div className="orbital-scale" aria-hidden="true"><span>−90°</span><span>0°</span><span>+90°</span></div>
-            <Link className="button primary" href={href(`/explorar/?${query}`)}>{t("Importar para o explorador")}</Link>
           </div>
         </div>
         <section className="orbital-stage" aria-label={t("Cena didática de apontamento")} aria-describedby="orbital-guide">
@@ -271,12 +272,35 @@ export default function Observatory({ targets }: { targets: Target[] }) {
               </p>}
               {holdingAim && <p>{t("Mira fixada no astro por 2 segundos.")}</p>}
             </div>
+            {discoveryInfo && (
+              <div className="orbital-funfact">
+                {featured !== lastDiscovery && <p className="orbital-acquisition-name">{featured?.name}</p>}
+                {discoveryInfo.descoberta && <p className="orbital-funfact-history">
+                  <strong>{t("Descoberta")}:</strong> {discoveryInfo.descoberta.quem} · {discoveryInfo.descoberta.quando}
+                </p>}
+                <p className="orbital-funfact-history">{discoveryInfo.historia}</p>
+                {facts.length > 0 && <>
+                  <p className="orbital-funfact-title"><strong>{t("Você sabia?")}</strong>
+                    {facts.length > 1 && <span>{factIndex % facts.length + 1}/{facts.length}</span>}</p>
+                  <p aria-live="polite">{facts[factIndex % facts.length]}</p>
+                  {facts.length > 1 && <button type="button" className="orbital-funfact-next"
+                    onClick={(event) => { event.stopPropagation(); setFactIndex((value) => value + 1); }}>
+                    {t("Outra curiosidade")} <span aria-hidden="true">›</span>
+                  </button>}
+                </>}
+              </div>
+            )}
             {lastDiscovery && (
               <button ref={sheetTrigger} type="button" className="orbital-sheet-link"
                   aria-expanded={sheet?.target.slug === lastDiscovery.slug} aria-controls={sheet ? "target-sheet" : undefined}>
                 {t("Ver ficha de {name}", { name: lastDiscovery.name })} <span aria-hidden="true">›</span>
               </button>
             )}
+            {/* stopPropagation: os botões da preview não devem abrir a ficha do astro. */}
+            <div onClick={(event) => event.stopPropagation()}>
+              <PointingPreview api={api} ra={ra} dec={dec} target={aimedTarget} paused={playing}
+                importHref={href(`/explorar/?${query}`)} />
+            </div>
             <div className="orbital-signal">
               <div className="orbital-signal-label">
                 <span>{t("Faixa de descoberta: 0° a {radius}° do alvo", { radius: CAPTURE_RADIUS })}</span>

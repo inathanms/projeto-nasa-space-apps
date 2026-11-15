@@ -427,3 +427,41 @@ body:where(:has(#inicio)) .site-menu nav .landing-links { display: inline-flex; 
   .a11y-button, .tour-help { justify-content: center; width: var(--touch); padding-inline: 0; }
   .a11y-button-label, .tour-help-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+
+/* Carregamento com foguetinho (components/ui/RocketLoader.tsx): o foguete orbita um planeta. */
+.rocket-loader {
+  --loader-size: 96px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  width: 100%; color: var(--mute); text-align: center;
+}
+.rocket-loader[data-inline=true] { --loader-size: 68px; gap: 6px; padding-block: 8px; }
+.rocket-loader-label { font-size: .9rem; }
+.rocket-loader-sky { position: relative; flex: none; width: var(--loader-size); height: var(--loader-size); }
+.rocket-loader-ring {
+  position: absolute; inset: 14%; border: 1.5px dashed color-mix(in srgb, var(--teal-light, #7cc9be) 55%, transparent);
+  border-radius: 50%;
+}
+.rocket-loader-planet {
+  position: absolute; inset: 36%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--teal-light, #7cc9be), var(--teal, #2a7f76) 60%, var(--night-deep, #06181a));
+  box-shadow: 0 0 14px color-mix(in srgb, var(--teal-light, #7cc9be) 40%, transparent);
+}
+/* O giro é do contêiner; o foguete fica no topo da órbita, com o bico apontando no sentido da volta. */
+.rocket-loader-orbit { position: absolute; inset: 0; animation: rocket-loader-spin 1.6s linear infinite; }
+.rocket-loader-rocket {
+  position: absolute; top: 0; left: 50%; width: 32%; height: 32%;
+  translate: -50% 0; rotate: 90deg;
+}
+.rocket-loader-body { fill: var(--cream, #f4eedd); }
+.rocket-loader-window { fill: var(--teal-light, #7cc9be); stroke: var(--night-deep, #06181a); stroke-width: 1.5; }
+.rocket-loader-fin { fill: var(--orange, #e8773f); }
+.rocket-loader-flame { fill: var(--sun, #f2c14e); transform-origin: 24px 34px; animation: rocket-loader-flame 140ms ease-in-out infinite alternate; }
+@keyframes rocket-loader-spin { to { rotate: 360deg; } }
+@keyframes rocket-loader-flame { from { scale: 1 .65; opacity: .7; } to { scale: 1 1.15; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .rocket-loader-orbit { animation-duration: 6s; }
+  .rocket-loader-flame { animation: none; }
+}
+/* Com "Reduzir movimento", o foguete continua girando bem devagar: é o único sinal de que algo está carregando. */
+:root[data-a11y-motion="true"] .rocket-loader-orbit { animation-duration: 6s !important; animation-iteration-count: infinite !important; }
+:root[data-a11y-motion="true"] .rocket-loader-flame { animation: none !important; }
