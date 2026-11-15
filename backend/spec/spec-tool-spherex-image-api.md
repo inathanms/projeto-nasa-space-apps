@@ -1,6 +1,6 @@
 ---
-title: SPHEREx Sky Explorer — Image API (v1: /epochs e /image, sem cache)
-version: 1.0
+title: SPHEREye — Image API (v0.1: /epochs e /image, sem cache)
+version: 0.1
 date_created: 2026-11-14
 last_updated: 2026-11-14
 owner: Time do hackathon NASA (backend)
@@ -9,7 +9,7 @@ tags: [tool, api, python, fastapi, astronomy, spherex, irsa]
 
 # Introdução
 
-Esta especificação define a primeira versão da API backend do **SPHEREx Sky Explorer**, uma aplicação web pública que permite a qualquer pessoa escolher um ponto do céu e um momento no tempo e ver a imagem que o telescópio SPHEREx (NASA) registrou ali, comparando como o céu muda entre visitas.
+Esta especificação define a primeira versão da API backend do **SPHEREye**, uma aplicação web pública que permite a qualquer pessoa escolher um ponto do céu e um momento no tempo e ver a imagem que o telescópio SPHEREx (NASA) registrou ali, comparando como o céu muda entre visitas.
 
 A API é um serviço HTTP stateless em Python que:
 
@@ -179,6 +179,7 @@ Lista as observations do SPHEREx que cobrem uma posição do céu.
 8. Agrupar as linhas por `obs_id` em observations. `start_mjd` = menor `t_min`, `end_mjd` = maior `t_max` do grupo.
 9. Ordenar as observations por `start_mjd` crescente.
 10. Agrupar em visits: percorrer em ordem; uma nova visit começa quando `start_mjd` da observation atual − `end_mjd` da anterior > `VISIT_GAP_DAYS` (default 2.0). `visit_index` começa em 0.
+10a. Em cada visit, `detectors` é a união ordenada (D1..D6) dos detectores das imagens de todas as suas observations (respeita o filtro `detector`); `rgb_available` é `true` se `detectors` contém D1, D2 e D3 (o `mode=rgb` padrão de `/image` funciona com qualquer observation da visit). Com filtro `detector`, é `false` por construção.
 11. Se o VOTable indicar truncamento (`INFO name="QUERY_STATUS" value="OVERFLOW"`), definir `truncated: true`.
 12. Resultado vazio não é erro: retornar `200` com listas vazias.
 
@@ -205,7 +206,9 @@ Lista as observations do SPHEREx que cobrem uma posição do céu.
       "end_time": "2026-05-17T10:59:58Z",
       "start_mjd": 61177.453996,
       "end_mjd": 61177.458313,
-      "observation_ids": ["2026W20_2A_0464_1", "2026W20_2A_0464_3"]
+      "observation_ids": ["2026W20_2A_0464_1", "2026W20_2A_0464_3"],
+      "detectors": ["D1", "D2", "D3", "D4", "D5", "D6"],
+      "rgb_available": true
     }
   ],
   "observations": [
@@ -352,7 +355,7 @@ Carregar com `pydantic-settings`. Fornecer `backend/.env.example` com todas elas
 | `IRSA_CUTOUT_TIMEOUT_SECONDS` | `60` | |
 | `IRSA_MAX_RETRIES` | `1` | |
 | `IRSA_MAX_CUTOUT_BYTES` | `52428800` | 50 MB. |
-| `HTTP_USER_AGENT` | `spherex-sky-explorer/0.1 (+hackathon)` | Enviado em toda chamada ao IRSA. |
+| `HTTP_USER_AGENT` | `sphereye/0.1 (+hackathon)` | Enviado em toda chamada ao IRSA. |
 | `MAX_CONCURRENT_RENDERS` | `4` | PER-002. |
 | `RENDER_QUEUE_TIMEOUT_SECONDS` | `30` | PER-002. |
 | `VISIT_GAP_DAYS` | `2.0` | Agrupamento de visits. |
