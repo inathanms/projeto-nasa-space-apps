@@ -1,3 +1,5 @@
+import { forLocales, type Locale } from "./i18n";
+
 export type Frame = {
   frame_id: string;
   observed_at_utc: string;
@@ -70,7 +72,7 @@ export function isSequence(value: unknown): value is Sequence {
     Date.parse(frames[0].observed_at_utc) < Date.parse(frames[1].observed_at_utc);
 }
 
-const utc = new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeZone: "UTC" });
-export function formatDate(date: string) {
-  return utc.format(new Date(date));
+const utc = forLocales((language) => new Intl.DateTimeFormat(language, { dateStyle: "medium", timeZone: "UTC" }));
+export function formatDate(date: string, locale: Locale = "en") {
+  return utc[locale].format(new Date(date));
 }

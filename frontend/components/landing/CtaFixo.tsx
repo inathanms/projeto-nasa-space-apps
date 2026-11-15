@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ctaFixo } from "../../content/landing";
+import { getLanding } from "../../content/landing";
+import { localizedHref, type Locale } from "../../lib/i18n";
 import styles from "./landing.module.css";
 
-export default function CtaFixo() {
+export default function CtaFixo({ locale }: { locale: Locale }) {
+  const { ctaFixo } = getLanding(locale);
   const [visible, setVisible] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -27,7 +29,7 @@ export default function CtaFixo() {
   if (!visible && !focused) return null;
   return (
     <div className={styles.fixed}>
-      <Link className="button primary" href={ctaFixo.href} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
+      <Link className="button primary" href={localizedHref(locale, ctaFixo.href)} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
         {ctaFixo.label} <span aria-hidden="true">→</span>
       </Link>
     </div>

@@ -1,5 +1,8 @@
 "use client";
 
+import { useLocale } from "../ui/LocaleProvider";
+import { forLocales } from "../../lib/i18n";
+
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRef, useState, type PointerEvent } from "react";
@@ -13,14 +16,16 @@ type Target = Angles & { name: string };
 const INITIAL: Angles = { ra: 35, dec: 28 };
 const clampDec = (value: number) => Math.max(-90, Math.min(90, value));
 const wrapRA = (value: number) => value >= 0 && value < 360 ? value : ((value % 360) + 360) % 360;
-const angle = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 6 });
+const anglesByLocale = forLocales((language) => new Intl.NumberFormat(language, { maximumFractionDigits: 6 }));
 
 function AngleInput({ name, value, change }: {
   name: "RA" | "Dec"; value: number; change: (value: number) => void;
 }) {
+  const { t, locale } = useLocale();
+  const angle = anglesByLocale[locale];
   const [draft, setDraft] = useState<string | null>(null);
   const ascension = name === "RA";
-  const label = ascension ? "Ascensão reta" : "Declinação";
+  const label = ascension ? t("Ascensão reta") : t("Declinação");
   const coordinate = draft === null ? value : parseCoordinate(draft);
   const invalid = draft !== null && !Number.isFinite(coordinate);
   const description = `angle-${name}-format`;
@@ -45,20 +50,21 @@ function AngleInput({ name, value, change }: {
           <span aria-hidden="true">°</span>
         </span>
       </div>
-      <input type="range" aria-label={`Ajustar ${label.toLowerCase()}`}
+      <input type="range" aria-label={t("Ajustar {label}", { label: label.toLowerCase() })}
         min={ascension ? 0 : -90} max={ascension ? 359.9 : 90}
-        step="0.1" value={value} aria-valuetext={`${angle.format(value)} graus`}
+        step="0.1" value={value} aria-valuetext={t("{value} graus", { value: angle.format(value) })}
         onChange={(event) => { setDraft(null); change(event.target.valueAsNumber); }} />
       <div className="pointing-limits" aria-hidden="true"><span>{ascension ? "0°" : "−90°"}</span><span>{ascension ? "360°" : "+90°"}</span></div>
       <p id={description} className="sr-only">
-        Em graus decimais. {ascension ? "A ascensão reta dá a volta em 360 graus." : "A declinação é limitada a menos 90 e mais 90 graus."}
+        {t("Em graus decimais.")} {ascension ? t("A ascensão reta dá a volta em 360 graus.") : t("A declinação é limitada a menos 90 e mais 90 graus.")}
       </p>
-      <p id={feedback} className="error pointing-feedback" role="status">{invalid ? "Digite um número em graus, por exemplo 35,5." : ""}</p>
+      <p id={feedback} className="error pointing-feedback" role="status">{invalid ? t("Digite um número em graus, por exemplo 35,5.") : ""}</p>
     </div>
   );
 }
 
 export default function PointingLab({ targets }: { targets: Target[] }) {
+  const { t, href } = useLocale();
   const [angles, setAngles] = useState(INITIAL);
   const [resetCount, setResetCount] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -101,39 +107,39 @@ export default function PointingLab({ targets }: { targets: Target[] }) {
   return (
     <div className="pointing-grid">
       <figure className="pointing-figure">
-        <SceneCanvas ra={angles.ra} dec={angles.dec} role="img" aria-label="Globo terrestre com eixo polar, equador e linha de visão do telescópio"
+        <SceneCanvas ra={angles.ra} dec={angles.dec} role="img" aria-label={t("Globo terrestre com eixo polar, equador e linha de visão do telescópio")}
           aria-describedby="pointing-description"
           className={dragging ? "pointing-canvas dragging" : "pointing-canvas"}
           onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={stopDrag}
           onPointerCancel={stopDrag} onLostPointerCapture={stopDrag} />
         <figcaption className="pointing-caption">
-          <span className="pointing-legend ra">Ascensão reta</span>
-          <span className="pointing-legend dec">Declinação</span>
-          <span className="pointing-legend sight">Linha de visão</span>
+          <span className="pointing-legend ra">{t("Ascensão reta")}</span>
+          <span className="pointing-legend dec">{t("Declinação")}</span>
+          <span className="pointing-legend sight">{t("Linha de visão")}</span>
         </figcaption>
       </figure>
       <section className="pointing-controls" aria-labelledby="pointing-controls-title">
-        <h2 id="pointing-controls-title">Coordenadas celestes</h2>
-        <p className="muted" id="pointing-description">Digite as coordenadas em graus decimais ou use as setas nos controles deslizantes. No globo, arraste na horizontal para mudar a RA e na vertical para mudar a declinação.</p>
+        <h2 id="pointing-controls-title">{t("Coordenadas celestes")}</h2>
+        <p className="muted" id="pointing-description">{t("Digite as coordenadas em graus decimais ou use as setas nos controles deslizantes. No globo, arraste na horizontal para mudar a RA e na vertical para mudar a declinação.")}</p>
         <AngleInput key={`ra-${resetCount}`} name="RA" value={angles.ra} change={(ra) => setAngles((previous) => ({ ...previous, ra: wrapRA(ra) }))} />
         <AngleInput key={`dec-${resetCount}`} name="Dec" value={angles.dec} change={(dec) => setAngles((previous) => ({ ...previous, dec: clampDec(dec) }))} />
         {targets.length > 0 && <label className="pointing-target">
-          Campos de exemplo
+          {t("Campos de exemplo")}
           <select value={targets.find((target) => target.ra === angles.ra && target.dec === angles.dec)?.name ?? ""}
             onChange={(event) => {
               const target = targets.find((item) => item.name === event.target.value);
               if (target) selectAngles({ ra: target.ra, dec: target.dec });
             }}>
-            <option value="" disabled>Escolher um campo</option>
+            <option value="" disabled>{t("Escolher um campo")}</option>
             {targets.map((target) => <option key={target.name} value={target.name}>{target.name}</option>)}
           </select>
         </label>}
         <div className="pointing-actions">
-          <Link className="button primary" href={`/explorar/?${query}`}>Usar no explorador</Link>
-          <button className="button secondary" type="button" onClick={() => selectAngles(INITIAL)}>Restaurar</button>
+          <Link className="button primary" href={href(`/explorar/?${query}`)}>{t("Usar no explorador")}</Link>
+          <button className="button secondary" type="button" onClick={() => selectAngles(INITIAL)}>{t("Restaurar")}</button>
         </div>
-        <p className="pointing-note">Modelo didático com a Terra como referência. A linha representa uma direção no céu e o telescópio é esquemático.</p>
-        <p className="pointing-credit">Textura da Terra · <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/">NASA Earth Observatory / Blue Marble</a></p>
+        <p className="pointing-note">{t("Modelo didático com a Terra como referência. A linha representa uma direção no céu e o telescópio é esquemático.")}</p>
+        <p className="pointing-credit">{t("Textura da Terra ·")} <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/">NASA Earth Observatory / Blue Marble</a></p>
       </section>
     </div>
   );

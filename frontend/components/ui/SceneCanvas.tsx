@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "./LocaleProvider";
+
 import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { makeScene } from "../../lib/scene";
 
@@ -11,6 +13,8 @@ type Props = ComponentProps<"canvas"> & {
 };
 
 export default function SceneCanvas({ ra, dec, time, variant = "lab", ...props }: Props) {
+  const { t } = useLocale();
+  const north = t("NORTE");
   const canvas = useRef<HTMLCanvasElement>(null);
   const scheduleDrawRef = useRef<() => void>(undefined);
   const angles = useRef({ ra, dec, time });
@@ -19,7 +23,7 @@ export default function SceneCanvas({ ra, dec, time, variant = "lab", ...props }
   useEffect(() => {
     const element = canvas.current;
     if (!element) return;
-    const scene = makeScene(element, variant);
+    const scene = makeScene(element, variant, north);
     if (!scene) {
       setFailed(true);
       return;
@@ -49,7 +53,7 @@ export default function SceneCanvas({ ra, dec, time, variant = "lab", ...props }
       if (frame !== undefined) cancelAnimationFrame(frame);
       scheduleDrawRef.current = undefined;
     };
-  }, [variant]);
+  }, [variant, north]);
 
   useEffect(() => {
     angles.current = { ra, dec, time };
@@ -59,7 +63,7 @@ export default function SceneCanvas({ ra, dec, time, variant = "lab", ...props }
   return (
     <>
       <canvas ref={canvas} {...props} />
-      {failed && <p className="scene-message" role="status">Cena 3D indisponível. Os controles de coordenadas continuam disponíveis.</p>}
+      {failed && <p className="scene-message" role="status">{t("Cena 3D indisponível. Os controles de coordenadas continuam disponíveis.")}</p>}
     </>
   );
 }

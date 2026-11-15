@@ -1,9 +1,11 @@
-const rows = ["Superior", "Central", "Inferior"];
-const columns = ["esquerda", "centro", "direita"];
+import { translators, type Locale } from "./i18n";
 
-export function compareRegions(first: ImageData, second: ImageData) {
+export function compareRegions(first: ImageData, second: ImageData, locale: Locale = "en") {
+  const t = translators[locale];
+  const rows = [t("Superior"), t("Central"), t("Inferior")];
+  const columns = [t("esquerda"), t("centro"), t("direita")];
   const { width, height } = first;
-  if (width !== second.width || height !== second.height) throw new Error("Quadros de tamanhos diferentes.");
+  if (width !== second.width || height !== second.height) throw new Error(t("Quadros de tamanhos diferentes."));
 
   const regions = rows.flatMap((row) => columns.map((column) => ({
     label: `${row} · ${column}`, first: 0, second: 0, count: 0,

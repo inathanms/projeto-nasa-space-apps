@@ -5,6 +5,7 @@ const config: NextConfig = {
   images: { unoptimized: true },
   trailingSlash: true,
   devIndicators: false,
+  experimental: { globalNotFound: true },
 };
 
 export default config;

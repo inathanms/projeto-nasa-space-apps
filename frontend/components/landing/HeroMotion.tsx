@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { useLocale } from "../ui/LocaleProvider";
 import styles from "./landing.module.css";
 
 const HeroMotionContext = createContext({ paused: false, toggle: () => {} });
@@ -19,10 +20,11 @@ export default function HeroMotion({ children }: { children: ReactNode }) {
 }
 
 export function HeroMotionToggle() {
+  const { t } = useLocale();
   const { paused, toggle } = useHeroMotion();
   return (
     <button type="button" className={`button secondary ${styles.heroMotionToggle}`} onClick={toggle} aria-controls="arte-hero">
-      {paused ? "Retomar animações" : "Pausar animações"}
+      {paused ? t("Retomar animações") : t("Pausar animações")}
     </button>
   );
 }

@@ -1,3 +1,8 @@
+"use client";
+
+import { useLocale } from "./LocaleProvider";
+
 export default function SceneLoading() {
-  return <div className="scene-loading" role="status">Carregando a cena 3D…</div>;
+  const { t } = useLocale();
+  return <div className="scene-loading" role="status">{t("Carregando a cena 3D…")}</div>;
 }

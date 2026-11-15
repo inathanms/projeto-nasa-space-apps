@@ -1,3 +1,5 @@
+import { translators, type Locale } from "./i18n";
+
 export type Target = { slug: string; name: string; ra: number; dec: number; time: string };
 
 export const CAPTURE_RADIUS = 5;
@@ -39,7 +41,8 @@ export function scanPath(from: { ra: number; dec: number }, nextRA: number, next
   return { hit: null, before: { ra: nextRA, dec: nextDec }, locked };
 }
 
-export function axisHint(axis: string, offset: number) {
-  if (Math.abs(offset) <= 1) return `${axis} no rumo`;
-  return `${offset > 0 ? "Aumente" : "Diminua"} ${axis}`;
+export function axisHint(axis: string, offset: number, locale: Locale = "en") {
+  const t = translators[locale];
+  if (Math.abs(offset) <= 1) return t("{axis} no rumo", { axis });
+  return t(offset > 0 ? "Aumente {axis}" : "Diminua {axis}", { axis });
 }

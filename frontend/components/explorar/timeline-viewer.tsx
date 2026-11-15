@@ -1,5 +1,8 @@
 "use client";
 
+import { useLocale } from "../ui/LocaleProvider";
+import { forLocales } from "../../lib/i18n";
+
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { formatDate, sourceLink, type Frame } from "../../lib/sequence";
@@ -7,13 +10,16 @@ import { observationIdForExposure, type CatalogExposure, type Timeline } from ".
 import { apiErrorMessage, fetchExposure, isUnavailableExposure, shareCoverage, type RenderedExposure } from "../../lib/spherex-api";
 import { useSkySwipe } from "./use-sky-swipe";
 
-const timeUTC = new Intl.DateTimeFormat("pt-BR", {
-  hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "UTC",
-});
+const timeFormats = forLocales((language) => new Intl.DateTimeFormat(language, {
+  hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23", timeZone: "UTC",
+}));
 
 export default function TimelineViewer({ timeline, api, savedFrames, onClose }: {
   timeline: Timeline; api?: string; savedFrames: Frame[]; onClose: () => void;
 }) {
+  const { t, locale } = useLocale();
+  const timeUTC = timeFormats[locale];
+  const imageCount = (count: number) => t(count === 1 ? "{count} imagem" : "{count} imagens", { count });
   const exposures = timeline.exposures;
   const { days, dayOptions, indexById, byDetector } = useMemo(() => {
     const days = new Map<string, CatalogExposure[]>();
@@ -33,10 +39,10 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
     });
 
     const dayOptions = Array.from(days, ([day, items]) =>
-      <option key={day} value={day}>{formatDate(items[0].observed_at_utc)} · {items.length} imagens</option>,
+      <option key={day} value={day}>{formatDate(items[0].observed_at_utc, locale)} · {t(items.length === 1 ? "{count} imagem" : "{count} imagens", { count: items.length })}</option>,
     );
     return { days, dayOptions, indexById, byDetector };
-  }, [exposures]);
+  }, [exposures, t, locale]);
   const [{ selected, frame }, setCurrent] = useState<{ selected?: CatalogExposure; frame?: Frame }>(() => {
     const initial = exposures.find((item) => item.frame_id === savedFrames[0]?.frame_id);
     return { selected: initial ?? exposures[0], frame: initial ? savedFrames[0] : undefined };
@@ -86,7 +92,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
         setCurrent({ selected: item, frame: image.frame });
       }
     } catch (error) {
-      if (!controller.signal.aborted) setMessage(apiErrorMessage(error));
+      if (!controller.signal.aborted) setMessage(apiErrorMessage(error, locale));
     } finally {
       if (pending.current === controller) {
         pending.current = null;
@@ -147,11 +153,11 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
       }
       if (!controller.signal.aborted) {
         setMessage(played > 1
-          ? `Reprodução concluída. ${played} exposições compatíveis exibidas${skipped ? ` e ${skipped} sem compatibilidade confirmada` : ""}.`
-          : "Nenhuma outra exposição do detector teve cobertura suficiente em comum.");
+          ? t(skipped ? "Reprodução concluída. {count} exposições compatíveis exibidas e {skipped} sem compatibilidade confirmada." : "Reprodução concluída. {count} exposições compatíveis exibidas.", { count: played, skipped })
+          : t("Nenhuma outra exposição do detector teve cobertura suficiente em comum."));
       }
     } catch (error) {
-      if (!controller.signal.aborted) setMessage(apiErrorMessage(error));
+      if (!controller.signal.aborted) setMessage(apiErrorMessage(error, locale));
     } finally {
       if (pending.current === controller) {
         pending.current = null;
@@ -175,26 +181,26 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
   const swipe = useSkySwipe(move);
 
   return (
-    <section className="viewer timeline-viewer" aria-label="Linha do tempo">
+    <section className="viewer timeline-viewer" aria-label={t("Linha do tempo")}>
       <div className="timeline-title">
-        <div><h2>Linha do tempo</h2><p className="muted">{days.size} dias UTC · {exposures.length} imagens no catálogo</p></div>
-        <button className="button secondary" type="button" onClick={onClose}>Voltar à comparação</button>
+        <div><h2>{t("Linha do tempo")}</h2><p className="muted">{t("{days} · {images} no catálogo", { days: t(days.size === 1 ? "{count} dia UTC" : "{count} dias UTC", { count: days.size }), images: imageCount(exposures.length) })}</p></div>
+        <button className="button secondary" type="button" onClick={onClose}>{t("Voltar à comparação")}</button>
       </div>
       {timeline.incomplete_collections.length > 0 && (
-        <p role="status" className="error">O catálogo está parcial. Repita a busca em alguns minutos para consultar {timeline.incomplete_collections.join(", ")}.</p>
+        <p role="status" className="error">{t("O catálogo está parcial. Repita a busca em alguns minutos para consultar {collections}.", { collections: timeline.incomplete_collections.join(", ") })}</p>
       )}
-      {timeline.truncated && <p role="status" className="error">O IRSA atingiu o limite de exposições para esta consulta. O catálogo está parcial.</p>}
+      {timeline.truncated && <p role="status" className="error">{t("O IRSA atingiu o limite de exposições para esta consulta. O catálogo está parcial.")}</p>}
       {selected ? <>
         <div className="plate">
           <div className="plate-top instrument">
-            <span>{formatDate(selected.observed_at_utc)} · {timeUTC.format(new Date(selected.observed_at_utc))} UTC</span>
+            <span>{formatDate(selected.observed_at_utc, locale)} · {timeUTC.format(new Date(selected.observed_at_utc))} UTC</span>
             <span>{selected.collection} · {selected.detector}</span>
           </div>
           <div className="sky-wrap">
             <figure className="sky timeline-sky" ref={sky} tabIndex={0} onKeyDown={keyboard} {...swipe}
-              aria-label="Recorte selecionado. Deslize na horizontal ou use as setas para navegar pelas exposições.">
-              {frame ? <Image src={frame.image_src} width={128} height={128} loading="eager" draggable={false} alt="Recorte SPHEREx da exposição selecionada" />
-                : <div className="timeline-placeholder">{busy ? "Carregando recorte…" : "Selecione uma exposição e abra o recorte."}</div>}
+              aria-label={t("Recorte selecionado. Deslize na horizontal ou use as setas para navegar pelas exposições.")}>
+              {frame ? <Image src={frame.image_src} width={128} height={128} loading="eager" draggable={false} alt={t("Recorte SPHEREx da exposição selecionada")} />
+                : <div className="timeline-placeholder">{busy ? t("Carregando recorte…") : t("Selecione uma exposição e abra o recorte.")}</div>}
               {frame && <><span className="north instrument" aria-hidden="true">N ↑<br />E ←</span><span className="scale instrument" aria-hidden="true">1′</span></>}
             </figure>
           </div>
@@ -203,7 +209,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
           </div>
         </div>
         <div className="timeline-inputs">
-          <label>Dia de observação
+          <label>{t("Dia de observação")}
             <select className="control-field" value={day} disabled={busy || playing} onChange={(event) => {
               const item = days.get(event.target.value)?.[0];
               if (item) void choose(item, true);
@@ -211,7 +217,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
               {dayOptions}
             </select>
           </label>
-          <label>Horário UTC e detector
+          <label>{t("Horário UTC e detector")}
             <select className="control-field" value={selected.image_id} disabled={busy || playing} onChange={(event) => {
               const index = indexById.get(event.target.value);
               if (index !== undefined) void choose(exposures[index], true);
@@ -223,36 +229,36 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
           </label>
         </div>
         <div className="timeline-actions">
-          <button className="button secondary" type="button" aria-disabled={busy || playing || index <= 0} onClick={() => move(-1)}>Anterior</button>
-          <button className="button secondary" type="button" aria-disabled={busy || playing || index >= exposures.length - 1} onClick={() => move(1)}>Próxima</button>
+          <button className="button secondary" type="button" aria-disabled={busy || playing || index <= 0} onClick={() => move(-1)}>{t("Anterior")}</button>
+          <button className="button secondary" type="button" aria-disabled={busy || playing || index >= exposures.length - 1} onClick={() => move(1)}>{t("Próxima")}</button>
           {!frame && api && observationId && <button className="button primary" type="button" aria-disabled={busy}
-            onClick={(event) => { if (!busy) void choose(selected, false, event.currentTarget); }}>Abrir recorte</button>}
+            onClick={(event) => { if (!busy) void choose(selected, false, event.currentTarget); }}>{t("Abrir recorte")}</button>}
           {api && <button className="button secondary" type="button" disabled={!playing && (!playable || busy)}
-            onClick={() => playing ? pause() : void play()}>{playing ? "Pausar" : "Reproduzir faixa"}</button>}
-          {!frame && cutout && <a className="button secondary" href={cutout} target="_blank" rel="noreferrer">Abrir FITS no IRSA</a>}
+            onClick={() => playing ? pause() : void play()}>{playing ? t("Pausar") : t("Reproduzir faixa")}</button>}
+          {!frame && cutout && <a className="button secondary" href={cutout} target="_blank" rel="noreferrer">{t("Abrir FITS no IRSA")}</a>}
         </div>
         {api && <p className="viewer-hint">{reference
-          ? "Escala de brilho fixada pela referência nas imagens do mesmo detector com cobertura em comum."
-          : "A reprodução usa a escala de brilho da exposição selecionada nos recortes do mesmo detector."}</p>}
-        {!api && <p className="viewer-hint">Catálogo salvo. Os quadros do exemplo ficam disponíveis aqui. Para as demais exposições, abra o link do FITS.</p>}
-        <p role="status" className="viewer-hint timeline-status">{busy ? "Carregando recorte…" : message}</p>
+          ? t("Escala de brilho fixada pela referência nas imagens do mesmo detector com cobertura em comum.")
+          : t("A reprodução usa a escala de brilho da exposição selecionada nos recortes do mesmo detector.")}</p>}
+        {!api && <p className="viewer-hint">{t("Catálogo salvo. Os quadros do exemplo ficam disponíveis aqui. Para as demais exposições, abra o link do FITS.")}</p>}
+        <p role="status" className="viewer-hint timeline-status">{busy ? t("Carregando recorte…") : message}</p>
         <p aria-live={playing ? "off" : "polite"} aria-atomic="true" className="sr-only">
-          Exposição selecionada em {formatDate(selected.observed_at_utc)}, {timeUTC.format(new Date(selected.observed_at_utc))} UTC, detector {selected.detector}.
+          {t("Exposição selecionada em {date}, {time} UTC, detector {detector}.", { date: formatDate(selected.observed_at_utc, locale), time: timeUTC.format(new Date(selected.observed_at_utc)), detector: selected.detector })}
         </p>
         <details className="sources">
-          <summary>Origem e processamento</summary>
+          <summary>{t("Origem e processamento")}</summary>
           <dl>
-            <dt>Observação UTC</dt><dd>{frame?.observed_at_utc ?? selected.observed_at_utc}</dd>
-            {observationId && <><dt>ID da observação</dt><dd>{observationId}</dd></>}
-            {selected.observation && !frame && <><dt>Faixa do detector</dt><dd>{selected.observation.minWavelength}–{selected.observation.maxWavelength} µm</dd></>}
+            <dt>{t("Observação UTC")}</dt><dd>{frame?.observed_at_utc ?? selected.observed_at_utc}</dd>
+            {observationId && <><dt>{t("ID da observação")}</dt><dd>{observationId}</dd></>}
+            {selected.observation && !frame && <><dt>{t("Faixa do detector")}</dt><dd>{selected.observation.minWavelength}–{selected.observation.maxWavelength} µm</dd></>}
             {frame && <>
-              <dt>{isLiveFrame ? "Faixa do detector" : "Faixa no centro"}</dt><dd>{frame.wavelength_um.toFixed(5)} µm · largura {frame.bandwidth_um.toFixed(5)} µm</dd>
-              <dt>Cobertura válida</dt><dd>{(frame.valid_fraction * 100).toFixed(1)}%</dd></>}
-            {source && <><dt>FITS original</dt><dd><a href={source} target="_blank" rel="noreferrer">Exposição no IRSA ↗</a></dd></>}
-            {cutout && <><dt>Recorte</dt><dd><a href={cutout} target="_blank" rel="noreferrer">Arquivo FITS ↗</a></dd></>}
+              <dt>{isLiveFrame ? t("Faixa do detector") : t("Faixa no centro")}</dt><dd>{frame.wavelength_um.toFixed(5)} µm · {t("largura")} {frame.bandwidth_um.toFixed(5)} µm</dd>
+              <dt>{t("Cobertura válida")}</dt><dd>{(frame.valid_fraction * 100).toFixed(1)}%</dd></>}
+            {source && <><dt>{t("FITS original")}</dt><dd><a href={source} target="_blank" rel="noreferrer">{t("Exposição no IRSA ↗")}</a></dd></>}
+            {cutout && <><dt>{t("Recorte")}</dt><dd><a href={cutout} target="_blank" rel="noreferrer">{t("Arquivo FITS ↗")}</a></dd></>}
           </dl>
         </details>
-      </> : <p className="viewer-hint">Nenhuma exposição encontrada para este campo.</p>}
+      </> : <p className="viewer-hint">{t("Nenhuma exposição encontrada para este campo.")}</p>}
     </section>
   );
 }

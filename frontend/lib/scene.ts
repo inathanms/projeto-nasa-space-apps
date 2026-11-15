@@ -48,7 +48,7 @@ const stars = Array.from({ length: 96 }, (_, index) => {
   return [turn(t * .6180339887), turn(t * .795438), turn(t * .327511)];
 });
 
-export function makeScene(canvas: HTMLCanvasElement, layout: "lab" | "orbital" = "lab") {
+export function makeScene(canvas: HTMLCanvasElement, layout: "lab" | "orbital" = "lab", north = "NORTH") {
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
   const layer = document.createElement("canvas");
@@ -253,7 +253,7 @@ export function makeScene(canvas: HTMLCanvasElement, layout: "lab" | "orbital" =
       ctx.fillStyle = "#bfcfc5";
       ctx.font = "11px ui-monospace, monospace";
       ctx.textAlign = "center";
-      ctx.fillText("NORTE", pole.x, pole.y - 7);
+      ctx.fillText(north, pole.x, pole.y - 7);
     }
   }
 

@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { nav } from "../../content/landing";
+import { localizedHref } from "../../lib/i18n";
+import { useLocale } from "./LocaleProvider";
 
-export default function ToolLinks() {
-  const pathname = usePathname().replace(/\/$/, "");
-  return nav.ferramentas.map(({ href, label }) => (
-    <Link href={href} key={href} aria-current={pathname === href.replace(/\/$/, "") ? "page" : undefined}>
+export default function ToolLinks({ links }: { links: { href: string; label: string }[] }) {
+  const pathname = usePathname();
+  const { locale, href } = useLocale();
+  return links.map(({ href: path, label }) => (
+    <Link href={href(path)} key={path} aria-current={localizedHref(locale, pathname) === href(path) ? "page" : undefined}>
       {label}
     </Link>
   ));

@@ -1,7 +1,9 @@
-import { comoFunciona } from "../../content/landing";
+import { getLanding } from "../../content/landing";
+import { type Locale } from "../../lib/i18n";
 import s from "./landing.module.css";
 
-export default function ComoFunciona() {
+export default function ComoFunciona({ locale }: { locale: Locale }) {
+  const { comoFunciona } = getLanding(locale);
   return (
     <section id="como-funciona" className={`${s.section} ${s.cream}`} aria-labelledby="como-titulo" tabIndex={-1}>
       <div className="wrap">

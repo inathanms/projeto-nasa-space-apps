@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { alvos, alvosSecao } from "../../content/landing";
+import { getLanding } from "../../content/landing";
+import { localizedHref, type Locale } from "../../lib/i18n";
 import styles from "./landing.module.css";
 
-export default function Alvos() {
+export default function Alvos({ locale }: { locale: Locale }) {
+  const { alvos, alvosSecao } = getLanding(locale);
   return (
     <section id="alvos" className={styles.section} aria-labelledby="alvos-titulo" tabIndex={-1}>
       <div className="wrap">
@@ -17,7 +19,7 @@ export default function Alvos() {
                 <Image src={`/alvos/${slug}.jpg`} alt={alvosSecao.fotoAlt(nome)} width={600} height={425} />
               </div>
               <div className={styles.targetBody}>
-                <h3><Link href={alvosSecao.hrefBase + slug} className={styles.targetLink}
+                <h3><Link href={localizedHref(locale, alvosSecao.hrefBase + slug)} className={styles.targetLink}
                   aria-describedby={`alvo-${slug}-descricao`}>{nome}</Link></h3>
                 <p id={`alvo-${slug}-descricao`}>{texto}</p>
                 <div className={styles.targetFoot}>

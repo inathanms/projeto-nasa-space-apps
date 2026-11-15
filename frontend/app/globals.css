@@ -145,14 +145,24 @@ body:where(:has(#inicio)) .site-menu nav .landing-links { display: inline-flex; 
 .button.primary:hover:not(:disabled) { background: var(--orange-hover); }
 .button.secondary { color: var(--cream); border-color: var(--control-border); background: var(--night); }
 .button.secondary:hover:not(:disabled) { border-color: var(--accent); background: var(--selected); }
-@media (max-width: 1020px) {
+.site-language a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  padding-inline: 5px;
+  color: var(--ink);
+  font-size: .85rem;
+}
+@media (max-width: 1160px) {
   .site-header .site-links { display: none; }
   .site-menu { display: block; margin-left: auto; }
-  .header-cta { order: 1; }
 }
 @media (max-width: 550px) {
   .site-header .header-cta { display: none; }
-  .site-header-inner { flex-wrap: wrap; }
+  .site-header-inner { flex-wrap: wrap; gap: 6px 8px; }
+  .site-brand { flex: 1 1 7.5rem; gap: 6px; }
+  .site-menu summary { padding-inline: 8px; }
+  .site-language a { padding-inline: 3px; }
   .site-footer-inner { grid-template-columns: minmax(0, 1fr); }
 }
 .not-found { padding-block: var(--section-space); }

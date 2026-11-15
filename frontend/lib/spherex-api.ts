@@ -1,3 +1,4 @@
+import { translators, type Locale } from "./i18n";
 import { isRecord, type Frame, type Sequence } from "./sequence";
 import { observationIdForExposure, type CatalogExposure, type LiveExposure, type LiveTimeline, type Timeline } from "./timeline";
 
@@ -25,21 +26,22 @@ async function strictFetch(url: string, signal: AbortSignal) {
   return response;
 }
 
-export function apiErrorMessage(error: unknown) {
+export function apiErrorMessage(error: unknown, locale: Locale = "en") {
+  const t = translators[locale];
   if (error instanceof SpherexApiError) {
-    if (error.code === "NO_COMPARABLE_PAIR") return "Nenhum par de visitas do mesmo detector teve cobertura suficiente. Veja as épocas disponíveis ou abra um exemplo.";
-    if (error.code === "EMPTY_IMAGE" || error.status === 404) return "Este recorte não está disponível. Tente outra exposição.";
-    if (error.status === 503) return "O serviço está ocupado. Tente novamente em instantes.";
-    if (error.status === 422) return "O serviço não aceitou os parâmetros enviados. Confira as coordenadas.";
-    if (error.status === 504) return "O arquivo IRSA demorou mais do que o esperado. Tente novamente.";
-    if (error.code === "INVALID_RESPONSE") return "O serviço devolveu dados em um formato inesperado.";
-    if (error.code === "MISSING_IMAGE_METADATA") return "O serviço não disponibilizou a escala de brilho ou os metadados do recorte. Confira a configuração de CORS.";
-    return "O serviço está temporariamente indisponível. Você pode abrir um exemplo.";
+    if (error.code === "NO_COMPARABLE_PAIR") return t("Nenhum par de visitas do mesmo detector teve cobertura suficiente. Veja as épocas disponíveis ou abra um exemplo.");
+    if (error.code === "EMPTY_IMAGE" || error.status === 404) return t("Este recorte não está disponível. Tente outra exposição.");
+    if (error.status === 503) return t("O serviço está ocupado. Tente novamente em instantes.");
+    if (error.status === 422) return t("O serviço não aceitou os parâmetros enviados. Confira as coordenadas.");
+    if (error.status === 504) return t("O arquivo IRSA demorou mais do que o esperado. Tente novamente.");
+    if (error.code === "INVALID_RESPONSE") return t("O serviço devolveu dados em um formato inesperado.");
+    if (error.code === "MISSING_IMAGE_METADATA") return t("O serviço não disponibilizou a escala de brilho ou os metadados do recorte. Confira a configuração de CORS.");
+    return t("O serviço está temporariamente indisponível. Você pode abrir um exemplo.");
   }
   if (error instanceof DOMException && (error.name === "AbortError" || error.name === "TimeoutError")) {
-    return "A consulta demorou mais do que o esperado. Você pode abrir um exemplo.";
+    return t("A consulta demorou mais do que o esperado. Você pode abrir um exemplo.");
   }
-  return "Não foi possível conectar ao serviço. Você pode abrir um exemplo.";
+  return t("Não foi possível conectar ao serviço. Você pode abrir um exemplo.");
 }
 
 export async function fetchEpochs(api: string, ra: number, dec: number, signal: AbortSignal): Promise<LiveTimeline> {
@@ -198,7 +200,8 @@ function candidatePairs(exposures: LiveExposure[]) {
   return pairs.sort((a, b) => b.gap - a.gap).slice(0, 6);
 }
 
-export async function fetchComparison(api: string, timeline: LiveTimeline, signal: AbortSignal): Promise<Sequence> {
+export async function fetchComparison(api: string, timeline: LiveTimeline, signal: AbortSignal, locale: Locale = "en"): Promise<Sequence> {
+  const t = translators[locale];
   const references = new Map<string, RenderedExposure | null>();
   for (const { first, second } of candidatePairs(timeline.exposures)) {
     signal.throwIfAborted();
@@ -223,7 +226,7 @@ export async function fetchComparison(api: string, timeline: LiveTimeline, signa
         collections: [first.collection],
         fetched_at_utc: new Date().toISOString(),
         generated_at_utc: null,
-        processing_version: "SPHEREye API · norte acima · escala de brilho compartilhada",
+        processing_version: t("SPHEREye API · norte acima · escala de brilho compartilhada"),
         frames: [anchor.frame, other.frame],
       };
     } catch (error) {
