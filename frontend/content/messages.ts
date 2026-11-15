@@ -170,6 +170,7 @@ export const englishMessages = {
   "Não foi possível ler os pixels destes quadros.": "Could not read the pixels in these images.",
   "O IRSA atingiu o limite de exposições para esta consulta. O catálogo está parcial.": "IRSA reached the exposure limit for this search. The catalog is incomplete.",
   "O arquivo IRSA demorou mais do que o esperado. Tente novamente.": "The IRSA archive took longer than expected. Try again.",
+  "O arquivo IRSA não conseguiu concluir a consulta. Tente de novo ou abra um exemplo offline.": "The IRSA archive could not complete the request. Try again or open an offline example.",
   "O céu que seus olhos não veem": "The sky our eyes can’t see",
   "O SPHEREx fotografa o universo em luz infravermelha. A gente transforma esses dados em algo que qualquer curioso consegue explorar.": "SPHEREx images the universe in infrared light. We make those observations available for anyone to explore.",
   "O serviço devolveu dados em um formato inesperado.": "The service returned data in an unexpected format.",

@@ -33,6 +33,7 @@ export function apiErrorMessage(error: unknown, locale: Locale = "en") {
     if (error.code === "EMPTY_IMAGE" || error.status === 404) return t("Este recorte não está disponível. Tente outra exposição.");
     if (error.status === 503) return t("O serviço está ocupado. Tente novamente em instantes.");
     if (error.status === 422) return t("O serviço não aceitou os parâmetros enviados. Confira as coordenadas.");
+    if (error.status === 502) return t("O arquivo IRSA não conseguiu concluir a consulta. Tente de novo ou abra um exemplo offline.");
     if (error.status === 504) return t("O arquivo IRSA demorou mais do que o esperado. Tente novamente.");
     if (error.code === "INVALID_RESPONSE") return t("O serviço devolveu dados em um formato inesperado.");
     if (error.code === "MISSING_IMAGE_METADATA") return t("O serviço não disponibilizou a escala de brilho ou os metadados do recorte. Confira a configuração de CORS.");
@@ -49,6 +50,8 @@ export async function fetchEpochs(api: string, ra: number, dec: number, signal: 
   const response = await strictFetch(`${api}/epochs?${query}`, signal);
   const payload: unknown = await response.json().catch(() => null);
   if (!isRecord(payload) || !isRecord(payload.query) || typeof payload.query.collection !== "string" ||
+      !isNumber(payload.query.ra) || payload.query.ra < 0 || payload.query.ra >= 360 ||
+      !isNumber(payload.query.dec) || payload.query.dec < -90 || payload.query.dec > 90 ||
       typeof payload.truncated !== "boolean" || !Array.isArray(payload.observations)) {
     throw new SpherexApiError("INVALID_RESPONSE");
   }
@@ -87,7 +90,10 @@ export async function fetchEpochs(api: string, ra: number, dec: number, signal: 
   }
   exposures.sort((a, b) => Date.parse(a.observed_at_utc) - Date.parse(b.observed_at_utc) ||
     a.detector.localeCompare(b.detector));
-  return { ra_deg: ra, dec_deg: dec, fov_arcmin: 6, truncated: payload.truncated, incomplete_collections: [], exposures };
+  return {
+    ra_deg: payload.query.ra, dec_deg: payload.query.dec, fov_arcmin: 6,
+    truncated: payload.truncated, incomplete_collections: [], exposures,
+  };
 }
 
 function imageDataUrl(png: Blob): Promise<string> {
@@ -108,7 +114,7 @@ export async function fetchExposure(api: string, timeline: Timeline, item: Catal
   const params = new URLSearchParams({
     ra: String(timeline.ra_deg), dec: String(timeline.dec_deg), observation_id: observationId,
     detector: item.detector, collection: item.collection,
-    size: String(timeline.fov_arcmin / 60), align: "true", colormap: "gray", upscale: "2",
+    size: String(timeline.fov_arcmin / 60), align: "true", colormap: "gray", upscale: "2", response_format: "png",
   });
   if (scale) {
     params.set("scale_min", scale.min);
@@ -148,7 +154,15 @@ export async function fetchExposure(api: string, timeline: Timeline, item: Catal
 }
 
 export function isUnavailableExposure(error: unknown) {
-  return error instanceof SpherexApiError && (error.status === 404 || error.code === "EMPTY_IMAGE");
+  return error instanceof SpherexApiError && (
+    error.status === 404 || error.code === "EMPTY_IMAGE" || isArchiveFailure(error)
+  );
+}
+
+function isArchiveFailure(error: unknown): error is SpherexApiError {
+  return error instanceof SpherexApiError && (
+    error.code === "UPSTREAM_ERROR" || error.code === "UPSTREAM_TIMEOUT"
+  );
 }
 
 export async function readPngPixels(png: Blob) {
@@ -203,6 +217,7 @@ function candidatePairs(exposures: LiveExposure[]) {
 export async function fetchComparison(api: string, timeline: LiveTimeline, signal: AbortSignal, locale: Locale = "en"): Promise<Sequence> {
   const t = translators[locale];
   const references = new Map<string, RenderedExposure | null>();
+  let archiveFailure: SpherexApiError | undefined;
   for (const { first, second } of candidatePairs(timeline.exposures)) {
     signal.throwIfAborted();
     try {
@@ -211,6 +226,7 @@ export async function fetchComparison(api: string, timeline: LiveTimeline, signa
           references.set(first.image_id, await fetchExposure(api, timeline, first, signal));
         } catch (error) {
           if (!isUnavailableExposure(error)) throw error;
+          if (isArchiveFailure(error)) archiveFailure ??= error;
           references.set(first.image_id, null);
         }
       }
@@ -231,7 +247,9 @@ export async function fetchComparison(api: string, timeline: LiveTimeline, signa
       };
     } catch (error) {
       if (!isUnavailableExposure(error)) throw error;
+      if (isArchiveFailure(error)) archiveFailure ??= error;
     }
   }
+  if (archiveFailure) throw archiveFailure;
   throw new SpherexApiError("NO_COMPARABLE_PAIR");
 }

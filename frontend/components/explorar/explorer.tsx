@@ -34,13 +34,12 @@ function TimelineLoading() {
   return <p className="muted" role="status">{t("Carregando a linha do tempo…")}</p>;
 }
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
 const numbers = forLocales((language) => new Intl.NumberFormat(language, { maximumFractionDigits: 5 }));
 const dateTimes = forLocales((language) => new Intl.DateTimeFormat(language, {
   dateStyle: "medium", timeStyle: "medium", timeZone: "UTC",
 }));
 
-export default function Explorer({ examples }: { examples: [Example, ...Example[]] }) {
+export default function Explorer({ examples, api }: { examples: [Example, ...Example[]]; api?: string }) {
   const { t, locale } = useLocale();
   const number = numbers[locale];
   const dateTime = dateTimes[locale];
@@ -159,11 +158,11 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
   }
 
   async function requestField(r: number, d: number, catalog: boolean, trigger?: HTMLElement) {
-    if (!API && catalog && r === 331.0954 && d === -56.8008) {
+    if (!api && catalog && r === 331.0954 && d === -56.8008) {
       await openSavedTimeline(trigger);
       return;
     }
-    if (!API) {
+    if (!api) {
       setError(t("A consulta ao IRSA não está configurada neste ambiente. Você pode comparar os quadros do exemplo abaixo."));
       return;
     }
@@ -175,7 +174,7 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
     setBusy(true);
     setPlaying(false);
     try {
-      const epochs = await fetchEpochs(API, r, d, request.signal);
+      const epochs = await fetchEpochs(api, r, d, request.signal);
       if (active.current !== request) return;
       if (catalog) {
         revealFrom.current = trigger ?? null;
@@ -183,7 +182,7 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
         setTimeline(epochs);
         setTimelineVersion((version) => version + 1);
       } else {
-        const pair = await fetchComparison(API, epochs, request.signal, locale);
+        const pair = await fetchComparison(api, epochs, request.signal, locale);
         request.signal.throwIfAborted();
         if (active.current !== request) return;
         revealFrom.current = trigger ?? null;
@@ -284,9 +283,9 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
               }
             }} aria-invalid={invalid === "dec"} aria-describedby={invalid === "dec" ? "coordinate-format search-error" : "coordinate-format"} />
             <button className="button primary" type="submit" aria-disabled={busy} aria-controls="resultado-explorador">{t("Buscar épocas no IRSA")}<span aria-hidden="true">↗</span></button>
-            {API && <button id="compare-pair" className="button secondary" type="submit" aria-disabled={busy}
+            {api && <button id="compare-pair" className="button secondary" type="submit" aria-disabled={busy}
               aria-controls="resultado-explorador">{t("Buscar par para comparação")}</button>}
-            {!API && <p className="muted offline-note">{t("A busca ao vivo requer uma API configurada neste ambiente.")}</p>}
+            {!api && <p className="muted offline-note">{t("A busca ao vivo requer uma API configurada neste ambiente.")}</p>}
             <p role="status" className="muted search-feedback">{busy ? t("Carregando observações…") : ""}</p>
             <p id="search-error" className="error search-feedback" role="alert">{error}</p>
           </form>
@@ -305,7 +304,7 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
 
         <div id="resultado-explorador" className="viewer" ref={results} tabIndex={-1} role="group" aria-label={t("Resultado do Explorador")}>
           {timeline ? <TimelineViewer key={timelineVersion}
-            timeline={timeline} api={API}
+            timeline={timeline} api={api}
             savedFrames={examples.find((item) => item.sequence.ra_deg === timeline.ra_deg && item.sequence.dec_deg === timeline.dec_deg)?.sequence.frames ?? []}
             onClose={closeTimeline} />
           : sequence && frame ? <section aria-label={t("Visor de comparação")} className="viewer">
@@ -390,7 +389,7 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
                 <div className="plate-top instrument"><span>{t("Campo selecionado")}</span></div>
                 <div className="sky-wrap">
                   <div className="sky timeline-placeholder">
-                    <p>{busy ? t("Carregando observações…") : API
+                    <p>{busy ? t("Carregando observações…") : api
                       ? t("Busque épocas para abrir os recortes deste campo.")
                       : t("A consulta a este campo precisa de uma API configurada.")}</p>
                   </div>
