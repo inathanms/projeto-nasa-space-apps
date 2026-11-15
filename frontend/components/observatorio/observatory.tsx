@@ -10,6 +10,7 @@ import { axisHint, CAPTURE_RADIUS, clamp, nearestTarget, scanPath, wrap, type Ta
 import SceneLoading from "../ui/SceneLoading";
 import { targetInfo } from "../../content/target-info";
 import TargetSheet from "./target-sheet";
+import { setDiscoveryField } from "../../lib/discovery";
 
 const SceneCanvas = dynamic(() => import("../ui/SceneCanvas"), { ssr: false, loading: SceneLoading });
 
@@ -46,6 +47,12 @@ export default function Observatory({ targets }: { targets: Target[] }) {
   const [mjdDraft, setMjdDraft] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [sheet, setSheet] = useState<Target | null>(null);
+
+  // Informa ao widget de descoberta para onde a mira aponta e em que instante.
+  useEffect(() => {
+    setDiscoveryField({ name: lockedTarget?.name, ra, dec, times: [new Date(time).toISOString()] });
+  }, [ra, dec, time, lockedTarget]);
+  useEffect(() => () => setDiscoveryField(null), []);
   const pointer = useRef<{ id: number; x: number; y: number; ra: number; dec: number; lastX: number } | null>(null);
   const pauseTimer = useRef<number | null>(null);
   const rangeGesture = useRef<{ id: number; interrupted: boolean } | null>(null);

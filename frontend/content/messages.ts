@@ -318,5 +318,6 @@ export const englishMessages = {
   "Pular": "Skip",
   "Voltar": "Back",
   "Concluir": "Finish",
-  "Próximo": "Next"
+  "Próximo": "Next",
+  "Todas as épocas de {name}": "All epochs of {name}"
 } as const;

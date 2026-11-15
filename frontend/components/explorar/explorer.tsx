@@ -6,6 +6,7 @@ import { forLocales } from "../../lib/i18n";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Help from "../ui/Help";
+import { setDiscoveryField } from "../../lib/discovery";
 import { useEffect, useEffectEvent, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { formatDate, sourceLink, type Example, type Sequence } from "../../lib/sequence";
 import { isTimeline, type Timeline } from "../../lib/timeline";
@@ -35,6 +36,8 @@ function TimelineLoading() {
 }
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "");
+// Catálogos de épocas salvos para uso offline. Os demais exemplos reais buscam as épocas ao vivo na API.
+const SAVED_TIMELINES: Readonly<Record<string, string>> = { "eps-indi-b": "/examples/eps-indi-b/timeline.json" };
 const numbers = forLocales((language) => new Intl.NumberFormat(language, { maximumFractionDigits: 5 }));
 const dateTimes = forLocales((language) => new Intl.DateTimeFormat(language, {
   dateStyle: "medium", timeStyle: "medium", timeZone: "UTC",
@@ -70,6 +73,21 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
   // O campo simulado não tem um astro centralizado, por isso fica de fora.
   const guideTarget = example && !example.synthetic ? example : null;
   const hasGuide = guideTarget !== null;
+  // O botão de épocas acompanha o exemplo escolhido no menu: catálogo salvo (offline) ou busca ao vivo.
+  // Exemplos simulados ficam de fora: a busca ao vivo traria dados reais, não a simulação.
+  const selectedExample = examples.find((item) => item.slug === selected) ?? examples[0];
+  const canOpenEpochs = Boolean(SAVED_TIMELINES[selectedExample.slug]) || (Boolean(API) && !selectedExample.synthetic);
+
+  // Informa ao widget de descoberta qual campo está aberto (coordenadas e datas das épocas).
+  useEffect(() => {
+    setDiscoveryField(sequence ? {
+      name: example?.name,
+      ra: sequence.ra_deg,
+      dec: sequence.dec_deg,
+      times: sequence.frames.map((item) => item.observed_at_utc).filter((time): time is string => Boolean(time)),
+    } : null);
+  }, [sequence, example]);
+  useEffect(() => () => setDiscoveryField(null), []);
 
   const openLinkedField = useEffectEvent(() => {
     const params = new URLSearchParams(window.location.search);
@@ -207,7 +225,7 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
     }
   }
 
-  async function openSavedTimeline(trigger?: HTMLElement) {
+  async function openSavedTimeline(trigger?: HTMLElement, path = SAVED_TIMELINES["eps-indi-b"]) {
     if (active.current) return;
     const request = new AbortController();
     active.current = request;
@@ -215,7 +233,7 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
     setPlaying(false);
     setError("");
     try {
-      const response = await fetch("/examples/eps-indi-b/timeline.json", { signal: request.signal });
+      const response = await fetch(path, { signal: request.signal });
       const payload: unknown = await response.json();
       if (!response.ok || !isTimeline(payload)) throw new Error();
       if (!request.signal.aborted) {
@@ -298,8 +316,12 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
             </select>
             <button type="button" className="button secondary" aria-controls="resultado-explorador"
               onClick={(event) => applyExample(examples.find((item) => item.slug === selected) ?? examples[0], event.currentTarget)}>{t("Abrir exemplo")} <span aria-hidden="true">↗</span></button>
-            <button type="button" className="button secondary" aria-disabled={busy} aria-controls="resultado-explorador"
-              onClick={(event) => void openSavedTimeline(event.currentTarget)}>{t("Épocas de Epsilon Indi B")}</button>
+            {canOpenEpochs && <button type="button" className="button secondary" aria-disabled={busy} aria-controls="resultado-explorador"
+              onClick={(event) => {
+                const saved = SAVED_TIMELINES[selectedExample.slug];
+                if (saved) void openSavedTimeline(event.currentTarget, saved);
+                else void requestField(selectedExample.sequence.ra_deg, selectedExample.sequence.dec_deg, true, event.currentTarget);
+              }}>{t("Todas as épocas de {name}", { name: selectedExample.name })}</button>}
           </div>
         </aside>
 

@@ -173,6 +173,17 @@ const steps: Source[] = [
     },
   },
   {
+    target: "discovery-bubble",
+    pt: {
+      title: "Achou algo diferente?",
+      body: "Se notar algo estranho, toque aqui. O assistente te ajuda a conferir se já é conhecido e, se for novo, a montar o relatório para o Minor Planet Center.",
+    },
+    en: {
+      title: "Found something odd?",
+      body: "If you notice something strange, tap here. The assistant helps you check whether it's already known and, if it's new, build the report for the Minor Planet Center.",
+    },
+  },
+  {
     target: "tour-help",
     pt: {
       title: "Pronto!",
