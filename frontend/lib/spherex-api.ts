@@ -1,6 +1,6 @@
 import { translators, type Locale } from "./i18n";
 import { isRecord, type Frame, type Sequence } from "./sequence";
-import { observationIdForExposure, type CatalogExposure, type LiveExposure, type LiveTimeline, type Timeline } from "./timeline";
+import { observationIdForExposure, rgbVisitExposures, type CatalogExposure, type LiveExposure, type LiveTimeline, type Timeline } from "./timeline";
 
 const minSharedCoverage = 0.65;
 
@@ -92,7 +92,9 @@ export async function fetchEpochs(api: string, ra: number, dec: number, signal: 
     a.detector.localeCompare(b.detector));
   return {
     ra_deg: payload.query.ra, dec_deg: payload.query.dec, fov_arcmin: 6,
-    truncated: payload.truncated, incomplete_collections: [], exposures,
+    truncated: payload.truncated, incomplete_collections: [], exposures, source: "live",
+    rgbVisits: Array.isArray(payload.visits) ? payload.visits.flatMap((visit: unknown) =>
+      isRecord(visit) && visit.rgb_available === true && isNumber(visit.visit_index) ? [visit.visit_index] : []) : [],
   };
 }
 
@@ -106,6 +108,38 @@ function imageDataUrl(png: Blob): Promise<string> {
     reader.onerror = () => reject(new SpherexApiError("INVALID_RESPONSE"));
     reader.readAsDataURL(png);
   });
+}
+
+export async function fetchRgbFrame(api: string, timeline: Timeline, item: CatalogExposure, signal: AbortSignal): Promise<Frame> {
+  const observationId = observationIdForExposure(item);
+  if (!observationId) throw new SpherexApiError("INVALID_RESPONSE");
+  const params = new URLSearchParams({
+    ra: String(timeline.ra_deg), dec: String(timeline.dec_deg), observation_id: observationId,
+    collection: item.collection, size: String(timeline.fov_arcmin / 60), mode: "rgb",
+    align: "true", upscale: "2", response_format: "png",
+  });
+  const response = await strictFetch(`${api}/image?${params}`, signal);
+  const png = await response.blob();
+  if (png.type !== "image/png" || !png.size) throw new SpherexApiError("INVALID_RESPONSE");
+  const minimum = response.headers.get("X-Wavelength-Min-Um")?.split(",").map(Number);
+  const maximum = response.headers.get("X-Wavelength-Max-Um")?.split(",").map(Number);
+  if (minimum?.length !== 3 || maximum?.length !== 3 ||
+      minimum.some((min, i) => !Number.isFinite(min) || min <= 0 || !Number.isFinite(maximum[i]) || min >= maximum[i])) {
+    throw new SpherexApiError("MISSING_IMAGE_METADATA");
+  }
+  const valid = Number(response.headers.get("X-Valid-Pixel-Fraction") ?? NaN);
+  return {
+    frame_id: observationId,
+    observed_at_utc: item.observed_at_utc,
+    collection: item.collection,
+    detector: response.headers.get("X-Detector") ?? "D3,D2,D1",
+    wavelength_um: (minimum[1] + maximum[1]) / 2,
+    bandwidth_um: maximum[1] - minimum[1],
+    wavelength_bands_um: minimum.map((min, i) => [min, maximum[i]]),
+    calibration_version: "—", source_url: null, cutout_url: null,
+    valid_fraction: valid >= 0 && valid <= 1 ? valid : null,
+    image_src: await imageDataUrl(png),
+  };
 }
 
 export async function fetchExposure(api: string, timeline: Timeline, item: CatalogExposure, signal: AbortSignal, scale?: BrightnessScale): Promise<RenderedExposure> {
@@ -214,7 +248,7 @@ function candidatePairs(exposures: LiveExposure[]) {
   return pairs.sort((a, b) => b.gap - a.gap).slice(0, 6);
 }
 
-export async function fetchComparison(api: string, timeline: LiveTimeline, signal: AbortSignal, locale: Locale = "en"): Promise<Sequence> {
+export async function fetchComparison(api: string, timeline: LiveTimeline, signal: AbortSignal, locale: Locale = "en") {
   const t = translators[locale];
   const references = new Map<string, RenderedExposure | null>();
   let archiveFailure: SpherexApiError | undefined;
@@ -234,7 +268,7 @@ export async function fetchComparison(api: string, timeline: LiveTimeline, signa
       if (!anchor || anchor.frame.valid_fraction + 0.00005 < minSharedCoverage) continue;
       const other = await fetchExposure(api, timeline, second, signal, anchor.scale);
       if (!(await shareCoverage(anchor, other))) continue;
-      return {
+      const sequence: Sequence = {
         sequence_id: `${first.image_id}/${second.image_id}`,
         ra_deg: timeline.ra_deg,
         dec_deg: timeline.dec_deg,
@@ -244,6 +278,13 @@ export async function fetchComparison(api: string, timeline: LiveTimeline, signa
         generated_at_utc: null,
         processing_version: t("SPHEREye API · norte acima · escala de brilho compartilhada"),
         frames: [anchor.frame, other.frame],
+      };
+      const available = rgbVisitExposures(timeline);
+      const earliest = available[0];
+      const latest = available.at(-1);
+      return {
+        sequence,
+        rgbExposures: earliest ? (latest && latest !== earliest ? [earliest, latest] : [earliest]) : [],
       };
     } catch (error) {
       if (!isUnavailableExposure(error)) throw error;

@@ -20,10 +20,17 @@ export type Timeline = {
   fov_arcmin: 6;
   incomplete_collections: string[];
   truncated?: boolean;
+  source?: "live";
+  rgbVisits?: number[];
   exposures: CatalogExposure[];
 };
 
 export type LiveTimeline = Timeline & { truncated: boolean; exposures: LiveExposure[] };
+
+export function rgbVisitExposures(timeline: Timeline) {
+  const visits = new Set(timeline.rgbVisits);
+  return timeline.exposures.filter(({ observation }) => observation && visits.delete(observation.visit));
+}
 
 export function observationIdForExposure(item: CatalogExposure) {
   if (item.observation) return item.observation.id;

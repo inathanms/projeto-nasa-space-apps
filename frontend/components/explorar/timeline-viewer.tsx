@@ -4,23 +4,27 @@ import { useLocale } from "../ui/LocaleProvider";
 import { forLocales } from "../../lib/i18n";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { formatDate, sourceLink, type Frame } from "../../lib/sequence";
-import { observationIdForExposure, type CatalogExposure, type Timeline } from "../../lib/timeline";
-import { apiErrorMessage, fetchExposure, isUnavailableExposure, shareCoverage, type RenderedExposure } from "../../lib/spherex-api";
+import { observationIdForExposure, rgbVisitExposures, type CatalogExposure, type Timeline } from "../../lib/timeline";
+import { apiErrorMessage, fetchExposure, fetchRgbFrame, isUnavailableExposure, shareCoverage, type RenderedExposure } from "../../lib/spherex-api";
+import ImageFormat, { type ImageMode } from "./image-format";
 import { useSkySwipe } from "./use-sky-swipe";
 
 const timeFormats = forLocales((language) => new Intl.DateTimeFormat(language, {
   hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23", timeZone: "UTC",
 }));
 
-export default function TimelineViewer({ timeline, api, savedFrames, onClose }: {
-  timeline: Timeline; api?: string; savedFrames: Frame[]; onClose: () => void;
+export default function TimelineViewer({ timeline, api, savedFrames, targetName, onClose }: {
+  timeline: Timeline; api?: string; savedFrames: Frame[]; targetName?: string; onClose: () => void;
 }) {
   const { t, locale } = useLocale();
   const timeUTC = timeFormats[locale];
   const imageCount = (count: number) => t(count === 1 ? "{count} imagem" : "{count} imagens", { count });
-  const exposures = timeline.exposures;
+  const [mode, setMode] = useState<ImageMode>("single");
+  const [showGuide, setShowGuide] = useState(false);
+  const rgbExposures = useMemo(() => rgbVisitExposures(timeline), [timeline]);
+  const exposures = mode === "rgb" ? rgbExposures : timeline.exposures;
   const { days, dayOptions, indexById, byDetector } = useMemo(() => {
     const days = new Map<string, CatalogExposure[]>();
     const indexById = new Map<string, number>();
@@ -60,11 +64,17 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
   const cutout = sourceLink(selected?.cutout_url ?? null);
   const observationId = selected && observationIdForExposure(selected);
   const isLiveFrame = frame && frame.frame_id === observationId;
-  const playable = selected && api && frame && byDetector.get(selected.detector)?.some(
+  const playable = mode === "single" && selected && api && frame && byDetector.get(selected.detector)?.some(
     (item) => item.collection === selected.collection && item.observed_at_utc !== selected.observed_at_utc,
   );
 
-  useEffect(() => () => pending.current?.abort(), []);
+  const openInitial = useEffectEvent(() => {
+    if (api && targetName && selected) void choose(selected);
+  });
+  useEffect(() => {
+    openInitial();
+    return () => pending.current?.abort();
+  }, []);
 
   function pause() {
     pending.current?.abort();
@@ -73,23 +83,24 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
     setBusy(false);
   }
 
-  async function choose(item: CatalogExposure, reuseSaved = false, trigger?: HTMLButtonElement) {
+  async function choose(item: CatalogExposure, reuseSaved = false, trigger?: HTMLButtonElement, format = mode) {
     pause();
     setReference(undefined);
     cachedReference.current = null;
     setMessage("");
-    const local = reuseSaved ? savedFrames.find((image) => image.frame_id === item.frame_id) : undefined;
+    const local = reuseSaved && format === "single" ? savedFrames.find((image) => image.frame_id === item.frame_id) : undefined;
     setCurrent({ selected: item, frame: local });
     if (local || !api || !observationIdForExposure(item)) return;
     const controller = new AbortController();
     pending.current = controller;
     setBusy(true);
     try {
-      const image = await fetchExposure(api, timeline, item, controller.signal);
+      const grayscale = format === "single" ? await fetchExposure(api, timeline, item, controller.signal) : undefined;
+      const nextFrame = grayscale?.frame ?? await fetchRgbFrame(api, timeline, item, controller.signal);
       if (!controller.signal.aborted) {
-        cachedReference.current = { id: item.image_id, image };
+        if (grayscale) cachedReference.current = { id: item.image_id, image: grayscale };
         if (trigger && document.activeElement === trigger) sky.current?.focus();
-        setCurrent({ selected: item, frame: image.frame });
+        setCurrent({ selected: item, frame: nextFrame });
       }
     } catch (error) {
       if (!controller.signal.aborted) setMessage(apiErrorMessage(error, locale));
@@ -99,6 +110,14 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
         setBusy(false);
       }
     }
+  }
+
+  function changeFormat(next: ImageMode) {
+    const item = next === "rgb" ? rgbExposures.find((exposure) =>
+      exposure.observation?.visit === selected?.observation?.visit) ?? rgbExposures[0] : selected;
+    if (!item) return;
+    setMode(next);
+    void choose(item, true, undefined, next);
   }
 
   async function play() {
@@ -183,7 +202,10 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
   return (
     <section className="viewer timeline-viewer" aria-label={t("Linha do tempo")}>
       <div className="timeline-title">
-        <div><h2>{t("Linha do tempo")}</h2><p className="muted">{t("{days} · {images} no catálogo", { days: t(days.size === 1 ? "{count} dia UTC" : "{count} dias UTC", { count: days.size }), images: imageCount(exposures.length) })}</p></div>
+        <div>
+          <h2>{targetName ?? t("Linha do tempo")}</h2>
+          <p className="muted">{timeline.source === "live" ? t("IRSA · AO VIVO") : t("Catálogo offline")} · {t("{days} · {images} no catálogo", { days: t(days.size === 1 ? "{count} dia UTC" : "{count} dias UTC", { count: days.size }), images: imageCount(exposures.length) })}</p>
+        </div>
         <button className="button secondary" type="button" onClick={onClose}>{t("Voltar à comparação")}</button>
       </div>
       {timeline.incomplete_collections.length > 0 && (
@@ -194,19 +216,27 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
         <div className="plate">
           <div className="plate-top instrument">
             <span>{formatDate(selected.observed_at_utc, locale)} · {timeUTC.format(new Date(selected.observed_at_utc))} UTC</span>
-            <span>{selected.collection} · {selected.detector}</span>
+            <span>{selected.collection} · {frame?.detector ?? selected.detector}</span>
           </div>
           <div className="sky-wrap">
-            <figure className="sky timeline-sky" ref={sky} tabIndex={0} onKeyDown={keyboard} {...swipe}
+            <figure id="timeline-sky" className={mode === "single" ? "sky timeline-sky sky-grayscale" : "sky timeline-sky"} ref={sky} tabIndex={0} onKeyDown={keyboard} {...swipe}
               aria-label={t("Recorte selecionado. Deslize na horizontal ou use as setas para navegar pelas exposições.")}>
               {frame ? <Image src={frame.image_src} width={128} height={128} loading="eager" draggable={false} alt={t("Recorte SPHEREx da exposição selecionada")} />
                 : <div className="timeline-placeholder">{busy ? t("Carregando recorte…") : t("Selecione uma exposição e abra o recorte.")}</div>}
+              {frame && showGuide && <span className="sky-guide" aria-hidden="true" />}
               {frame && <><span className="north instrument" aria-hidden="true">N ↑<br />E ←</span><span className="scale instrument" aria-hidden="true">1′</span></>}
             </figure>
           </div>
           <div className="plate-bottom instrument">
             <span>RA {timeline.ra_deg}° · DEC {timeline.dec_deg}°</span><span>6′ × 6′</span>
           </div>
+        </div>
+        <div className="viewer-tools">
+          <ImageFormat mode={mode} rgbAvailable={Boolean(api && rgbExposures.length)} busy={busy || playing} onChange={changeFormat} />
+          <button className="button secondary mark-target" type="button" aria-pressed={showGuide} aria-controls="timeline-sky"
+            onClick={() => setShowGuide((visible) => !visible)}>
+            {targetName ? t("Marcar {name}", { name: targetName }) : t("Marcar alvo")}
+          </button>
         </div>
         <div className="timeline-inputs">
           <label>{t("Dia de observação")}
@@ -217,13 +247,13 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
               {dayOptions}
             </select>
           </label>
-          <label>{t("Horário UTC e detector")}
+          <label>{mode === "rgb" ? t("Horário UTC da visita") : t("Horário UTC e detector")}
             <select className="control-field" value={selected.image_id} disabled={busy || playing} onChange={(event) => {
               const index = indexById.get(event.target.value);
               if (index !== undefined) void choose(exposures[index], true);
             }}>
               {days.get(day)?.map((item) => <option key={item.image_id} value={item.image_id}>
-                {timeUTC.format(new Date(item.observed_at_utc))} · {item.detector} · {item.collection.replace("spherex_", "").toUpperCase()}
+                {timeUTC.format(new Date(item.observed_at_utc))}{mode === "single" && ` · ${item.detector} · ${item.collection.replace("spherex_", "").toUpperCase()}`}
               </option>)}
             </select>
           </label>
@@ -233,11 +263,12 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
           <button className="button secondary" type="button" aria-disabled={busy || playing || index >= exposures.length - 1} onClick={() => move(1)}>{t("Próxima")}</button>
           {!frame && api && observationId && <button className="button primary" type="button" aria-disabled={busy}
             onClick={(event) => { if (!busy) void choose(selected, false, event.currentTarget); }}>{t("Abrir recorte")}</button>}
-          {api && <button className="button secondary" type="button" disabled={!playing && (!playable || busy)}
+          {api && mode === "single" && <button className="button secondary" type="button" disabled={!playing && (!playable || busy)}
             onClick={() => playing ? pause() : void play()}>{playing ? t("Pausar") : t("Reproduzir faixa")}</button>}
           {!frame && cutout && <a className="button secondary" href={cutout} target="_blank" rel="noreferrer">{t("Abrir FITS no IRSA")}</a>}
         </div>
-        {api && <p className="viewer-hint">{reference
+        {mode === "rgb" && <p className="viewer-hint">{t("As composições RGB usam escalas de brilho próprias.")}</p>}
+        {api && mode === "single" && <p className="viewer-hint">{reference
           ? t("Escala de brilho fixada pela referência nas imagens do mesmo detector com cobertura em comum.")
           : t("A reprodução usa a escala de brilho da exposição selecionada nos recortes do mesmo detector.")}</p>}
         {!api && <p className="viewer-hint">{t("Catálogo salvo. Os quadros do exemplo ficam disponíveis aqui. Para as demais exposições, abra o link do FITS.")}</p>}
@@ -252,7 +283,8 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
             {observationId && <><dt>{t("ID da observação")}</dt><dd>{observationId}</dd></>}
             {selected.observation && !frame && <><dt>{t("Faixa do detector")}</dt><dd>{selected.observation.minWavelength}–{selected.observation.maxWavelength} µm</dd></>}
             {frame && <>
-              <dt>{isLiveFrame ? t("Faixa do detector") : t("Faixa no centro")}</dt><dd>{frame.wavelength_um.toFixed(5)} µm · {t("largura")} {frame.bandwidth_um.toFixed(5)} µm</dd>
+              {frame.wavelength_bands_um ? <><dt>{t("Bandas RGB")}</dt><dd>{frame.wavelength_bands_um.map(([min, max], i) => `${"RGB"[i]} ${min}–${max} µm`).join(" · ")}</dd></>
+                : <><dt>{isLiveFrame ? t("Faixa do detector") : t("Faixa no centro")}</dt><dd>{frame.wavelength_um.toFixed(5)} µm · {t("largura")} {frame.bandwidth_um.toFixed(5)} µm</dd></>}
               {frame.valid_fraction !== null && <><dt>{t("Cobertura válida")}</dt><dd>{(frame.valid_fraction * 100).toFixed(1)}%</dd></>}
             </>}
             {source && <><dt>{t("FITS original")}</dt><dd><a href={source} target="_blank" rel="noreferrer">{t("Exposição no IRSA ↗")}</a></dd></>}

@@ -8,11 +8,12 @@ import Image from "next/image";
 import Help from "../ui/Help";
 import { useEffect, useEffectEvent, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { formatDate, sourceLink, type Example, type Sequence } from "../../lib/sequence";
-import { isTimeline, type Timeline } from "../../lib/timeline";
+import { isTimeline, type CatalogExposure, type LiveTimeline, type Timeline } from "../../lib/timeline";
 import { exampleAliases, exampleDescriptions } from "../../content/examples";
-import { apiErrorMessage, fetchComparison, fetchEpochs } from "../../lib/spherex-api";
+import { apiErrorMessage, fetchComparison, fetchEpochs, fetchRgbFrame } from "../../lib/spherex-api";
 import { parseCoordinate } from "../../lib/coordinates";
 import ComparisonReadout from "./comparison-readout";
+import ImageFormat, { type ImageMode } from "./image-format";
 import { useSkySwipe } from "./use-sky-swipe";
 
 const SpherexOrbit = dynamic(() => import("./spherex-orbit"), {
@@ -51,7 +52,10 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const [ra, setRa] = useState(String(examples[0].sequence.ra_deg));
   const [dec, setDec] = useState(String(examples[0].sequence.dec_deg));
   const [index, setIndex] = useState(0);
-  const [mode, setMode] = useState<"single" | "rgb">("single");
+  const [rgbSource, setRgbSource] = useState<{ timeline: LiveTimeline; exposures: CatalogExposure[] }>();
+  const [rgbLoading, setRgbLoading] = useState(false);
+  const [rgbError, setRgbError] = useState("");
+  const [mode, setMode] = useState<ImageMode>("single");
   const [playing, setPlaying] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -59,6 +63,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const [timeline, setTimeline] = useState<Timeline | null>(null);
   const [timelineVersion, setTimelineVersion] = useState(0);
   const [invalid, setInvalid] = useState<"ra" | "dec" | "">("");
+  const rgbRequest = useRef<AbortController | null>(null);
   const active = useRef<AbortController | null>(null);
   const results = useRef<HTMLDivElement>(null);
   const revealFrom = useRef<HTMLElement | null>(null);
@@ -70,10 +75,9 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const frame = frames?.[index];
   const frameCount = frames?.length ?? 0;
   const canCompare = frameCount > 1;
-  // Os exemplos reais são centrados no alvo, então a moldura central vale para todos.
-  // O campo simulado não tem um astro centralizado, por isso fica de fora.
-  const guideTarget = example && !example.synthetic ? example : null;
-  const hasGuide = guideTarget !== null;
+  const epsilon = examples.find((item) => item.slug === "eps-indi-b");
+  const canUseRgb = Boolean(rgbFrames || (rgbSource && rgbSource.exposures.length > 0));
+  const guideName = example && !example.synthetic ? example.name : undefined;
 
   const openLinkedField = useEffectEvent(() => {
     const params = new URLSearchParams(window.location.search);
@@ -83,8 +87,8 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     const requestedDec = parseCoordinate(params.get("dec_deg") ?? "");
     const hasField = requestedRA >= 0 && requestedRA < 360 && requestedDec >= -90 && requestedDec <= 90;
     const mode = params.get("modo");
-    if (mode === "epocas" && (!hasField || (requestedRA === 331.0954 && requestedDec === -56.8008))) {
-      void openSavedTimeline();
+    if (mode === "epocas" && !hasField && epsilon) {
+      void openEpsilonTimeline();
       return;
     }
     const preset = examples.find((item) => item.slug === slug) ??
@@ -107,6 +111,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   useEffect(() => {
     openLinkedField();
     return () => {
+      rgbRequest.current?.abort();
       active.current?.abort();
       active.current = null;
     };
@@ -125,6 +130,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
 
   function applyExample(preset: Example, trigger?: HTMLElement) {
     active.current?.abort();
+    resetRgb();
     active.current = null;
     revealFrom.current = trigger ?? null;
     setBusy(false);
@@ -163,12 +169,17 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     void requestField(r, d, catalog, trigger);
   }
 
+  function openEpsilonTimeline(trigger?: HTMLElement) {
+    if (!epsilon || active.current) return;
+    const { ra_deg, dec_deg } = epsilon.sequence;
+    setRa(String(ra_deg));
+    setDec(String(dec_deg));
+    void requestField(ra_deg, dec_deg, true, trigger);
+  }
+
   async function requestField(r: number, d: number, catalog: boolean, trigger?: HTMLElement) {
-    if (!api && catalog && r === 331.0954 && d === -56.8008) {
-      await openSavedTimeline(trigger);
-      return;
-    }
-    if (!api) {
+    const savedEpsilon = catalog && r === epsilon?.sequence.ra_deg && d === epsilon.sequence.dec_deg;
+    if (!api && !savedEpsilon) {
       setError(t("A consulta ao IRSA não está configurada neste ambiente. Você pode comparar os quadros do exemplo abaixo."));
       return;
     }
@@ -180,30 +191,52 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     setBusy(true);
     setPlaying(false);
     try {
-      const epochs = await fetchEpochs(api, r, d, request.signal);
+      let epochs: LiveTimeline | undefined;
+      if (api) {
+        const catalogSignal = savedEpsilon
+          ? AbortSignal.any([request.signal, AbortSignal.timeout(12_000)])
+          : request.signal;
+        try {
+          epochs = await fetchEpochs(api, r, d, catalogSignal);
+        } catch (cause) {
+          if (!savedEpsilon) throw cause;
+          request.signal.throwIfAborted();
+        }
+      }
       if (active.current !== request) return;
+
       if (catalog) {
+        let data: Timeline | undefined = epochs;
+        if (savedEpsilon && !epochs?.exposures.length) {
+          const response = await fetch("/examples/eps-indi-b/timeline.json", { signal: request.signal });
+          const payload: unknown = await response.json();
+          if (!response.ok || !isTimeline(payload)) {
+            setError(t("Não foi possível abrir o catálogo salvo."));
+            return;
+          }
+          data = payload;
+        }
+        if (!data || active.current !== request) return;
         revealFrom.current = trigger ?? null;
         timelineTrigger.current = trigger ?? null;
-        setTimeline(epochs);
+        setTimeline(data);
         setTimelineVersion((version) => version + 1);
-      } else {
+      } else if (api && epochs) {
         const pair = await fetchComparison(api, epochs, request.signal, locale);
         request.signal.throwIfAborted();
         if (active.current !== request) return;
         revealFrom.current = trigger ?? null;
+        resetRgb();
+        setRgbSource({ timeline: epochs, exposures: pair.rgbExposures });
         setTimeline(null);
-        setSequence(pair);
+        setSequence(pair.sequence);
         setExample(null);
         setShowGuide(false);
-        setPlaying(false);
         setIndex(0);
         setMode("single");
       }
     } catch (cause) {
-      if (active.current === request) {
-        setError(apiErrorMessage(cause, locale));
-      }
+      if (active.current === request) setError(apiErrorMessage(cause, locale));
     } finally {
       window.clearTimeout(timeout);
       if (active.current === request) {
@@ -213,31 +246,44 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     }
   }
 
-  async function openSavedTimeline(trigger?: HTMLElement) {
-    if (active.current) return;
+  function resetRgb() {
+    rgbRequest.current?.abort();
+    rgbRequest.current = null;
+    setRgbSource(undefined);
+    setRgbLoading(false);
+    setRgbError("");
+  }
+
+  async function changeFormat(next: ImageMode) {
+    setRgbError("");
+    if (next === "single" || rgbFrames) {
+      setMode(next);
+      chooseFrame(0);
+      return;
+    }
+    if (!api || !sequence || !rgbSource?.exposures.length || rgbRequest.current) return;
     const request = new AbortController();
-    active.current = request;
-    setBusy(true);
+    rgbRequest.current = request;
     setPlaying(false);
-    setError("");
+    setRgbLoading(true);
     try {
-      const response = await fetch("/examples/eps-indi-b/timeline.json", { signal: request.signal });
-      const payload: unknown = await response.json();
-      if (!response.ok || !isTimeline(payload)) throw new Error();
-      if (!request.signal.aborted) {
-        revealFrom.current = trigger ?? null;
-        timelineTrigger.current = trigger ?? null;
-        setRa(String(payload.ra_deg));
-        setDec(String(payload.dec_deg));
-        setTimeline(payload);
-        setTimelineVersion((version) => version + 1);
+      const results = await Promise.allSettled(rgbSource.exposures.map((item) => fetchRgbFrame(api, rgbSource.timeline, item, request.signal)));
+      if (rgbRequest.current !== request) return;
+      const [first, ...rest] = results.flatMap((result) => result.status === "fulfilled" ? [result.value] : []);
+      if (!first) {
+        const failed = results.find((result) => result.status === "rejected");
+        throw failed?.reason;
       }
-    } catch {
-      if (!request.signal.aborted) setError(t("Não foi possível abrir o catálogo salvo."));
+      setSequence({ ...sequence, rgb_frames: [first, ...rest] });
+      setMode("rgb");
+      chooseFrame(0);
+    } catch (cause) {
+      if (rgbRequest.current === request) setRgbError(apiErrorMessage(cause, locale));
     } finally {
-      if (active.current === request) {
-        active.current = null;
-        setBusy(false);
+      if (rgbRequest.current === request) {
+        request.abort();
+        rgbRequest.current = null;
+        setRgbLoading(false);
       }
     }
   }
@@ -291,8 +337,6 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             </select>
             <button type="button" className="button secondary" aria-controls="resultado-explorador"
               onClick={(event) => applyExample(examples.find((item) => item.slug === selected) ?? examples[0], event.currentTarget)}>{t("Abrir exemplo")} <span aria-hidden="true">↗</span></button>
-            <button type="button" className="button secondary" aria-disabled={busy} aria-controls="resultado-explorador"
-              onClick={(event) => void openSavedTimeline(event.currentTarget)}>{t("Épocas de Epsilon Indi B")}</button>
           </div>
           <form data-tour="explorar-busca" onSubmit={(event) => void search(event, (event.nativeEvent as SubmitEvent).submitter?.id !== "compare-pair")} noValidate>
             <h2>{t("Buscar por coordenadas")}</h2>
@@ -316,6 +360,8 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             <button className="button primary" type="submit" aria-disabled={busy} aria-controls="resultado-explorador">{t("Buscar épocas no IRSA")}<span aria-hidden="true">↗</span></button>
             {api && <button id="compare-pair" className="button secondary" type="submit" aria-disabled={busy}
               aria-controls="resultado-explorador">{t("Buscar par para comparação")}</button>}
+            <button type="button" className="button secondary" aria-disabled={busy} aria-controls="resultado-explorador"
+              onClick={(event) => openEpsilonTimeline(event.currentTarget)}>{t("Épocas de Epsilon Indi B")}</button>
             {!api && <p className="muted offline-note">{t("A busca ao vivo requer uma API configurada neste ambiente.")}</p>}
             <p role="status" className="muted search-feedback">{busy ? t("Carregando observações…") : ""}</p>
             <p id="search-error" className="error search-feedback" role="alert">{error}</p>
@@ -324,8 +370,9 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
 
         <div id="resultado-explorador" className="viewer" ref={results} tabIndex={-1} role="group" aria-label={t("Resultado do Explorador")}>
           {timeline ? <TimelineViewer key={timelineVersion}
-            timeline={timeline} api={api}
-            savedFrames={examples.find((item) => item.sequence.ra_deg === timeline.ra_deg && item.sequence.dec_deg === timeline.dec_deg)?.sequence.frames ?? []}
+            timeline={timeline} api={timeline.source === "live" ? api : undefined}
+            targetName={timeline.ra_deg === epsilon?.sequence.ra_deg && timeline.dec_deg === epsilon.sequence.dec_deg ? epsilon.name : undefined}
+            savedFrames={timeline.source === "live" ? [] : epsilon?.sequence.frames ?? []}
             onClose={closeTimeline} />
           : sequence && frames && frame ? <section aria-label={t("Visor de comparação")} className="viewer">
             <div className="plate" data-tour="explorar-visor">
@@ -334,7 +381,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
                 <span>{example?.synthetic ? t("SIMULAÇÃO") : example ? t("EXEMPLO REAL") : t("IRSA · AO VIVO")}</span>
               </div>
               <div className="sky-wrap">
-                <figure id="sky-field" className="sky" tabIndex={canCompare ? 0 : undefined}
+                <figure id="sky-field" className={mode === "single" && !example?.synthetic ? "sky sky-grayscale" : "sky"} tabIndex={canCompare ? 0 : undefined}
                   {...(canCompare ? { onKeyDown: keyboard, ...swipe } : {})}
                   aria-label={canCompare ? t("Campo de comparação. Deslize na horizontal ou use as setas para alternar as épocas.") : t("Campo de observação")}>
                   {frames.map((image, i) => (
@@ -344,7 +391,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
                   ))}
                   <span className="north instrument" aria-hidden="true">N ↑<br />E ←</span>
                   <span className="scale instrument" aria-hidden="true">{number.format(sequence.fov_arcmin / 6)}′</span>
-                  {hasGuide && showGuide && <span className="sky-guide" aria-hidden="true" />}
+                  {showGuide && <span className="sky-guide" aria-hidden="true" />}
                 </figure>
               </div>
               <div className="plate-bottom instrument">
@@ -353,16 +400,14 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
               </div>
             </div>
 
-            {rgbFrames && <label className="preset-format">
-              <span>{t("Formato da imagem")}</span>
-              <select className="control-field" value={mode} onChange={(event) => {
-                setMode(event.currentTarget.value === "rgb" ? "rgb" : "single");
-                chooseFrame(0);
-              }}>
-                <option value="single">{t("Tons de cinza")}</option>
-                <option value="rgb">{t("Composição RGB")}</option>
-              </select>
-            </label>}
+            <div className="viewer-tools" data-tour="explorar-marcar">
+              {!example?.synthetic && <ImageFormat mode={mode} rgbAvailable={canUseRgb} busy={rgbLoading} onChange={(next) => void changeFormat(next)} />}
+              <button className="button secondary mark-target" type="button" aria-pressed={showGuide} aria-controls="sky-field" onClick={() => setShowGuide((visible) => !visible)}>
+                {guideName ? t("Marcar {name}", { name: guideName }) : t("Marcar alvo")}
+              </button>
+            </div>
+            {rgbLoading && <p className="viewer-hint" role="status">{t("Carregando composição RGB…")}</p>}
+            {rgbError && <p className="error" role="alert">{rgbError}</p>}
             {canCompare ? <div className="transport" data-tour="explorar-epocas">
               <label className="epoch-range">
                 <span>{t("Época exibida")}</span>
@@ -383,27 +428,19 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             </div> : <p className="viewer-hint">
               {observedLabel}: {formatDate(frame.observed_at_utc, locale)}. {t("Este formato tem uma única época disponível.")}
             </p>}
-            {example?.preset && canCompare && <p className="viewer-hint">{mode === "rgb"
+            {(example?.preset || !example) && canCompare && <p className="viewer-hint">{mode === "rgb"
               ? t("As composições RGB usam escalas de brilho próprias.")
               : t("As imagens em tons de cinza usam a mesma escala de brilho entre épocas.")}</p>}
             <div aria-live={playing ? "off" : "polite"} aria-atomic="true" className="sr-only">{observedLabel}: {timestamp(frame.observed_at_utc)}</div>
-            {guideTarget ? (
-              <div className="viewer-guide" data-tour="explorar-marcar">
-                {canCompare && <p>{guideTarget.slug === "eps-indi-b"
-                  ? t("Procure Epsilon Indi B perto do centro. Ao alternar as épocas, a fonte se desloca ligeiramente para a esquerda e para baixo em relação às estrelas do campo.")
-                  : t("Procure {name} perto do centro e confira qualquer mudança aparente entre as épocas.", { name: guideTarget.name })}</p>}
-                <button className="button secondary" type="button" aria-pressed={showGuide} aria-controls="sky-field" onClick={() => setShowGuide((visible) => !visible)}>
-                  {t("Marcar {name}", { name: guideTarget.name })}
-                </button>
-              </div>
-            ) : (
-              <p className="viewer-hint">{example?.synthetic ? t("Imagens simuladas. Procure o ponto que muda de posição.") : t("Confira qualquer mudança aparente nos dados de origem.")}</p>
-            )}
+            {example?.slug === "eps-indi-b" && canCompare && <p className="viewer-hint">
+              {t("Procure Epsilon Indi B perto do centro. Ao alternar as épocas, a fonte se desloca ligeiramente para a esquerda e para baixo em relação às estrelas do campo.")}
+            </p>}
+            {example?.synthetic && <p className="viewer-hint">{t("Imagens simuladas. Procure o ponto que muda de posição.")}</p>}
             {exampleDescription && <details className="sources">
               <summary>{t("Descrição da comparação")}</summary>
               <p>{exampleDescription}</p>
             </details>}
-            {!example && frames[1] && <ComparisonReadout key={sequence.sequence_id} frames={[frames[0], frames[1]]} />}
+            {!example && mode === "single" && frames[1] && <ComparisonReadout key={sequence.sequence_id} frames={[frames[0], frames[1]]} />}
             {canCompare && <p className="viewer-hint">{t("Deslize na horizontal ou use ← → no visor para alternar.")}<Help id="epoca" label={t("uma época")} /></p>}
             <details className="sources" data-tour="explorar-origem">
               <summary>{t("Origem e processamento")}</summary>
