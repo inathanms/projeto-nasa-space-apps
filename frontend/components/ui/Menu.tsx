@@ -2,9 +2,11 @@
 
 import type { ReactNode } from "react";
 
-export default function Menu({ label, children }: { label: string; children: ReactNode }) {
+export default function Menu({ label, children, className = "site-menu" }: {
+  label: ReactNode; children: ReactNode; className?: string;
+}) {
   return (
-    <details className="site-menu"
+    <details className={className}
       onClick={(event) => {
         const link = event.target instanceof Element && event.target.closest("a");
         if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

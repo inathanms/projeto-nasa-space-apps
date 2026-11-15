@@ -42,7 +42,8 @@ export default function TutorialButton() {
     <>
       {isTool && (
         <button ref={trigger} type="button" className="tour-help" data-tour="tour-help" aria-haspopup="dialog" onClick={() => setStart(firstStepHere)}>
-          <span aria-hidden="true">?</span> {t("Tutorial")}
+          <span className="tour-help-icon" aria-hidden="true">?</span>
+          <span className="tour-help-label">{t("Tutorial")}</span>
         </button>
       )}
       {start !== null && <SpotlightTour steps={steps} start={start} onClose={close} />}

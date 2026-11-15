@@ -33,12 +33,14 @@ export default function Nav({ locale }: { locale: Locale }) {
             {nav.links.map(({ href, label }) => <Link href={localizedHref(locale, href)} key={href} className="landing-links">{label}</Link>)}
           </nav>
         </Menu>
-        <TutorialButton />
-        <AccessibilityMenu />
-        <LanguageSwitch />
         <Link className="button primary header-cta" href={localizedHref(locale, nav.cta.href)}>
           {nav.cta.label} <span aria-hidden="true">→</span>
         </Link>
+        <div className="site-header-tools">
+          <TutorialButton />
+          <AccessibilityMenu />
+          <LanguageSwitch />
+        </div>
       </div>
     </header>
   );
