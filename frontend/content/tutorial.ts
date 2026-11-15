@@ -33,11 +33,11 @@ const steps: Source[] = [
     target: "explorar-exemplos",
     pt: {
       title: "Escolha um astro",
-      body: "Comece por aqui: escolha um astro de exemplo e clique em “Abrir exemplo”. Os exemplos funcionam mesmo sem conexão com a NASA.",
+      body: "Escolha um astro na lista para carregar as imagens no visor. Os exemplos funcionam mesmo sem conexão com a NASA.",
     },
     en: {
       title: "Pick an object",
-      body: "Start here: choose an example object and click “Open example”. Examples work even without a connection to NASA.",
+      body: "Choose an object from the list to load its images in the viewer. Examples work even without a connection to NASA.",
     },
   },
   {
@@ -45,11 +45,11 @@ const steps: Source[] = [
     target: "explorar-visor",
     pt: {
       title: "O visor",
-      body: "Esta é uma foto real do céu em infravermelho. “N ↑” e “E ←” mostram onde ficam o norte e o leste, e a barrinha “1′” dá a escala (1′ é 1/60 de grau).",
+      body: "Esta é uma foto real do céu em infravermelho. “N ↑” e “E ←” mostram onde ficam o norte e o leste. A barra indica a escala em minutos de arco (1′ equivale a 1/60 de grau).",
     },
     en: {
       title: "The viewer",
-      body: "This is a real infrared image of the sky. “N ↑” and “E ←” show where north and east are, and the “1′” bar gives the scale (1′ is 1/60 of a degree).",
+      body: "This is a real infrared image of the sky. “N ↑” and “E ←” show where north and east are. The scale bar is marked in arcminutes (1′ equals 1/60 of a degree).",
     },
   },
   {

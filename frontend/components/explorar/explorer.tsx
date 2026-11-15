@@ -48,11 +48,11 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const dateTime = dateTimes[locale];
   const timestamp = (date: string | null) =>
     date && Number.isFinite(Date.parse(date)) ? dateTime.format(new Date(date)) + " UTC" : "—";
-  const [example, setExample] = useState<Example | null>(examples[0]);
-  const [sequence, setSequence] = useState<Sequence | null>(examples[0].sequence);
-  const [selected, setSelected] = useState("");
-  const [ra, setRa] = useState(String(examples[0].sequence.ra_deg));
-  const [dec, setDec] = useState(String(examples[0].sequence.dec_deg));
+  const initialExample = examples.find((item) => item.slug === "preset-m51") ?? examples[0];
+  const [example, setExample] = useState<Example | null>(initialExample);
+  const [sequence, setSequence] = useState<Sequence | null>(initialExample.sequence);
+  const [ra, setRa] = useState(String(initialExample.sequence.ra_deg));
+  const [dec, setDec] = useState(String(initialExample.sequence.dec_deg));
   const [index, setIndex] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [rgbSource, setRgbSource] = useState<{ timeline: LiveTimeline; exposures: CatalogExposure[] }>();
@@ -144,11 +144,11 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     revealFrom.current = null;
   }, [sequence, timeline]);
 
-  function applyExample(preset: Example, trigger?: HTMLElement) {
+  function applyExample(preset: Example) {
     active.current?.abort();
     resetRgb();
     active.current = null;
-    revealFrom.current = trigger ?? null;
+    revealFrom.current = null;
     setBusy(false);
     setPlaying(false);
     setShowGuide(false);
@@ -157,7 +157,6 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     setMode("single");
     setError("");
     setInvalid("");
-    setSelected(preset.preset ? preset.slug : "");
     setExample(preset);
     setSequence(preset.sequence);
     setTimeline(null);
@@ -334,7 +333,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const cutout = sourceLink(frame?.cutout_url ?? null);
   const exampleDescription = example && exampleDescriptions(locale)[example.slug];
   const presets = examples.filter((item) => item.preset);
-  const selectedPreset = presets.find((item) => item.slug === selected);
+  const selectedPreset = example?.preset ? example : null;
 
   return (
     <>
@@ -344,14 +343,16 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             <h2>{t("Alvos offline")}</h2>
             <p className="muted offline-note">{t("Abra um alvo com imagens salvas no site, mesmo quando a API estiver indisponível.")}</p>
             <label htmlFor="preset">{t("Campo de observação")}</label>
-            <select className="control-field" id="preset" value={selected} onChange={(event) => setSelected(event.target.value)}>
+            <select className="control-field" id="preset" value={selectedPreset?.slug ?? ""} aria-controls="resultado-explorador"
+              onChange={(event) => {
+                const preset = presets.find((item) => item.slug === event.currentTarget.value);
+                if (preset) applyExample(preset);
+              }}>
               <option value="" disabled>{t("Escolha um alvo")}</option>
               <optgroup label={t("Alvos pré-configurados do SPHEREx")}>
                 {presets.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}
               </optgroup>
             </select>
-            <button type="button" className="button secondary" disabled={!selectedPreset} aria-controls="resultado-explorador"
-              onClick={(event) => { if (selectedPreset) applyExample(selectedPreset, event.currentTarget); }}>{t("Abrir exemplo")} <span aria-hidden="true">↗</span></button>
             {api && selectedPreset && <button type="button" className="button secondary" aria-disabled={busy} aria-controls="resultado-explorador"
               onClick={(event) => openTargetTimeline(selectedPreset, event.currentTarget)}>
               {t("Todas as épocas de {name}", { name: selectedPreset.name })}

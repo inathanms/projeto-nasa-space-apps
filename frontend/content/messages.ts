@@ -14,7 +14,6 @@ export const englishMessages = {
   "A visualização 3D da NASA usa mouse ou toque.": "NASA’s 3D visualization uses a mouse or touch input.",
   "A busca ao vivo requer uma API configurada neste ambiente.": "Live search requires a configured API in this environment.",
   "Abrir FITS no IRSA": "Open FITS in IRSA",
-  "Abrir exemplo": "Open example",
   "Abrir no site do Eyes ↗": "Open in NASA Eyes ↗",
   "Abrir o laboratório": "Open the lab",
   "Abrir o observatório orbital": "Open the orbital observatory",
