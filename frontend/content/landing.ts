@@ -13,9 +13,9 @@ export type IconKey =
 export type AlvoTag = "movimento" | "brilho";
 
 export const marca = {
-  nome: "Oxen",
-  nomeDestaque: "Tech",
-  subtitulo: "CÉU DO SERTÃO · SPHEREx",
+  nome: "Spher",
+  nomeDestaque: "Eye",
+  subtitulo: "OxenTech · NASA Space Apps Challenge 2026",
   logoMark: "/brand/logo-oxentech-mark.png",
   logoIcon: "/brand/logo-oxentech-icon.png",
   logoAlt: "Logo da OxenTech: cacto e boi-constelação sob o céu do sertão",
@@ -34,7 +34,7 @@ export const nav = {
   ferramentas: [
     { href: "/explorar/", label: "Explorador" },
     { href: "/observatorio/", label: "Observatório" },
-    { href: "/laboratorio/", label: "Laboratório" },
+    // Laboratório em standby (redundante com o Observatório). A página /laboratorio continua existindo.
   ],
   cta: { href: "/explorar/", label: "Explorar o céu" },
 };
@@ -74,7 +74,7 @@ export const porQue = {
   cards: [
     {
       icone: "invisivel" as IconKey,
-      titulo: "Veja o invisível",
+      titulo: "Veja o ''invisível''",
       texto:
         "Imagens infravermelhas reais, de estrelas frias e poeira que nenhum telescópio comum mostra.",
     },
@@ -174,7 +174,7 @@ export const dados = {
   fluxo: [
     { icone: "satelite" as IconKey, titulo: "SPHEREx", texto: "órbita a 700 km" },
     { icone: "arquivo" as IconKey, titulo: "IRSA", texto: "arquivo NASA" },
-    { icone: "cacto" as IconKey, titulo: "OxenTech", texto: "alinha e mostra" },
+    { icone: "cacto" as IconKey, titulo: "SpherEye", texto: "alinha e mostra" },
   ],
 };
 
@@ -193,7 +193,6 @@ export const ctaFinal = {
   acoes: [
     nav.cta,
     { href: "/observatorio/", label: "Abrir o observatório" },
-    { href: "/laboratorio/", label: "Ajustar a mira no laboratório" },
   ],
 };
 

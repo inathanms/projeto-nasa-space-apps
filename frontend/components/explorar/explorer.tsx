@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { formatDate, isRecord, isSequence, sourceLink, type Example, type Sequence } from "../../lib/sequence";
 import { isTimeline, type Timeline } from "../../lib/timeline";
@@ -10,6 +9,7 @@ import { exampleAliases } from "../../content/examples";
 import { apiErrorDetail } from "../../lib/api-error";
 import { parseCoordinate } from "../../lib/coordinates";
 import { useSkySwipe } from "./use-sky-swipe";
+import Help from "../ui/Help";
 
 const SpherexOrbit = dynamic(() => import("./spherex-orbit"), {
   ssr: false,
@@ -46,7 +46,10 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
   const raInput = useRef<HTMLInputElement>(null);
   const decInput = useRef<HTMLInputElement>(null);
   const frame = sequence.frames[index];
-  const hasGuide = example?.slug === "eps-indi-b";
+  // Os exemplos reais são centrados no alvo, então a moldura central vale para todos.
+  // O campo simulado não tem um astro centralizado, por isso fica de fora.
+  const guideTarget = example && !example.synthetic ? example : null;
+  const hasGuide = guideTarget !== null;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -220,8 +223,7 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
     chooseFrame(1 - index);
   }
 
-  const swipe = useSkySwipe(() => chooseFrame(1 - index));
-  const observedLabel = example?.synthetic ? "Data ilustrativa" : "Observação";
+  const swipe = useSkySwipe(() => chooseFrame(1 - index));  const observedLabel = example?.synthetic ? "Data ilustrativa" : "Observação";
   const source = sourceLink(frame.source_url);
   const cutout = sourceLink(frame.cutout_url);
 
@@ -229,10 +231,10 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
     <>
       <div className="explorer-grid">
         <aside className="controls" aria-label="Escolha do campo">
-          <form onSubmit={(event) => void search(event, (event.nativeEvent as SubmitEvent).submitter?.id !== "compare-pair")} noValidate>
+          <form data-tour="explorar-busca" onSubmit={(event) => void search(event, (event.nativeEvent as SubmitEvent).submitter?.id !== "compare-pair")} noValidate>
             <h2>Buscar por coordenadas</h2>
-            <p className="muted">Use graus decimais no sistema ICRS.</p>
-            <label htmlFor="ra">Ascensão reta <span>RA</span></label>
+            <p className="muted">Use graus decimais no sistema ICRS.<Help id="icrs" label="o sistema ICRS" /></p>
+            <div className="label-row"><label htmlFor="ra">Ascensão reta <span>RA</span></label><Help id="ascensao-reta" label="ascensão reta" /></div>
             <input className="control-field" ref={raInput} id="ra" name="ra_deg" inputMode="decimal" value={ra} readOnly={busy} onChange={(event) => {
               setRa(event.target.value);
               if (invalid === "ra") {
@@ -240,7 +242,7 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
                 setError("");
               }
             }} aria-invalid={invalid === "ra"} aria-describedby={invalid === "ra" ? "search-error" : undefined} />
-            <label htmlFor="dec">Declinação <span>DEC</span></label>
+            <div className="label-row"><label htmlFor="dec">Declinação <span>DEC</span></label><Help id="declinacao" label="declinação" /></div>
             <input className="control-field" ref={decInput} id="dec" name="dec_deg" inputMode="decimal" value={dec} readOnly={busy} onChange={(event) => {
               setDec(event.target.value);
               if (invalid === "dec") {
@@ -250,12 +252,11 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
             }} aria-invalid={invalid === "dec"} aria-describedby={invalid === "dec" ? "search-error" : undefined} />
             <button className="button primary" type="submit" disabled={busy}>{busy ? "Consultando…" : "Buscar épocas no IRSA"}<span aria-hidden="true">↗</span></button>
             {API && <button id="compare-pair" className="button secondary" type="submit" disabled={busy}>Buscar par para comparação</button>}
-            <p className="muted offline-note"><Link href="/laboratorio/">Ajustar coordenadas no globo 3D</Link></p>
             {!API && <p className="muted offline-note">A busca ao vivo requer uma API configurada neste ambiente.</p>}
             {busy && <p role="status" className="muted offline-note">Carregando observações…</p>}
             {error && <p id="search-error" className="error" role="alert">{error}</p>}
           </form>
-          <div className="preset">
+          <div className="preset" data-tour="explorar-exemplos">
             <h2>Exemplo offline</h2>
             <label htmlFor="preset">Campo de observação</label>
             <select className="control-field" id="preset" value={selected} onChange={(event) => setSelected(event.target.value)}>
@@ -271,9 +272,9 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
           savedFrames={examples.find((item) => item.sequence.ra_deg === timeline.ra_deg && item.sequence.dec_deg === timeline.dec_deg)?.sequence.frames ?? []}
           onClose={() => setTimeline(null)} />
         : <section aria-label="Visor de comparação" className="viewer">
-          <div className="plate">
+          <div className="plate" data-tour="explorar-visor">
             <div className="plate-top instrument">
-              <span>{example?.name ?? "Campo consultado"}</span>
+              <span className="plate-name">{example?.name ?? "Campo consultado"}</span>
               <span>{example?.synthetic ? "SIMULAÇÃO" : example ? "EXEMPLO REAL" : "IRSA · AO VIVO"}</span>
             </div>
             <div className="sky-wrap">
@@ -294,7 +295,7 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
             </div>
           </div>
 
-          <div className="transport">
+          <div className="transport" data-tour="explorar-epocas">
             <label className="epoch-range">
               <span>Época exibida</span>
               <input type="range" min={0} max={1} step={1} value={index}
@@ -313,29 +314,31 @@ export default function Explorer({ examples }: { examples: [Example, ...Example[
             </button>
           </div>
           <div aria-live={playing ? "off" : "polite"} className="sr-only">{observedLabel}: {timestamp(frame.observed_at_utc)}</div>
-          {hasGuide ? (
-            <div className="viewer-guide">
-              <p>Procure Epsilon Indi B perto do centro. Ao alternar as épocas, a fonte se desloca ligeiramente para a esquerda e para baixo em relação às estrelas do campo.</p>
+          {guideTarget ? (
+            <div className="viewer-guide" data-tour="explorar-marcar">
+              <p>{guideTarget.slug === "eps-indi-b"
+                ? "Procure Epsilon Indi B perto do centro. Ao alternar as épocas, a fonte se desloca ligeiramente para a esquerda e para baixo em relação às estrelas do campo."
+                : `Procure ${guideTarget.name} perto do centro e confira qualquer mudança aparente entre as épocas.`}</p>
               <button className="button secondary" type="button" aria-pressed={showGuide} aria-controls="sky-field" onClick={() => setShowGuide((visible) => !visible)}>
-                Marcar região da fonte
+                Marcar {guideTarget.name}
               </button>
             </div>
           ) : (
             <p className="viewer-hint">{example?.synthetic ? "Imagens simuladas. Procure o ponto que muda de posição." : "Confira qualquer mudança aparente nos dados de origem."}</p>
           )}
-          <p className="viewer-hint">Deslize na horizontal ou use ← → no visor para alternar.</p>
-          <details className="sources">
+          <p className="viewer-hint">Deslize na horizontal ou use ← → no visor para alternar.<Help id="epoca" label="uma época" /></p>
+          <details className="sources" data-tour="explorar-origem">
             <summary>Origem e processamento</summary>
             <dl>
               <dt>{observedLabel}</dt><dd>{timestamp(frame.observed_at_utc)}</dd>
               <dt>Coleção e detector</dt><dd>{frame.collection} · {frame.detector}</dd>
-              <dt>Faixa no centro</dt><dd>{number.format(frame.wavelength_um)} µm · largura {number.format(frame.bandwidth_um)} µm</dd>
+              <dt>Faixa no centro<Help id="comprimento-de-onda" label="a faixa de comprimento de onda" /></dt><dd>{number.format(frame.wavelength_um)} µm · largura {number.format(frame.bandwidth_um)} µm</dd>
               <dt>Cobertura válida</dt><dd>{number.format(frame.valid_fraction * 100)}%</dd>
               <dt>Calibração</dt><dd>{frame.calibration_version}</dd>
               <dt>Recuperado em</dt><dd>{timestamp(sequence.fetched_at_utc)}</dd>
               <dt>Processamento</dt><dd>{sequence.processing_version} · {timestamp(sequence.generated_at_utc)}</dd>
               <dt>Produto</dt><dd>{source ? <a href={source} target="_blank" rel="noreferrer">Exposição no IRSA ↗</a> : "Sem produto de origem"}</dd>
-              {cutout && <><dt>Recorte</dt><dd><a href={cutout} target="_blank" rel="noreferrer">Arquivo FITS ↗</a></dd></>}
+              {cutout && <><dt>Recorte<Help id="fits" label="um arquivo FITS" /></dt><dd><a href={cutout} target="_blank" rel="noreferrer">Arquivo FITS ↗</a></dd></>}
             </dl>
           </details>
         </section>}

@@ -14,6 +14,10 @@
 .controls label, .timeline-inputs label { color: var(--mute); font-size: .875rem; }
 .controls label { display: flex; justify-content: space-between; margin-block: 13px 5px; }
 .controls label span { color: var(--accent); font: .75rem var(--mono); }
+/* Rótulo + sigla + "?" na mesma linha, todos centralizados verticalmente */
+.label-row { display: flex; align-items: center; gap: 8px; margin-block: 13px 5px; }
+.label-row label { flex: 1; align-items: center; margin: 0; line-height: 18px; }
+.label-row .help { margin: 0; }
 .controls input, .controls select, .timeline-inputs select { width: 100%; min-height: var(--touch); padding: 7px 10px; }
 .controls input { font-family: var(--mono); }
 .controls input[aria-invalid="true"] { border-color: var(--error); }
@@ -36,6 +40,7 @@
   text-transform: uppercase;
 }
 .plate-top span:last-child { color: var(--sun); }
+.plate-top .plate-name { color: #fff; font-weight: 700; }
 .sky-wrap { display: grid; place-items: center; background: var(--night-deep); border-block: 1px solid var(--rule); }
 .sky {
   position: relative;

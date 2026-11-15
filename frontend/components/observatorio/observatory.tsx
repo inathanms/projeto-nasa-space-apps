@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { axisHint, CAPTURE_RADIUS, clamp, nearestTarget, scanPath, wrap, type Target } from "../../lib/pointing";
 import SceneLoading from "../ui/SceneLoading";
+import { targetInfo } from "../../content/target-info";
+import TargetSheet from "./target-sheet";
 
 const SceneCanvas = dynamic(() => import("../ui/SceneCanvas"), { ssr: false, loading: SceneLoading });
 
@@ -37,6 +39,7 @@ export default function Observatory({ targets }: { targets: Target[] }) {
   const [mode, setMode] = useState<"utc" | "mjd">("utc");
   const [mjdDraft, setMjdDraft] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [sheet, setSheet] = useState<Target | null>(null);
   const pointer = useRef<{ id: number; x: number; y: number; ra: number; dec: number; lastX: number } | null>(null);
   const pauseTimer = useRef<number | null>(null);
   const rangeGesture = useRef<{ id: number; interrupted: boolean } | null>(null);
@@ -168,7 +171,7 @@ export default function Observatory({ targets }: { targets: Target[] }) {
   return (
     <>
       <div className="orbital-header shell">
-        <div className="orbital-targets" role="group" aria-label="Alvos de exemplo">
+        <div className="orbital-targets" data-tour="obs-alvos" role="group" aria-label="Alvos de exemplo">
           {targets.map((item, index) => (
             <button className="orbital-target" key={item.slug} type="button" aria-pressed={target === item.slug}
               aria-disabled={aimPaused} onClick={() => selectTarget(item)}>
@@ -185,14 +188,13 @@ export default function Observatory({ targets }: { targets: Target[] }) {
             <span className="orbital-symbol manual" aria-hidden="true" /> Manual
           </button>
         </div>
-        <Link className="button secondary orbital-return" href="/laboratorio/">Abrir o laboratório</Link>
       </div>
 
       <section className="orbital-stage" aria-label="Cena didática de apontamento" data-aim-paused={aimPaused}>
         <SceneCanvas ra={ra} dec={dec} time={time} variant="orbital" role="img" aria-label="Terra à esquerda e telescópio no centro com linha de visão"
           onPointerDown={startDrag} onPointerMove={moveDrag}
           onLostPointerCapture={() => { pointer.current = null; }} />
-        <div className="orbital-ra" data-adjusted={raAdjusted}>
+        <div className="orbital-ra" data-tour="obs-ra" data-adjusted={raAdjusted}>
           <div className="orbital-value"><label htmlFor="orbital-ra">Ascensão reta</label><output htmlFor="orbital-ra">{angleLabel.format(ra)}°</output></div>
           <input id="orbital-ra" type="range" min={0} max={359.9} step={.1} value={ra} {...rangeGuard}
             onChange={(event) => { if (!rangeGesture.current?.interrupted) setAngles(event.currentTarget.valueAsNumber, dec); }} />
@@ -201,15 +203,18 @@ export default function Observatory({ targets }: { targets: Target[] }) {
         </div>
         <p className="orbital-scope-label">SPHEREx <span>· modelo didático</span></p>
         {acquisition && <span key={acquisition.item.slug} className="orbital-discovery-pulse" aria-hidden="true" />}
-        <div className="orbital-dec" data-adjusted={decAdjusted}>
+        <div className="orbital-dec" data-tour="obs-dec" data-adjusted={decAdjusted}>
           <div className="orbital-value"><label htmlFor="orbital-dec">Inclinação · Dec</label><output htmlFor="orbital-dec">{angleLabel.format(dec)}°</output></div>
           <input id="orbital-dec" type="range" min={-90} max={90} step={.1} value={dec} {...rangeGuard}
             onChange={(event) => { if (!rangeGesture.current?.interrupted) setAngles(ra, event.currentTarget.valueAsNumber); }} />
           <div className="orbital-scale" aria-hidden="true"><span>−90°</span><span>0°</span><span>+90°</span></div>
           {decAdjusted && <small className="orbital-adjusted">Dec ajustada automaticamente</small>}
-          <Link className="button primary" href={`/explorar/?${query}`}>Usar no explorador</Link>
+          <Link className="button primary" href={`/explorar/?${query}`}>Importar para o explorador</Link>
         </div>
-        <aside className="orbital-logbook" aria-label="Diário de bordo" data-aligned={Boolean(acquisition)}>
+        {/* Clicar no card aberto mostra a ficha do astro; o botão interno garante acesso por teclado. */}
+        <aside className="orbital-logbook" data-tour="obs-diario" aria-label="Diário de bordo" data-aligned={Boolean(acquisition)}
+          data-clickable={Boolean(acquisition && targetInfo[acquisition.item.slug])}
+          onClick={() => { if (acquisition && targetInfo[acquisition.item.slug]) setSheet(acquisition.item); }}>
           <div className="orbital-logbook-title"><strong>Diário de bordo</strong><span>{discovered.length} de {targets.length} descobertos</span></div>
           <div className="orbital-discovery-message" role="status">
             {acquisition && <>
@@ -222,6 +227,11 @@ export default function Observatory({ targets }: { targets: Target[] }) {
             </>}
           </div>
           {acquisition && <p className="orbital-pause-note" role="status">{aimPaused ? "Mira travada por um instante." : "Mira liberada. Continue explorando."}</p>}
+          {acquisition && targetInfo[acquisition.item.slug] && (
+            <button type="button" className="orbital-sheet-link" aria-haspopup="dialog">
+              Conhecer a história de {acquisition.item.name} <span aria-hidden="true">›</span>
+            </button>
+          )}
           {!acquisition && <>
             <div className="orbital-signal">
               <div className="orbital-signal-label">
@@ -240,7 +250,7 @@ export default function Observatory({ targets }: { targets: Target[] }) {
         </aside>
       </section>
 
-      <section className="orbital-time" aria-labelledby="orbital-time-label">
+      <section className="orbital-time" data-tour="obs-tempo" aria-labelledby="orbital-time-label">
         <h2 id="orbital-time-label">Tempo</h2>
         <div className="orbital-time-modes" role="group" aria-label="Formato do tempo">
           <button type="button" aria-pressed={mode === "utc"} onClick={() => { setMjdDraft(null); setMode("utc"); }}>Data e hora UTC</button>
@@ -275,6 +285,7 @@ export default function Observatory({ targets }: { targets: Target[] }) {
           <button type="button" aria-label="Avançar um dia" onClick={() => changeTime(time + DAY)}><span aria-hidden="true">›</span></button>
         </div>
       </section>
+      <TargetSheet target={sheet} onClose={() => setSheet(null)} />
       <footer className="orbital-credit">
         <span>Simulação de apontamento e rotação, sem telemetria orbital.</span>
         <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/">Textura NASA Earth Observatory / Blue Marble</a>
