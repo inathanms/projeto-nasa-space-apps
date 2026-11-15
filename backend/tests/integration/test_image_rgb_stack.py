@@ -206,7 +206,10 @@ def test_rgb_scale_reuse_changes_nothing_but_headers(make_client, synthetic_chan
         },
     )
     assert again.status_code == 200, again.text
-    assert again.content == first.content
+    # REQ-503 rounds scale_mins/scale_maxs to 6 significant digits, so the reused scale can
+    # differ from the computed one in the 7th digit: at most 1 level per channel.
+    diff = np.abs(png_array(again).astype(int) - png_array(first).astype(int))
+    assert diff.max() <= 1
 
 
 def test_ac205_explicit_rgb_scale_headers(make_client, synthetic_channel_bytes):

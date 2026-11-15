@@ -204,6 +204,178 @@ docker build -t sphereye-api .
 docker run -e PORT=8080 -p 8080:8080 -e CORS_ALLOWED_ORIGINS=https://your-frontend.example sphereye-api
 ```
 
+## Cache / Storage
+
+An optional cache keeps rendered PNGs (L2, object storage) and SIA query results (L1 memory and
+L2) so repeated requests skip IRSA and the render. It is **off by default** (`CACHE_ENABLED=false`):
+then no S3 call is made and `/image` answers with `X-Cache: BYPASS`, as before.
+
+The storage is any S3-compatible bucket. The code is S3-first; in production the provider is
+Cloudflare R2 (only the configuration is provider-specific, see the checklist below).
+
+Image credit (keep it wherever the PNGs are published): **Data: NASA/JPL-Caltech/IPAC — SPHEREx, via IRSA**.
+
+### Normalization and cache keys
+
+- `/image` and `/epochs` **always** normalize `ra`/`dec` to the native pixel grid (one SPHEREx pixel,
+  6.15″), even with the cache off. The image is rendered from the normalized values, so the picture
+  matches its key. `/epochs` `query.ra`/`query.dec` show the normalized values too.
+- Keys are `images/{RENDER_VERSION}/{collection}/{observation_id}/{hash}.png` (sidecar `{hash}.json`)
+  and `sia/{collection}/{hash}.json`, all under `S3_KEY_PREFIX`.
+- 360° is not a multiple of 6.15″, so `ra` is wrapped with `mod 360` before rounding and the point just below 360° maps to `0.0` (e.g. `ra=359.9999` → `0.0`); normalization is idempotent.
+
+### Variables
+
+Set them in the environment (or `.env`, see `.env.example`). "Required" applies only when
+`CACHE_ENABLED=true`. Secrets are never logged and never echoed in startup errors.
+
+| Variable                       | Required | Default   | Description                                                                 |
+| ------------------------------ | -------- | --------- | --------------------------------------------------------------------------- |
+| `CACHE_ENABLED`                | —        | `false`   | Turns the cache on. With `false` no `S3_*` variable is needed.              |
+| `S3_ENDPOINT_URL`              | yes      | —         | S3 API endpoint (R2: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`).      |
+| `S3_REGION`                    | —        | `auto`    | R2: `auto`. AWS: the bucket region.                                         |
+| `S3_BUCKET`                    | yes      | —         | Bucket name.                                                                |
+| `S3_ACCESS_KEY_ID`             | yes      | —         | Access key id of a token limited to this bucket.                            |
+| `S3_SECRET_ACCESS_KEY`         | yes      | —         | Secret key (`SecretStr`).                                                   |
+| `S3_ADDRESSING_STYLE`          | —        | `path`    | `path` or `virtual`.                                                        |
+| `S3_CHECKSUM_MODE`             | —        | `when_required` | botocore `request_checksum_calculation` and `response_checksum_validation`: `when_required` or `when_supported`. |
+| `S3_CONNECT_TIMEOUT_SECONDS`   | —        | `5`       | Connect timeout.                                                            |
+| `S3_READ_TIMEOUT_SECONDS`      | —        | `20`      | Read timeout.                                                               |
+| `S3_MAX_ATTEMPTS`              | —        | `3`       | botocore retries in `standard` mode. Total attempts = `total_max_attempts` = 4. |
+| `S3_MAX_POOL_CONNECTIONS`      | —        | `20`      | HTTP connection pool size.                                                  |
+| `S3_PUBLIC_BASE_URL`           | yes      | —         | Public URL of the bucket, e.g. `https://pub-<id>.r2.dev`. https, no query string, no trailing `/`. |
+| `S3_KEY_PREFIX`                | —        | `""`      | Separates environments in one bucket, e.g. `dev/`. If not empty it must end with `/`. |
+| `API_PUBLIC_BASE_URL`          | yes      | —         | Public URL of this API, e.g. `https://sphereye-api.onrender.com`. Used by `json`/`redirect` when the cache is bypassed. |
+| `POSITION_QUANTUM_ARCSEC`      | —        | `6.15`    | Position grid. Changing it changes keys.                                    |
+| `SIA_CACHE_TTL_SECONDS`        | —        | `21600`   | TTL of SIA results (6 h).                                                   |
+| `IMAGE_META_L1_TTL_SECONDS`    | —        | `3600`    | TTL of sidecars in the L1 memory cache.                                     |
+| `MEMORY_CACHE_MAX_ITEMS`       | —        | `512`     | Max items of the L1 LRU.                                                    |
+| `STORAGE_CIRCUIT_OPEN_SECONDS` | —        | `60`      | How long the circuit breaker stays open after 3 consecutive storage failures. |
+
+The app fails at boot, listing only the **names** of missing variables, when `CACHE_ENABLED=true`
+and a required one is missing, or when `S3_KEY_PREFIX` / `S3_PUBLIC_BASE_URL` are malformed.
+
+### Provisioning checklist (Cloudflare R2)
+
+Manual, outside the code (no bucket operation is done at runtime; the token only needs object
+permissions):
+
+1. Create the bucket (e.g. `sphereye-images`), automatic location.
+2. Create an R2 API Token with **Object Read & Write** permission, scoped to **only** this bucket.
+   Save the `Access Key ID`, the `Secret Access Key` (shown once) and the S3 endpoint.
+3. In *Settings → Public Development URL*, click *Enable* and confirm. Copy the URL
+   (`https://pub-<id>.r2.dev`) into `S3_PUBLIC_BASE_URL`.
+4. Do not configure a custom domain (not available in this project).
+5. In *Settings → CORS Policy*, set:
+
+   ```json
+   [
+     {
+       "AllowedOrigins": ["*"],
+       "AllowedMethods": ["GET", "HEAD"],
+       "AllowedHeaders": ["*"],
+       "ExposeHeaders": ["Content-Length", "Content-Type", "ETag"],
+       "MaxAgeSeconds": 86400
+     }
+   ]
+   ```
+
+   `"*"` is used because all content is public and Vercel previews get a new URL on every deploy.
+   To restrict it, replace it with `["http://localhost:3000", "https://<project>.vercel.app"]`.
+6. In *Settings → Object lifecycle rules*, delete objects with prefix `sia/` (or
+   `{S3_KEY_PREFIX}sia/`) after 7 days. The code already applies the 6 h TTL itself.
+7. Check it: `curl -I https://pub-<id>.r2.dev/<test-key>.png` should return `200`,
+   `content-type: image/png` and a `cache-control` with `immutable`. Repeat with
+   `-H "Origin: http://localhost:3000"` and check `access-control-allow-origin`.
+   Result of this check: _to be recorded here after the live run (VAL-503)._
+8. On Render, set the variables above and `CACHE_ENABLED=true`.
+
+### Response format (`response_format` on `GET /image`)
+
+| Value               | Hit                                                   | Miss                                                    | Bypass                                         |
+| ------------------- | ----------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------- |
+| `png` (default)     | `200 image/png` from storage, `X-Cache: HIT`          | `200 image/png` rendered, `X-Cache: MISS`, upload runs in background | `200 image/png`, `X-Cache: BYPASS`             |
+| `json`              | `200 application/json`, `cache_status: "hit"`         | rendered and stored first, then `200`, `cache_status: "miss"` | `200`, `cache_status: "bypass"`, `url` = API URL |
+| `redirect`          | `302 Location: <public URL>` + `X-*` headers          | rendered and stored first, then `302`                   | `302` to the API URL                           |
+
+- `json` is the recommended mode for the frontend: one call returns the public URL and all metadata
+  (scale, observation, stack). Its body is the sidecar contents plus `url` and `cache_status`.
+- `redirect` is for `<img src>` straight to the API. Browsers and `fetch` follow the 302 and
+  **do not expose** the `X-*` headers of the redirect response, so use `json` when you need the
+  scale. The 302 carries `Cache-Control: public, max-age=86400`.
+- With the cache off, `response_format=redirect` answers `302` straight to the API URL
+  (`{API_PUBLIC_BASE_URL}/image?...&response_format=png`) **without rendering**. Render errors
+  (for example `404 DETECTOR_NOT_AVAILABLE`) therefore show up only when that URL is loaded.
+- `X-Cache`, `X-Center-Ra`/`X-Center-Dec` (normalized, 6 decimals) and `X-Render-Version` are
+  added to the headers. Hits rebuild the other `X-*` headers from the sidecar.
+
+### Frontend usage
+
+```ts
+// Recommended: one call, public URL + metadata
+const res = await fetch(`${API}/image?ra=${ra}&dec=${dec}&observation_id=${id}&detector=D2&response_format=json`);
+const meta = await res.json();
+img.crossOrigin = "anonymous";
+img.onerror = () => {             // fallback if r2.dev answers 429
+  img.onerror = null;
+  img.src = `${API}/image?ra=${ra}&dec=${dec}&observation_id=${id}&detector=D2&response_format=png`;
+};
+img.src = meta.url;               // served by the public bucket URL
+const [scaleMin] = meta.scale.min; // reuse on the other dates
+const [scaleMax] = meta.scale.max;
+```
+
+```html
+<!-- Shortcut without metadata -->
+<img crossorigin="anonymous"
+     src="https://<api>/image?ra=83.82&dec=-5.39&observation_id=<id>&mode=rgb&response_format=redirect" />
+```
+
+Use `crossOrigin="anonymous"` on every `<img>` that points to the public URL, so the browser cache
+never keeps a copy without CORS headers (needed if a `<canvas>` reads the pixels).
+
+### Rendering changes: `RENDER_VERSION`
+
+`RENDER_VERSION` is a constant in `app/processing/__init__.py` (currently `"r1"`). It is part of
+every image key. **If a change alters any output pixel** (stretch, mask, reprojection, stack,
+upscale, colormap, defaults), **increment it**. Old objects stay in the bucket under the old
+version and are never served again. SIA keys do not include it, so SIA results survive the change.
+
+### Deleting cached items
+
+Always delete the **sidecar `.json` before the PNG**. The sidecar is the "write finished" marker:
+if the PNG is removed first, the sidecar still exists, `json`/`redirect` return a URL that answers
+`404`, and nothing rebuilds it. With the sidecar gone first, the next request is a miss, renders
+again and rewrites both objects.
+
+```bash
+# Export the token and endpoint of the bucket (any S3 client works; AWS CLI shown here)
+export AWS_ACCESS_KEY_ID=<S3_ACCESS_KEY_ID> AWS_SECRET_ACCESS_KEY=<S3_SECRET_ACCESS_KEY> AWS_DEFAULT_REGION=auto
+# 1. sidecar first
+aws s3api delete-object --endpoint-url "$S3_ENDPOINT_URL" --bucket "$S3_BUCKET" \
+  --key "<S3_KEY_PREFIX>images/r1/spherex_qr3/<observation_id>/<hash>.json"
+# 2. then the PNG
+aws s3api delete-object --endpoint-url "$S3_ENDPOINT_URL" --bucket "$S3_BUCKET" \
+  --key "<S3_KEY_PREFIX>images/r1/spherex_qr3/<observation_id>/<hash>.png"
+```
+
+`sia/` objects (`{S3_KEY_PREFIX}sia/...json`) can be deleted at any time.
+
+### Degradation and circuit breaker
+
+- Storage errors (network, 5xx, bad credentials) on read or write never fail the request: the
+  request is served as `BYPASS` and logged as `error` with `event="storage_unavailable"`.
+- After 3 consecutive failures the circuit opens for `STORAGE_CIRCUIT_OPEN_SECONDS` (60 s) and the
+  storage is not called at all. `GET /health` reports `cache.enabled` and `cache.circuit_open`
+  without touching the storage.
+- If IRSA fails and an expired SIA entry exists in storage, that entry is served (stale-if-error),
+  logged as `warning` with `event="sia_stale_served"`.
+- A request that ends in an error can leave an object under `sia/`, never under `images/`: errors
+  (`404`, `422`, `502`, `504`, `EMPTY_IMAGE`, `REQUEST_TOO_LARGE`) are not cached, and the PNG is
+  written only after a successful render.
+- Storage writes are idempotent (same key, same content). A `429`/`SlowDown` on upload is
+  treated as success when a follow-up `HeadObject` confirms the object exists.
+
 ## Tests
 
 ```bash

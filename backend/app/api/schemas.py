@@ -1,6 +1,7 @@
 import math
 from datetime import UTC, datetime
-from typing import Any
+from enum import StrEnum
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
@@ -84,6 +85,14 @@ def parse_triplet(value: str, name: str) -> tuple[float, ...]:
 
 def _join(values: tuple[Any, ...]) -> str:
     return ",".join(str(v) for v in values)
+
+
+class ResponseFormat(StrEnum):
+    """How GET /image returns the image (spec cache 4.2)."""
+
+    PNG = "png"
+    JSON = "json"
+    REDIRECT = "redirect"
 
 
 # --- Query parameters -------------------------------------------------------------------
@@ -327,6 +336,16 @@ class ImageQuery(BaseModel):
         ),
         examples=["5,8,12"],
     )
+    response_format: ResponseFormat = Field(
+        ResponseFormat.PNG,
+        description=(
+            "png (default): the PNG bytes with metadata in X-* headers. json (recommended for "
+            "the frontend): the public URL of the image plus all metadata in one call. "
+            "redirect: 302 to the public URL, for <img src>; browsers and fetch follow it "
+            "without exposing the X-* headers of the 302, so use json to read metadata."
+        ),
+        examples=["png"],
+    )
 
     @field_validator("detector")
     @classmethod
@@ -440,8 +459,14 @@ class ImageQuery(BaseModel):
 
 
 class EpochsQueryEcho(BaseModel):
-    ra: float = Field(description="Requested RA, degrees.", examples=[M101_RA])
-    dec: float = Field(description="Requested Dec, degrees.", examples=[M101_DEC])
+    ra: float = Field(
+        description="RA searched, degrees: the requested value rounded to the position grid.",
+        examples=[210.8015],
+    )
+    dec: float = Field(
+        description="Dec searched, degrees: the requested value rounded to the position grid.",
+        examples=[54.348917],
+    )
     radius: float = Field(description="Search radius, degrees.", examples=[0.001])
     collection: Collection = Field(description="Collection queried.", examples=["spherex_qr3"])
     detector: Detector | None = Field(description="Detector filter, if any.", examples=[None])
@@ -518,6 +543,98 @@ class EpochsResponse(BaseModel):
     )
     visits: list[VisitOut] = Field(description="Visits in time order.")
     observations: list[ObservationOut] = Field(description="Observations in time order.")
+
+
+# --- /image?response_format=json ------------------------------------------------------
+
+
+class ImageJsonImage(BaseModel):
+    width: int = Field(description="PNG width, pixels.", examples=[585])
+    height: int = Field(description="PNG height, pixels.", examples=[585])
+    bytes: int = Field(description="PNG size, bytes.", examples=[412337])
+    sha256: str = Field(description="SHA-256 of the PNG, hex.", examples=["3f9a0c1e..."])
+    pixel_scale_arcsec: float = Field(
+        description="Pixel scale of the PNG, arcsec per pixel.", examples=[6.15]
+    )
+    native_pixel_scale_arcsec: float = Field(
+        description="Native SPHEREx pixel scale, arcsec per pixel.", examples=[6.15]
+    )
+    valid_pixel_fraction: float = Field(
+        description="Fraction of non-transparent pixels, 0-1.", examples=[0.982]
+    )
+
+
+class ImageJsonObservation(BaseModel):
+    observation_id: str = Field(
+        description="Reference observation id.", examples=["2026W20_2A_0464_3"]
+    )
+    observation_time: str = Field(
+        description="Start time (t_min) of the reference image, ISO 8601 UTC.",
+        examples=["2026-05-17T10:58:03Z"],
+    )
+    detectors: list[str] = Field(
+        description="Detector per channel (1 in single, 3 in rgb, R,G,B order).", examples=[["D2"]]
+    )
+    wavelength_min_um: list[float] = Field(
+        description="Lower band wavelength per channel, µm.", examples=[[1.1033]]
+    )
+    wavelength_max_um: list[float] = Field(
+        description="Upper band wavelength per channel, µm.", examples=[[1.6499]]
+    )
+
+
+class ImageJsonScale(BaseModel):
+    min: list[float] = Field(description="vmin per channel, MJy/sr.", examples=[[0.0123]])
+    max: list[float] = Field(description="vmax per channel, MJy/sr.", examples=[[4.5678]])
+
+
+class ImageJsonStack(BaseModel):
+    count: list[int] = Field(description="Frames combined per channel.", examples=[[5]])
+    observation_ids: list[str] = Field(
+        description="Observation ids used, in time order.",
+        examples=[["2026W20_2A_0464_1", "2026W20_2A_0464_3"]],
+    )
+    time_span_seconds: float = Field(
+        description="Seconds from the first t_min to the last t_max.", examples=[612.4]
+    )
+    truncated: bool = Field(
+        description="True when the cutout budget reduced the frames.", examples=[False]
+    )
+
+
+class ImageJsonResponse(BaseModel):
+    """Body of GET /image?response_format=json (spec cache 4.3)."""
+
+    url: str = Field(
+        description=(
+            "Where to load the PNG: the public storage URL on hit/miss, or this API's "
+            "/image?...&response_format=png URL on bypass."
+        ),
+        examples=["https://storage.example/images/r1/spherex_qr3/2026W20_2A_0464_3/3f9a.png"],
+    )
+    cache_status: Literal["hit", "miss", "bypass"] = Field(
+        description="hit: served from the cache; miss: rendered and stored now; bypass: cache "
+        "disabled or unavailable.",
+        examples=["hit"],
+    )
+    key: str = Field(
+        description="Storage key of the PNG.",
+        examples=["images/r1/spherex_qr3/2026W20_2A_0464_3/3f9a0c1e5b7d2a4c8e6f1b3d5a7c9e0f.png"],
+    )
+    render_version: str = Field(description="Rendering algorithm version.", examples=["r1"])
+    created_at: str = Field(
+        description="When the image was rendered, ISO 8601 UTC.", examples=["2026-11-15T12:03:44Z"]
+    )
+    params: dict[str, Any] = Field(
+        description="Normalized parameters that determine the image (cache key input).",
+        examples=[{"collection": "spherex_qr3", "ra": 210.8015, "dec": 54.348917}],
+    )
+    image: ImageJsonImage = Field(description="PNG properties.")
+    observation: ImageJsonObservation = Field(description="Observation(s) rendered.")
+    scale: ImageJsonScale = Field(
+        description="Scale used per channel; reuse as scale_min/scale_max across dates."
+    )
+    stack: ImageJsonStack | None = Field(description="Stack summary; null when stack=false.")
 
 
 # --- Errors -----------------------------------------------------------------------------

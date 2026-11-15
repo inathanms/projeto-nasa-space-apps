@@ -56,9 +56,15 @@ def test_ac001_image_responses_documented(make_client):
 @respx.mock
 def test_ac002_health_without_irsa(make_client):
     respx.route().mock(side_effect=httpx.ConnectError("down"))
-    response = make_client().get("/health")
+    client = make_client()
+    response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "version": "0.1.0"}
+    assert response.json() == {
+        "status": "ok",
+        "version": "0.1.0",
+        # REQ-554 (enabled follows the suite mode, see SPHEREYE_TEST_CACHE)
+        "cache": {"enabled": client.app.state.settings.cache_enabled, "circuit_open": False},
+    }
     assert respx.calls.call_count == 0
 
 
@@ -79,6 +85,10 @@ def test_ac017_cors_exposes_image_headers(make_client):
         "x-valid-pixel-fraction",
         "x-upscale",
         "x-native-pixel-scale-arcsec",
+        "x-cache",
+        "x-center-ra",
+        "x-center-dec",
+        "x-render-version",
     } <= exposed
 
     preflight = client.options("/image", headers={**origin, "Access-Control-Request-Method": "GET"})
@@ -89,3 +99,36 @@ def test_ac017_cors_exposes_image_headers(make_client):
 def test_cors_rejects_unknown_origin(make_client):
     response = make_client().get("/health", headers={"Origin": "https://evil.example.com"})
     assert "access-control-allow-origin" not in response.headers
+
+
+def test_cache_headers_and_response_format_documented(make_client):
+    schema = make_client().get("/openapi.json").json()
+    operation = schema["paths"]["/image"]["get"]
+    new_headers = {"X-Cache", "X-Center-Ra", "X-Center-Dec", "X-Render-Version"}
+    assert new_headers <= set(operation["responses"]["200"]["headers"])
+    redirect = operation["responses"]["302"]
+    assert {"Location", "Cache-Control"} | new_headers <= set(redirect["headers"])
+    assert redirect["headers"]["Cache-Control"]["schema"]["example"] == "public, max-age=86400"
+    content = operation["responses"]["200"]["content"]
+    assert {"image/png", "application/json"} <= set(content)
+    assert content["application/json"]["schema"]["$ref"].endswith("/ImageJsonResponse")
+    body = schema["components"]["schemas"]["ImageJsonResponse"]["properties"]
+    assert {"url", "cache_status", "key", "params", "image", "scale", "stack"} <= set(body)
+
+    params = {p["name"]: p for p in operation["parameters"]}
+    response_format = params["response_format"]
+    assert response_format["schema"]["default"] == "png"
+    assert response_format["example"] == "png"
+    ref = response_format["schema"].get("$ref") or response_format["schema"]["allOf"][0]["$ref"]
+    assert schema["components"]["schemas"][ref.rsplit("/", 1)[-1]]["enum"] == [
+        "png",
+        "json",
+        "redirect",
+    ]
+    # Mandatory notes of spec cache 4.2.
+    for phrase in (
+        "recommended for the frontend",
+        "do not expose",
+        "Cache-Control: public, max-age=86400",
+    ):
+        assert phrase in operation["description"], phrase
