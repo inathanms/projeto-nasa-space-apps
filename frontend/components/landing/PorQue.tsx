@@ -1,10 +1,12 @@
-import { porQue } from "../../content/landing";
+import { getLanding } from "../../content/landing";
+import { type Locale } from "../../lib/i18n";
 import Icon from "./Icons";
 import s from "./landing.module.css";
 
-export default function PorQue() {
+export default function PorQue({ locale }: { locale: Locale }) {
+  const { porQue } = getLanding(locale);
   return (
-    <section id="por-que" className={s.section} aria-labelledby="por-que-titulo">
+    <section id="por-que" className={s.section} aria-labelledby="por-que-titulo" tabIndex={-1}>
       <div className="wrap">
         <p className={s.kicker}>{porQue.kicker}</p>
         <h2 id="por-que-titulo" className={s.h2}>{porQue.titulo}</h2>

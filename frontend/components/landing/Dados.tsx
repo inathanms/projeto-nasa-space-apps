@@ -1,11 +1,13 @@
 import { Fragment } from "react";
-import { dados } from "../../content/landing";
+import { getLanding } from "../../content/landing";
+import { type Locale } from "../../lib/i18n";
 import Icon from "./Icons";
 import s from "./landing.module.css";
 
-export default function Dados() {
+export default function Dados({ locale }: { locale: Locale }) {
+  const { dados } = getLanding(locale);
   return (
-    <section id="dados" className={`${s.section} ${s.night2}`} aria-labelledby="dados-titulo">
+    <section id="dados" className={`${s.section} ${s.night2}`} aria-labelledby="dados-titulo" tabIndex={-1}>
       <div className={`wrap ${s.data}`}>
         <div>
           <p className={s.kicker}>{dados.kicker}</p>

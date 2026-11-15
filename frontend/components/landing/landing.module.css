@@ -45,7 +45,7 @@
 .heroSatellite svg { display: block; width: 100%; height: auto; }
 @media (prefers-reduced-motion: no-preference) {
   .heroSatellite { animation: satelliteOrbit 22s linear infinite paused; }
-  .heroOrbit[data-visible="true"] .heroSatellite { animation-play-state: running; }
+  .heroOrbit[data-visible="true"][data-paused="false"] .heroSatellite { animation-play-state: running; }
 }
 @keyframes satelliteOrbit {
   0% { offset-distance: 0%; transform: rotate(14deg) scale(1); opacity: .75; }
@@ -102,7 +102,10 @@
   gap: clamp(20px, 3vw, 44px);
   align-items: center;
 }
-[data-enter] .heroGrid { animation: enter 750ms var(--ease-out) both; }
+.heroMotionToggle { margin-top: 12px; font-size: .82rem; }
+@media (prefers-reduced-motion: no-preference) {
+  [data-enter] .heroGrid { animation: enter 750ms var(--ease-out) both; }
+}
 @keyframes enter {
   from { transform: translateY(12px); }
   to { transform: translateY(0); }
@@ -192,6 +195,7 @@
 
 .section { padding-block: var(--section-space); }
 .cream, .ctaWrap { color: var(--ink-dark); background: var(--cream); }
+.cream { --focus: #21574d; }
 .night2 { background: var(--night-soft); }
 .h2 { font-size: var(--heading); font-weight: 780; line-height: 1.08; letter-spacing: -.03em; }
 .kicker { margin-bottom: 11px; color: var(--orange); font-size: .73rem; font-weight: 750; letter-spacing: .125em; }
@@ -218,6 +222,7 @@
 .step p { color: var(--muted-dark); }
 .num { flex: 0 0 40px; display: grid; place-items: center; height: 40px; border-radius: 50%; background: #216b5e; color: white; font-weight: 750; }
 .target {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -225,10 +230,19 @@
   text-decoration: none;
   transition: transform 180ms var(--ease-out), border-color 180ms;
 }
-.target:hover, .target:focus-visible { border-color: var(--teal-light); transform: translateY(-2px); }
+.target:hover, .target:focus-within { border-color: var(--teal-light); }
+.targetLink { color: inherit; text-decoration: none; }
+.targetLink::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius-card); }
+.targetLink:focus-visible::after { outline: 2px solid var(--focus); outline-offset: 4px; }
 .targetImage { aspect-ratio: 1.53; overflow: hidden; border-radius: calc(var(--radius-card) - 1px) calc(var(--radius-card) - 1px) 0 0; background: var(--night-deep); }
 .targetImage img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 280ms var(--ease-out); }
-.target:hover img { transform: scale(1.03); }
+@media (prefers-reduced-motion: no-preference) {
+  .target:hover { transform: translateY(-2px); }
+  .target:hover img { transform: scale(1.03); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroMotionToggle { display: none; }
+}
 .targetBody { display: flex; flex: 1; flex-direction: column; padding: 16px; }
 .targetFoot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 14px; color: var(--orange); }
 .pill { padding: 4px 9px; border-radius: var(--radius-pill); background: #173d3a; color: var(--teal-light); font-size: .75rem; }
@@ -263,14 +277,15 @@
   bottom: max(1rem, env(safe-area-inset-bottom));
 }
 .fixed a { box-shadow: 0 5px 16px #05131680; }
+:global(body):has(:focus-visible) .fixed:not(:focus-within) { display: none; }
 @media (max-width: 1100px) {
   .targets { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 840px) {
-  .heroGrid { grid-template-columns: 1fr; align-items: start; }
+  .heroGrid { grid-template-columns: minmax(0, 1fr); align-items: start; }
   .discovery { width: min(100%, 36rem); }
   .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .data, .ctaBand { display: grid; grid-template-columns: 1fr; }
+  .data, .ctaBand { display: grid; grid-template-columns: minmax(0, 1fr); }
   .ctaActions { justify-content: flex-start; }
 }
 @media (max-width: 580px) {
@@ -284,10 +299,10 @@
   .heroActions a { min-height: 44px; padding-inline: 14px; }
   .heroActions a.heroPrimary { width: 100%; min-height: 62px; }
   .heroNotes { gap: 4px 10px; font-size: .77rem; }
-  .features, .steps, .targets, .about { grid-template-columns: 1fr; }
+  .features, .steps, .targets, .about { grid-template-columns: minmax(0, 1fr); }
   .targetImage { aspect-ratio: 1.9; }
   .aboutLogo { width: min(54%, 13rem); }
-  .ctaActions { display: grid; }
+  .ctaActions { display: grid; grid-template-columns: minmax(0, 1fr); }
   .fixed {
     inset: auto 0 0;
     display: flex;

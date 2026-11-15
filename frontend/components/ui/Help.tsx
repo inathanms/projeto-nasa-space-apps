@@ -2,9 +2,11 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { glossary, type GlossaryKey } from "../../content/glossary";
+import { useLocale } from "./LocaleProvider";
 
 /** Botão "?" com explicação curta para iniciantes. Abre ao passar o mouse, ao focar ou ao tocar. */
 export default function Help({ id, label }: { id: GlossaryKey; label: string }) {
+  const { locale, t } = useLocale();
   const [open, setOpen] = useState(false);
   const [alignRight, setAlignRight] = useState(false);
   const root = useRef<HTMLSpanElement>(null);
@@ -33,11 +35,11 @@ export default function Help({ id, label }: { id: GlossaryKey; label: string }) 
   return (
     <span className="help" ref={root} data-open={open} data-align={alignRight ? "right" : "left"}
       onPointerEnter={measure} onFocus={measure}>
-      <button type="button" className="help-button" aria-label={`O que é ${label}?`} aria-expanded={open} aria-describedby={tipId}
+      <button type="button" className="help-button" aria-label={t("O que é {label}?", { label })} aria-expanded={open} aria-describedby={tipId}
         onClick={() => { measure(); setOpen((value) => !value); }}>
         ?
       </button>
-      <span id={tipId} role="tooltip" className="help-tip">{glossary[id]}</span>
+      <span id={tipId} role="tooltip" className="help-tip">{glossary[locale][id]}</span>
     </span>
   );
 }

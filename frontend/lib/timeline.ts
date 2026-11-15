@@ -1,15 +1,35 @@
 import { isRecord, type Frame } from "./sequence";
 
 export type CatalogExposure = Pick<Frame, "frame_id" | "observed_at_utc" | "collection" |
-  "source_url" | "cutout_url"> & { image_id: string; detector: string };
+  "source_url" | "cutout_url"> & {
+  image_id: string;
+  detector: string;
+  observation?: {
+    id: string;
+    visit: number;
+    minWavelength: number;
+    maxWavelength: number;
+  };
+};
+
+export type LiveExposure = CatalogExposure & { observation: NonNullable<CatalogExposure["observation"]> };
 
 export type Timeline = {
   ra_deg: number;
   dec_deg: number;
   fov_arcmin: 6;
   incomplete_collections: string[];
+  truncated?: boolean;
   exposures: CatalogExposure[];
 };
+
+export type LiveTimeline = Timeline & { truncated: boolean; exposures: LiveExposure[] };
+
+export function observationIdForExposure(item: CatalogExposure) {
+  if (item.observation) return item.observation.id;
+  const saved = /^ivo:\/\/irsa\.ipac\/(spherex_\w+)\?([A-Za-z0-9_]{1,64})\/(D[1-6])$/.exec(item.frame_id);
+  return saved && saved[1] === item.collection && saved[3] === item.detector ? saved[2] : undefined;
+}
 
 export function isTimeline(value: unknown): value is Timeline {
   return isRecord(value) && Number.isFinite(value.ra_deg) && Number.isFinite(value.dec_deg) &&

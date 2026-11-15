@@ -2,11 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { targetInfo } from "../../content/target-info";
+import { useLocale } from "../ui/LocaleProvider";
 
 /** Ficha do astro: contexto histórico, descoberta e o que observar. Abre como modal. */
 export default function TargetSheet({ target, onClose }: { target: { slug: string; name: string } | null; onClose: () => void }) {
+  const { locale, t } = useLocale();
   const dialog = useRef<HTMLDialogElement>(null);
-  const info = target ? targetInfo[target.slug] : undefined;
+  const info = target ? targetInfo[locale][target.slug] : undefined;
 
   useEffect(() => {
     const element = dialog.current;
@@ -25,28 +27,28 @@ export default function TargetSheet({ target, onClose }: { target: { slug: strin
               <p className="target-sheet-kicker">{info.tipo}</p>
               <h2 id="target-sheet-title">{target.name}</h2>
             </div>
-            <button type="button" className="target-sheet-close" aria-label="Fechar ficha" onClick={() => dialog.current?.close()}>×</button>
+            <button type="button" className="target-sheet-close" aria-label={t("Fechar ficha")} onClick={() => dialog.current?.close()}>×</button>
           </header>
 
           <dl className="target-sheet-facts">
-            <div><dt>Constelação</dt><dd>{info.constelacao}</dd></div>
-            {info.distancia && <div><dt>Distância</dt><dd>{info.distancia}</dd></div>}
-            {info.descoberta && <div><dt>Descoberta</dt><dd>{info.descoberta.quem} · {info.descoberta.quando}</dd></div>}
+            <div><dt>{t("Constelação")}</dt><dd>{info.constelacao}</dd></div>
+            {info.distancia && <div><dt>{t("Distância")}</dt><dd>{info.distancia}</dd></div>}
+            {info.descoberta && <div><dt>{t("Descoberta")}</dt><dd>{info.descoberta.quem} · {info.descoberta.quando}</dd></div>}
           </dl>
 
           {info.descoberta && <section>
-            <h3>Como foi descoberto</h3>
+            <h3>{t("Como foi descoberto")}</h3>
             <p>{info.descoberta.como}</p>
           </section>}
           <section>
-            <h3>Contexto histórico</h3>
+            <h3>{t("Contexto histórico")}</h3>
             <p>{info.historia}</p>
           </section>
           {info.curiosidade && <section>
-            <h3>Curiosidade</h3>
+            <h3>{t("Curiosidade")}</h3>
             <p>{info.curiosidade}</p>
           </section>}
-          <p className="target-sheet-look"><strong>O que observar nas imagens:</strong> {info.oQueVer}</p>
+          <p className="target-sheet-look"><strong>{t("O que observar nas imagens:")}</strong> {info.oQueVer}</p>
         </div>
       )}
     </dialog>

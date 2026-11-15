@@ -4,6 +4,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import type { TourStep } from "../../content/tutorial";
+import { localizedHref } from "../../lib/i18n";
+import { useLocale } from "../ui/LocaleProvider";
 
 type Rect = { top: number; left: number; width: number; height: number };
 
@@ -24,7 +26,9 @@ export default function SpotlightTour({ steps, start = 0, onClose }: { steps: To
   const tipRef = useRef<HTMLDivElement>(null);
   const scrolledFor = useRef(-1);
   const router = useRouter();
-  const pathname = usePathname();
+  const { locale, t } = useLocale();
+  // Rota atual normalizada para o idioma (ex.: /explorar → /explore/ no inglês).
+  const pathname = localizedHref(locale, usePathname());
 
   const step = steps[index];
   const isLast = index === steps.length - 1;
@@ -126,16 +130,16 @@ export default function SpotlightTour({ steps, start = 0, onClose }: { steps: To
         : <div className="tour-dim" />}
       <div ref={tipRef} className="tour-tip" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-body" tabIndex={-1}
         style={{ left: tip.left, top: tip.top, width: tip.width, opacity: ready ? 1 : 0, pointerEvents: ready ? "auto" : "none" }}>
-        <p className="tour-tip-step">Passo {index + 1} de {steps.length}</p>
+        <p className="tour-tip-step">{t("Passo {step} de {total}", { step: index + 1, total: steps.length })}</p>
         <h2 id="tour-title" className="tour-tip-title">{step.title}</h2>
         <p id="tour-body" className="tour-tip-body">{step.body}</p>
         <div className="tour-tip-actions">
-          <button type="button" className="tour-skip" onClick={onClose}>Pular</button>
+          <button type="button" className="tour-skip" onClick={onClose}>{t("Pular")}</button>
           <div className="tour-tip-nav">
-            {index > 0 && <button type="button" className="button secondary" onClick={() => setIndex((value) => value - 1)}>Voltar</button>}
+            {index > 0 && <button type="button" className="button secondary" onClick={() => setIndex((value) => value - 1)}>{t("Voltar")}</button>}
             {isLast
-              ? <button type="button" className="button primary" onClick={onClose}>Concluir</button>
-              : <button type="button" className="button primary" onClick={() => setIndex((value) => value + 1)}>Próximo</button>}
+              ? <button type="button" className="button primary" onClick={onClose}>{t("Concluir")}</button>
+              : <button type="button" className="button primary" onClick={() => setIndex((value) => value + 1)}>{t("Próximo")}</button>}
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import styles from "./landing.module.css";
 
 export default function HeroArt() {
   return (
-    <div className={styles.heroArt} aria-hidden="true">
+    <div className={styles.heroArt} id="arte-hero" aria-hidden="true">
       <HeroOrbit>
         <Icon name="satelite" />
       </HeroOrbit>

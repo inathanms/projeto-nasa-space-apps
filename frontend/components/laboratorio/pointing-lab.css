@@ -1,5 +1,5 @@
 .pointing-lab { padding-block: clamp(32px, 5vw, 70px) var(--section-space); }
-.pointing-heading { display: grid; gap: 12px; margin-bottom: 28px; }
+.pointing-heading { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; margin-bottom: 28px; }
 .pointing-heading .button { justify-self: start; }
 .pointing-heading p { color: var(--mute); max-width: 60ch; line-height: 1.5; }
 .pointing-grid { display: grid; grid-template-columns: minmax(0, 1.95fr) minmax(280px, 1fr); gap: clamp(20px, 4vw, 54px); align-items: start; }
@@ -16,21 +16,24 @@
 .pointing-controls { min-width: 0; padding: 18px; border: 1px solid var(--rule); border-radius: var(--radius-card); background: var(--card); }
 .pointing-controls h2 { font-size: 1.35rem; margin-bottom: 7px; }
 .pointing-angle { margin-top: 15px; }
-.pointing-angle-label { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--mute); font-size: .88rem; }
+.pointing-angle-label { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; color: var(--mute); font-size: .88rem; }
 .pointing-angle-label strong { color: var(--ink); }
 .pointing-number { position: relative; }
 .pointing-number span { position: absolute; right: 9px; top: 9px; pointer-events: none; }
 .pointing-number input, .pointing-target select { border: 1px solid var(--control-border); border-radius: var(--radius-control); background: var(--inset); color: var(--ink); min-height: var(--touch); }
 .pointing-number input { width: 112px; padding: 5px 20px 5px 8px; font-variant-numeric: tabular-nums; }
+.pointing-number input[aria-invalid="true"] { border-color: var(--error); }
+.pointing-feedback:empty { margin: 0; }
 .pointing-angle input[type=range] { display: block; width: 100%; min-height: var(--touch); margin: 4px 0 0; accent-color: var(--accent); }
 .pointing-limits { display: flex; justify-content: space-between; color: var(--mute); font: .74rem var(--mono); }
 .pointing-target { display: grid; gap: 6px; margin-top: 18px; font-size: .85rem; color: var(--mute); }
 .pointing-target select { width: 100%; padding: 5px 9px; }
 .pointing-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
 .pointing-note, .pointing-credit { color: var(--mute); font-size: .8rem; line-height: 1.5; margin-top: 12px; }
+.pointing-credit a { display: inline-flex; align-items: center; min-height: var(--touch); }
 @media (max-width: 760px) {
   .pointing-lab { padding-block: 32px 40px; }
-  .pointing-grid { grid-template-columns: 1fr; }
+  .pointing-grid { grid-template-columns: minmax(0, 1fr); }
   .pointing-heading { margin-bottom: 18px; }
   .pointing-canvas, .pointing-figure .scene-loading { height: clamp(285px, 76vw, 440px); }
 }

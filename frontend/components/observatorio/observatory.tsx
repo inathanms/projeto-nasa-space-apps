@@ -1,5 +1,8 @@
 "use client";
 
+import { useLocale } from "../ui/LocaleProvider";
+import { forLocales } from "../../lib/i18n";
+
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
@@ -20,10 +23,13 @@ const LIMIT_END = Date.parse("2100-12-31T23:59:59Z");
 const SIGNAL_SCALE = CAPTURE_RADIUS * 3;
 const CAPTURE_PAUSE = 1600;
 const LOGBOOK_KEY = "spherex:observatory:discoveries:v1";
-const angleLabel = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 });
-const exactAngle = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 6 });
+const angleLabels = forLocales((language) => new Intl.NumberFormat(language, { maximumFractionDigits: 2 }));
+const exactAngles = forLocales((language) => new Intl.NumberFormat(language, { maximumFractionDigits: 6 }));
 
 export default function Observatory({ targets }: { targets: Target[] }) {
+  const { t, locale, href } = useLocale();
+  const angleLabel = angleLabels[locale];
+  const exactAngle = exactAngles[locale];
   const [target, setTarget] = useState<string | null>(null);
   const [lockedTarget, setLockedTarget] = useState<Target | null>(null);
   const [aimPaused, setAimPaused] = useState(false);
@@ -46,6 +52,10 @@ export default function Observatory({ targets }: { targets: Target[] }) {
   const signal = nearestTarget(ra, dec, targets, (item) => discovered.includes(item.slug) || item.slug === lockedTarget?.slug);
   const raAdjusted = acquisition !== null && acquisition.before.ra !== acquisition.item.ra;
   const decAdjusted = acquisition !== null && acquisition.before.dec !== acquisition.item.dec;
+  const mjdValue = mjdDraft === null ? NaN : Number(mjdDraft.trim().replace(",", "."));
+  const mjdTime = Math.round((mjdValue - MJD_AT_UNIX) * DAY);
+  const mjdInvalid = mjdDraft !== null && (!/^\d{5}(?:[.,]\d+)?$/.test(mjdDraft.trim()) ||
+    !Number.isFinite(mjdTime) || mjdTime < LIMIT_START || mjdTime > LIMIT_END);
 
   useEffect(() => {
     try {
@@ -167,17 +177,22 @@ export default function Observatory({ targets }: { targets: Target[] }) {
     ra_deg: String(Number(ra.toFixed(6)) % 360),
     dec_deg: String(Number(dec.toFixed(6))),
   });
+  if (lockedTarget && target === lockedTarget.slug && ra === lockedTarget.ra && dec === lockedTarget.dec) {
+    query.set("exemplo", lockedTarget.slug);
+  } else {
+    query.set("modo", "consultar");
+  }
 
   return (
     <>
       <div className="orbital-header shell">
-        <div className="orbital-targets" data-tour="obs-alvos" role="group" aria-label="Alvos de exemplo">
+        <div className="orbital-targets" data-tour="obs-alvos" role="group" aria-label={t("Alvos de exemplo")}>
           {targets.map((item, index) => (
             <button className="orbital-target" key={item.slug} type="button" aria-pressed={target === item.slug}
               aria-disabled={aimPaused} onClick={() => selectTarget(item)}>
               <span className={`orbital-symbol target-${index % 3}`} aria-hidden="true" />
               {item.name}
-              {discovered.includes(item.slug) && <span className="orbital-found-mark" aria-label="Descoberto">✓</span>}
+              {discovered.includes(item.slug) && <span className="orbital-found-mark" aria-label={t("Descoberto")}>✓</span>}
             </button>
           ))}
           <button className="orbital-target" type="button" aria-pressed={target === null} aria-disabled={aimPaused} onClick={() => {
@@ -190,105 +205,113 @@ export default function Observatory({ targets }: { targets: Target[] }) {
         </div>
       </div>
 
-      <section className="orbital-stage" aria-label="Cena didática de apontamento" data-aim-paused={aimPaused}>
-        <SceneCanvas ra={ra} dec={dec} time={time} variant="orbital" role="img" aria-label="Terra à esquerda e telescópio no centro com linha de visão"
+      <section className="orbital-stage" aria-label={t("Cena didática de apontamento")} aria-describedby="orbital-guide" data-aim-paused={aimPaused}>
+        <p className="sr-only" id="orbital-guide">{t("Use os controles de ascensão reta e declinação para mover a mira. O diário de bordo indica a direção de um alvo próximo e anuncia as descobertas.")}</p>
+        <SceneCanvas ra={ra} dec={dec} time={time} variant="orbital" role="img" aria-label={t("Terra à esquerda e telescópio no centro com linha de visão")}
           onPointerDown={startDrag} onPointerMove={moveDrag}
           onLostPointerCapture={() => { pointer.current = null; }} />
         <div className="orbital-ra" data-tour="obs-ra" data-adjusted={raAdjusted}>
-          <div className="orbital-value"><label htmlFor="orbital-ra">Ascensão reta</label><output htmlFor="orbital-ra">{angleLabel.format(ra)}°</output></div>
-          <input id="orbital-ra" type="range" min={0} max={359.9} step={.1} value={ra} {...rangeGuard}
+          <div className="orbital-value"><label htmlFor="orbital-ra">{t("Ascensão reta")}</label><span aria-hidden="true">{angleLabel.format(ra)}°</span></div>
+          <input id="orbital-ra" type="range" min={0} max={359.9} step={.1} value={ra} aria-valuetext={t("{value} graus", { value: exactAngle.format(ra) })} {...rangeGuard}
             onChange={(event) => { if (!rangeGesture.current?.interrupted) setAngles(event.currentTarget.valueAsNumber, dec); }} />
           <div className="orbital-scale" aria-hidden="true"><span>0°</span><span>360°</span></div>
-          {raAdjusted && <small className="orbital-adjusted">RA ajustada automaticamente</small>}
+          {raAdjusted && <small className="orbital-adjusted">{t("RA ajustada automaticamente")}</small>}
         </div>
-        <p className="orbital-scope-label">SPHEREx <span>· modelo didático</span></p>
+        <p className="orbital-scope-label">SPHEREx <span>{t("· modelo didático")}</span></p>
         {acquisition && <span key={acquisition.item.slug} className="orbital-discovery-pulse" aria-hidden="true" />}
         <div className="orbital-dec" data-tour="obs-dec" data-adjusted={decAdjusted}>
-          <div className="orbital-value"><label htmlFor="orbital-dec">Inclinação · Dec</label><output htmlFor="orbital-dec">{angleLabel.format(dec)}°</output></div>
-          <input id="orbital-dec" type="range" min={-90} max={90} step={.1} value={dec} {...rangeGuard}
+          <div className="orbital-value"><label htmlFor="orbital-dec">{t("Declinação · Dec")}</label><span aria-hidden="true">{angleLabel.format(dec)}°</span></div>
+          <input id="orbital-dec" type="range" min={-90} max={90} step={.1} value={dec} aria-valuetext={t("{value} graus", { value: exactAngle.format(dec) })} {...rangeGuard}
             onChange={(event) => { if (!rangeGesture.current?.interrupted) setAngles(ra, event.currentTarget.valueAsNumber); }} />
           <div className="orbital-scale" aria-hidden="true"><span>−90°</span><span>0°</span><span>+90°</span></div>
-          {decAdjusted && <small className="orbital-adjusted">Dec ajustada automaticamente</small>}
-          <Link className="button primary" href={`/explorar/?${query}`}>Importar para o explorador</Link>
+          {decAdjusted && <small className="orbital-adjusted">{t("Dec ajustada automaticamente")}</small>}
+          <Link className="button primary" href={href(`/explorar/?${query}`)}>{t("Importar para o explorador")}</Link>
         </div>
         {/* Clicar no card aberto mostra a ficha do astro; o botão interno garante acesso por teclado. */}
-        <aside className="orbital-logbook" data-tour="obs-diario" aria-label="Diário de bordo" data-aligned={Boolean(acquisition)}
-          data-clickable={Boolean(acquisition && targetInfo[acquisition.item.slug])}
-          onClick={() => { if (acquisition && targetInfo[acquisition.item.slug]) setSheet(acquisition.item); }}>
-          <div className="orbital-logbook-title"><strong>Diário de bordo</strong><span>{discovered.length} de {targets.length} descobertos</span></div>
+        <aside className="orbital-logbook" data-tour="obs-diario" aria-label={t("Diário de bordo")} data-aligned={Boolean(acquisition)}
+          data-clickable={Boolean(acquisition && targetInfo[locale][acquisition.item.slug])}
+          onClick={() => { if (acquisition && targetInfo[locale][acquisition.item.slug]) setSheet(acquisition.item); }}>
+          <div className="orbital-logbook-title"><strong>{t("Diário de bordo")}</strong><span>{t("{count} de {total} descobertos", { count: discovered.length, total: targets.length })}</span></div>
           <div className="orbital-discovery-message" role="status">
             {acquisition && <>
-              <p className="orbital-acquisition-name"><strong>{acquisition.isNew ? "Descoberta registrada" : "Alvo reencontrado"}:</strong> {acquisition.item.name}</p>
-              <p>{raAdjusted || decAdjusted ? "Mira ajustada às coordenadas exatas." : "A mira já estava nas coordenadas exatas."}</p>
+              <p className="orbital-acquisition-name"><strong>{acquisition.isNew ? t("Descoberta registrada") : t("Alvo reencontrado")}:</strong> {acquisition.item.name}</p>
+              <p>{raAdjusted || decAdjusted ? t("Mira ajustada às coordenadas exatas.") : t("A mira já estava nas coordenadas exatas.")}</p>
               {(raAdjusted || decAdjusted) && <ul className="orbital-correction">
                 {raAdjusted && <li>RA <span>{exactAngle.format(acquisition.before.ra)}° → {exactAngle.format(acquisition.item.ra)}°</span></li>}
                 {decAdjusted && <li>Dec <span>{exactAngle.format(acquisition.before.dec)}° → {exactAngle.format(acquisition.item.dec)}°</span></li>}
               </ul>}
             </>}
           </div>
-          {acquisition && <p className="orbital-pause-note" role="status">{aimPaused ? "Mira travada por um instante." : "Mira liberada. Continue explorando."}</p>}
-          {acquisition && targetInfo[acquisition.item.slug] && (
+          <p className="orbital-pause-note" role="status">
+            {acquisition ? aimPaused ? t("Mira travada por um instante.") : t("Mira liberada. Continue explorando.") : ""}
+          </p>
+          {acquisition && targetInfo[locale][acquisition.item.slug] && (
             <button type="button" className="orbital-sheet-link" aria-haspopup="dialog">
-              Conhecer a história de {acquisition.item.name} <span aria-hidden="true">›</span>
+              {t("Conhecer a história de {name}", { name: acquisition.item.name })} <span aria-hidden="true">›</span>
             </button>
           )}
           {!acquisition && <>
             <div className="orbital-signal">
               <div className="orbital-signal-label">
-                <span>Faixa de descoberta: 0° a {CAPTURE_RADIUS}° do alvo</span>
-                {signal && <strong>Sinal a {angleLabel.format(signal.distance)}°</strong>}
+                <span>{t("Faixa de descoberta: 0° a {radius}° do alvo", { radius: CAPTURE_RADIUS })}</span>
+                {signal && <strong>{t("Sinal a {distance}°", { distance: angleLabel.format(signal.distance) })}</strong>}
               </div>
               {signal && <div className="orbital-signal-track" aria-hidden="true">
                 <span className="orbital-signal-zone" style={{ width: `${CAPTURE_RADIUS / SIGNAL_SCALE * 100}%` }} />
                 <span className="orbital-signal-marker" style={{ left: `clamp(5px, ${Math.min(signal.distance / SIGNAL_SCALE, 1) * 100}%, 100% - 5px)` }} />
               </div>}
             </div>
-            <p>{signal ? <>{axisHint("RA", signal.item.ra - ra)} · {axisHint("Dec", signal.item.dec - dec)}</>
-              : discovered.length === targets.length ? "Mapa completo. Você encontrou todos os alvos!"
-              : "Afaste a mira e volte para registrar esse alvo."}</p>
+            <p>{signal ? <>{axisHint("RA", signal.item.ra - ra, locale)} · {axisHint("Dec", signal.item.dec - dec, locale)}</>
+              : discovered.length === targets.length ? t("Mapa completo. Você encontrou todos os alvos!")
+              : t("Afaste a mira e volte para registrar esse alvo.")}</p>
           </>}
         </aside>
       </section>
 
       <section className="orbital-time" data-tour="obs-tempo" aria-labelledby="orbital-time-label">
-        <h2 id="orbital-time-label">Tempo</h2>
-        <div className="orbital-time-modes" role="group" aria-label="Formato do tempo">
-          <button type="button" aria-pressed={mode === "utc"} onClick={() => { setMjdDraft(null); setMode("utc"); }}>Data e hora UTC</button>
+        <h2 id="orbital-time-label">{t("Tempo")}</h2>
+        <div className="orbital-time-modes" role="group" aria-label={t("Formato do tempo")}>
+          <button type="button" aria-pressed={mode === "utc"} onClick={() => { setMjdDraft(null); setMode("utc"); }}>{t("Data e hora UTC")}</button>
           <button type="button" aria-pressed={mode === "mjd"} onClick={() => setMode("mjd")}>MJD</button>
         </div>
         <div className="orbital-datetime">
           {mode === "utc" ? <>
-            <input type="date" aria-label="Data UTC" min="1900-01-01" max="2100-12-31" value={iso.slice(0, 10)}
+            <input type="date" aria-label={t("Data UTC")} min="1900-01-01" max="2100-12-31" value={iso.slice(0, 10)}
               onChange={(event) => changeTime(Date.parse(`${event.currentTarget.value}T${iso.slice(11, 23)}Z`))} />
-            <input type="time" aria-label="Hora UTC" step={1} value={iso.slice(11, 19)}
+            <input type="time" aria-label={t("Hora UTC")} step={1} value={iso.slice(11, 19)}
               onChange={(event) => changeTime(Date.parse(`${iso.slice(0, 10)}T${event.currentTarget.value}Z`))} />
-          </> : <input className="orbital-mjd" type="text" inputMode="decimal" aria-label="Data Juliana Modificada"
+          </> : <input className="orbital-mjd" type="text" inputMode="decimal" aria-label={t("Data Juliana Modificada")}
+              aria-invalid={mjdInvalid} aria-describedby={mjdInvalid ? "orbital-mjd-error" : undefined}
               value={mjdDraft ?? (time / DAY + MJD_AT_UNIX).toFixed(6)}
               onBlur={() => setMjdDraft(null)}
               onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }}
               onChange={(event) => {
-                const raw = event.currentTarget.value;
+                const raw = event.currentTarget.value.trim();
                 setMjdDraft(raw);
                 setPlaying(false);
-                if (/^\d{5}(?:[.,]\d+)?$/.test(raw)) changeTime(Math.round((Number(raw.replace(",", ".")) - MJD_AT_UNIX) * DAY));
+                const next = Math.round((Number(raw.replace(",", ".")) - MJD_AT_UNIX) * DAY);
+                if (/^\d{5}(?:[.,]\d+)?$/.test(raw) && next >= LIMIT_START && next <= LIMIT_END) changeTime(next);
               }} />}
         </div>
         <div className="orbital-transport">
-          <button type="button" aria-label="Voltar um dia" onClick={() => changeTime(time - DAY)}><span aria-hidden="true">‹</span></button>
-          <button type="button" className="orbital-play" aria-label={playing ? "Pausar tempo" : "Reproduzir tempo"}
+          <button type="button" aria-label={t("Voltar um dia")} onClick={() => changeTime(time - DAY)}><span className="orbital-day-arrow back" aria-hidden="true" /></button>
+          <button type="button" className="orbital-play" aria-label={playing ? t("Pausar tempo") : t("Reproduzir tempo")}
             onClick={() => { setMjdDraft(null); setPlaying(!playing); }}>
             <span className={playing ? "orbital-pause-icon" : "orbital-play-icon"} aria-hidden="true" />
           </button>
-          <input type="range" aria-label="Percorrer tempo da simulação" min={timeBounds.start} max={timeBounds.end}
+          <input type="range" aria-label={t("Percorrer tempo da simulação")} min={timeBounds.start} max={timeBounds.end}
             step="any" value={time} aria-valuetext={iso}
             onChange={(event) => changeTime(Math.round(event.currentTarget.valueAsNumber))} />
-          <button type="button" aria-label="Avançar um dia" onClick={() => changeTime(time + DAY)}><span aria-hidden="true">›</span></button>
+          <button type="button" aria-label={t("Avançar um dia")} onClick={() => changeTime(time + DAY)}><span className="orbital-day-arrow" aria-hidden="true" /></button>
         </div>
+        <p className="error orbital-mjd-error" id="orbital-mjd-error" role="status">
+          {mjdInvalid ? t("Informe uma data MJD com cinco dígitos e decimais opcionais, entre os anos 1900 e 2100.") : ""}
+        </p>
       </section>
       <TargetSheet target={sheet} onClose={() => setSheet(null)} />
       <footer className="orbital-credit">
-        <span>Simulação de apontamento e rotação, sem telemetria orbital.</span>
-        <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/">Textura NASA Earth Observatory / Blue Marble</a>
+        <span>{t("Simulação de apontamento e rotação, sem telemetria orbital.")}</span>
+        <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/">{t("Textura NASA Earth Observatory / Blue Marble")}</a>
       </footer>
     </>
   );

@@ -1,3 +1,5 @@
+import type { Locale } from "../lib/i18n";
+
 // Fichas dos alvos do observatório: aparecem ao clicar no card do diário de bordo.
 // Mantenha os textos curtos e para iniciantes. Revise números antes de publicar.
 
@@ -11,7 +13,7 @@ export type TargetInfo = {
   oQueVer: string;
 };
 
-export const targetInfo: Record<string, TargetInfo> = {
+const pt: Record<string, TargetInfo> = {
   barnard: {
     tipo: "Anã vermelha",
     constelacao: "Ofiúco (Ophiuchus)",
@@ -80,3 +82,75 @@ export const targetInfo: Record<string, TargetInfo> = {
     oQueVer: "Contexto: galáxias não se movem visivelmente em poucos anos; a diferença entre épocas costuma ser estrelas da nossa própria galáxia na frente.",
   },
 };
+
+const en: Record<string, TargetInfo> = {
+  barnard: {
+    tipo: "Red dwarf",
+    constelacao: "Ophiuchus",
+    distancia: "about 6 light-years",
+    descoberta: {
+      quem: "Edward Emerson Barnard",
+      quando: "1916",
+      como: "By comparing photographs of the sky taken years apart, he noticed the star had moved much farther than any other.",
+    },
+    historia: "It is the closest single star to the Sun after the Alpha Centauri system. For decades it was searched for planets, with several false alarms, until small planets were confirmed around it in 2024 and 2025.",
+    curiosidade: "It has the largest known proper motion of any star: it crosses a full Moon's width of sky about every 180 years.",
+    oQueVer: "Motion: between epochs it shifts position relative to the background stars.",
+  },
+  wise0855: {
+    tipo: "Brown dwarf (a “failed star”)",
+    constelacao: "Hydra",
+    distancia: "about 7.4 light-years",
+    descoberta: {
+      quem: "Kevin Luhman",
+      quando: "2014",
+      como: "Found in data from NASA's WISE infrared space telescope and confirmed with Spitzer, also from NASA.",
+    },
+    historia: "It is one of the Sun's closest neighbors, yet so cold and faint that it was only found in the 21st century, and only in infrared. The James Webb telescope detected water vapor in its atmosphere.",
+    curiosidade: "Its temperature is close to 0 °C (32 °F), like a winter day here on Earth. For a “star”, that is freezing.",
+    oQueVer: "Motion: because it is so close, it visibly shifts between epochs.",
+  },
+  "eps-indi-b": {
+    tipo: "Pair of brown dwarfs",
+    constelacao: "Indus",
+    distancia: "about 12 light-years",
+    descoberta: {
+      quem: "Ralf-Dieter Scholz's team",
+      quando: "2003",
+      como: "Identified by its motion across the sky in photographic surveys. In 2004 it turned out to be two brown dwarfs orbiting each other.",
+    },
+    historia: "The two brown dwarfs orbit the star Epsilon Indi A, visible to the naked eye from the southern hemisphere. In 2024 James Webb directly imaged a giant planet around that star.",
+    curiosidade: "For a decade it was the closest known pair of brown dwarfs. Because they orbit each other, their masses can be measured, which is rare for this kind of object.",
+    oQueVer: "Motion: the source shifts slightly left and down between epochs.",
+  },
+  "rw-aur": {
+    tipo: "Young star (T Tauri type), in a binary system",
+    constelacao: "Auriga",
+    distancia: "about 500 light-years",
+    historia: "It is only a few million years old, a baby on stellar scales, and is still surrounded by the disk of gas and dust where planets can form. Since 2010 it has gone through deep dimming events, probably caused by dust from that disk passing in front of the star.",
+    curiosidade: "Studying it helps us understand what the Sun was like right after it was born.",
+    oQueVer: "Brightness: compare how bright it appears in each epoch.",
+  },
+  "r-dra": {
+    tipo: "Variable red giant (Mira type)",
+    constelacao: "Draco",
+    historia: "Mira-type stars are near the end of their lives: they swell and shrink in regular cycles, changing brightness a lot. R Draconis completes a cycle in about 8 months.",
+    curiosidade: "At its brightest it can be seen with binoculars; at its faintest it is hundreds of times dimmer.",
+    oQueVer: "Brightness: the same point can look much stronger or weaker between epochs.",
+  },
+  m101: {
+    tipo: "Spiral galaxy (Pinwheel Galaxy)",
+    constelacao: "Ursa Major",
+    distancia: "about 21 million light-years",
+    descoberta: {
+      quem: "Pierre Méchain",
+      quando: "1781",
+      como: "Observed through a telescope and added by Charles Messier to his famous catalog of deep-sky objects.",
+    },
+    historia: "It is larger than the Milky Way and seen face-on, which shows its spiral arms clearly. Two bright supernovae exploded in it recently: SN 2011fe and SN 2023ixf.",
+    curiosidade: "The light you are seeing left it before there were humans on Earth.",
+    oQueVer: "Context: galaxies do not visibly move in a few years; differences between epochs are usually stars from our own galaxy in the foreground.",
+  },
+};
+
+export const targetInfo: Record<Locale, Record<string, TargetInfo>> = { pt, en };

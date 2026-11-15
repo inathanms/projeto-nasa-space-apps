@@ -1,15 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { TUTORIAL_KEY, tutorialSteps } from "../../content/tutorial";
+import { localizedHref } from "../../lib/i18n";
+import { useLocale } from "../ui/LocaleProvider";
 import SpotlightTour, { samePath } from "./SpotlightTour";
 
 /** Botão "? Tutorial" do cabeçalho. Só aparece nas telas de ferramenta e abre sozinho na primeira visita. */
 export default function TutorialButton() {
+  const { locale, t } = useLocale();
   const pathname = usePathname();
+  const steps = useMemo(() => tutorialSteps(locale), [locale]);
   const [start, setStart] = useState<number | null>(null);
-  const firstStepHere = tutorialSteps.findIndex((step) => step.route && samePath(step.route, pathname));
+  // Normaliza a rota atual (ex.: /explorar → /explore/ no inglês) antes de comparar.
+  const here = localizedHref(locale, pathname);
+  const firstStepHere = steps.findIndex((step) => step.route && samePath(step.route, here));
   const isTool = firstStepHere >= 0;
 
   useEffect(() => {
@@ -34,10 +40,10 @@ export default function TutorialButton() {
     <>
       {isTool && (
         <button type="button" className="tour-help" data-tour="tour-help" onClick={() => setStart(firstStepHere)}>
-          <span aria-hidden="true">?</span> Tutorial
+          <span aria-hidden="true">?</span> {t("Tutorial")}
         </button>
       )}
-      {start !== null && <SpotlightTour steps={tutorialSteps} start={start} onClose={close} />}
+      {start !== null && <SpotlightTour steps={steps} start={start} onClose={close} />}
     </>
   );
 }

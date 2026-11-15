@@ -1,10 +1,12 @@
 import Image from "next/image";
-import { marca, sobre } from "../../content/landing";
+import { getLanding } from "../../content/landing";
+import { type Locale } from "../../lib/i18n";
 import s from "./landing.module.css";
 
-export default function Sobre() {
+export default function Sobre({ locale }: { locale: Locale }) {
+  const { marca, sobre } = getLanding(locale);
   return (
-    <section id="sobre" className={`${s.section} ${s.cream}`} aria-labelledby="sobre-titulo">
+    <section id="sobre" className={`${s.section} ${s.cream}`} aria-labelledby="sobre-titulo" tabIndex={-1}>
       <div className={`wrap ${s.about}`}>
         <Image className={s.aboutLogo} src={marca.logoMark} alt={marca.logoAlt} width={300} height={300} />
         <div>
