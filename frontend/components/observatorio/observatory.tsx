@@ -45,7 +45,7 @@ export default function Observatory({ targets }: { targets: Target[] }) {
   const [mode, setMode] = useState<"utc" | "mjd">("utc");
   const [mjdDraft, setMjdDraft] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
-  const [sheet, setSheet] = useState<Target | null>(null);
+  const [sheet, setSheet] = useState<{ target: Target; focusOnOpen: boolean } | null>(null);
 
   // Informa ao widget de descoberta para onde a mira aponta e em que instante.
   useEffect(() => {
@@ -84,6 +84,7 @@ export default function Observatory({ targets }: { targets: Target[] }) {
     setRA(item.ra);
     setDec(item.dec);
     setLastDiscovery(item);
+    setSheet({ target: item, focusOnOpen: false });
     const next = [...discovered, item.slug];
     setDiscovered(next);
     try {
@@ -261,7 +262,7 @@ export default function Observatory({ targets }: { targets: Target[] }) {
           <aside className="orbital-logbook" data-tour="obs-diario" aria-label={t("Diário de bordo")} data-aligned={Boolean(lastDiscovery)}
             data-clickable={Boolean(lastDiscovery)}
             onClick={() => {
-              if (lastDiscovery) setSheet(lastDiscovery);
+              if (lastDiscovery) setSheet({ target: lastDiscovery, focusOnOpen: true });
             }}>
             <div className="orbital-logbook-title"><strong>{t("Diário de bordo")}</strong><span>{t("{count} de {total} descobertos", { count: discoveredCount, total: targets.length })}</span></div>
             <div className="orbital-discovery-message" role="status">
@@ -272,7 +273,7 @@ export default function Observatory({ targets }: { targets: Target[] }) {
             </div>
             {lastDiscovery && (
               <button ref={sheetTrigger} type="button" className="orbital-sheet-link"
-                aria-expanded={sheet?.slug === lastDiscovery.slug} aria-controls={sheet ? "target-sheet" : undefined}>
+                  aria-expanded={sheet?.target.slug === lastDiscovery.slug} aria-controls={sheet ? "target-sheet" : undefined}>
                 {t("Ver ficha de {name}", { name: lastDiscovery.name })} <span aria-hidden="true">›</span>
               </button>
             )}
@@ -290,7 +291,7 @@ export default function Observatory({ targets }: { targets: Target[] }) {
               : discoveredCount === targets.length ? t("Mapa completo. Você encontrou todos os alvos!")
               : t("Afaste a mira e volte para registrar esse alvo.")}</p>
           </aside>
-          <TargetSheet target={sheet} onClose={() => {
+          <TargetSheet target={sheet?.target ?? null} focusOnOpen={sheet?.focusOnOpen ?? false} onClose={() => {
             setSheet(null);
             sheetTrigger.current?.focus();
           }} />

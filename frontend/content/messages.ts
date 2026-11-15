@@ -40,7 +40,7 @@ export const englishMessages = {
   "Calibração": "Calibration",
   "Caminho dos dados": "Data pipeline",
   "Campo consultado": "Search result",
-  "Campo de comparação. Deslize na horizontal ou use as setas para alternar as épocas.": "Comparison field. Swipe horizontally or use the arrow keys to switch epochs.",
+  "Clique duas vezes ou faça uma pinça para ampliar. Arraste a imagem ampliada ou use as setas para movê-la.": "Double-click or pinch to zoom. Drag the zoomed image or use the arrow keys to move it.",
   "Campo de observação": "Observation field",
   "Campo selecionado": "Selected field",
   "Campo simulado": "Simulated field",
@@ -230,7 +230,7 @@ export const englishMessages = {
   "Quem somos": "About us",
   "QUEM SOMOS": "ABOUT US",
   "Recorte SPHEREx da exposição selecionada": "SPHEREx cutout of the selected exposure",
-  "Recorte selecionado. Deslize na horizontal ou use as setas para navegar pelas exposições.": "Selected cutout. Swipe horizontally or use the arrow keys to browse exposures.",
+  "Recorte selecionado": "Selected cutout",
   "Recorte": "Cutout",
   "Recuperado em": "Retrieved",
   "Região": "Region",
@@ -342,5 +342,4 @@ export const englishMessages = {
   "Voltar": "Back",
   "Concluir": "Finish",
   "Próximo": "Next",
-  "Todas as épocas de {name}": "All epochs of {name}"
 } as const;

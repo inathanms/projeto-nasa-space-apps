@@ -11,7 +11,11 @@ import { useLocale } from "../ui/LocaleProvider";
 const angles = forLocales((language) => new Intl.NumberFormat(language, { maximumFractionDigits: 6 }));
 
 /** Ficha do astro exibida junto ao diário de bordo. */
-export default function TargetSheet({ target, onClose }: { target: Target | null; onClose: () => void }) {
+export default function TargetSheet({ target, focusOnOpen, onClose }: {
+  target: Target | null;
+  focusOnOpen: boolean;
+  onClose: () => void;
+}) {
   const { locale, t, href } = useLocale();
   const closeButton = useRef<HTMLButtonElement>(null);
   const info = target ? targetInfo[locale][target.slug.replace(/^preset-/, "")] : undefined;
@@ -20,8 +24,8 @@ export default function TargetSheet({ target, onClose }: { target: Target | null
   const note = info?.oQueVer ?? preset?.note?.[locale];
 
   useEffect(() => {
-    if (target) closeButton.current?.focus();
-  }, [target]);
+    if (target && focusOnOpen) closeButton.current?.focus();
+  }, [target, focusOnOpen]);
 
   if (!target) return null;
 

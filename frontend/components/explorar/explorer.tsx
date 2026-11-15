@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Help from "../ui/Help";
 import { setDiscoveryField } from "../../lib/discovery";
-import { useEffect, useEffectEvent, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type FormEvent } from "react";
 import { formatDate, sourceLink, type Example, type Sequence } from "../../lib/sequence";
 import { isTimeline, type CatalogExposure, type LiveTimeline, type Timeline } from "../../lib/timeline";
 import { exampleAliases, exampleDescriptions } from "../../content/examples";
@@ -16,7 +16,7 @@ import { parseCoordinate } from "../../lib/coordinates";
 import ComparisonReadout from "./comparison-readout";
 import ImageFormat, { type ImageMode } from "./image-format";
 import ImageZoom from "./image-zoom";
-import { useSkySwipe } from "./use-sky-swipe";
+import { useSkyViewport } from "./use-sky-viewport";
 
 const SpherexOrbit = dynamic(() => import("./spherex-orbit"), {
   ssr: false,
@@ -54,7 +54,6 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const [ra, setRa] = useState(String(initialExample.sequence.ra_deg));
   const [dec, setDec] = useState(String(initialExample.sequence.dec_deg));
   const [index, setIndex] = useState(0);
-  const [zoom, setZoom] = useState(1);
   const [rgbSource, setRgbSource] = useState<{ timeline: LiveTimeline; exposures: CatalogExposure[] }>();
   const [rgbLoading, setRgbLoading] = useState(false);
   const [rgbError, setRgbError] = useState("");
@@ -104,7 +103,10 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     const hasField = requestedRA >= 0 && requestedRA < 360 && requestedDec >= -90 && requestedDec <= 90;
     const mode = params.get("modo");
     if (mode === "epocas" && !hasField && epsilon) {
-      openTargetTimeline(epsilon);
+      const { ra_deg, dec_deg } = epsilon.sequence;
+      setRa(String(ra_deg));
+      setDec(String(dec_deg));
+      void requestField(ra_deg, dec_deg, true);
       return;
     }
     const preset = examples.find((item) => item.slug === slug) ??
@@ -153,7 +155,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     setPlaying(false);
     setShowGuide(false);
     setIndex(0);
-    setZoom(1);
+    viewport.reset();
     setMode("single");
     setError("");
     setInvalid("");
@@ -183,14 +185,6 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     }
     const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
     void requestField(r, d, catalog, trigger);
-  }
-
-  function openTargetTimeline(target: Example, trigger?: HTMLElement) {
-    if (active.current) return;
-    const { ra_deg, dec_deg } = target.sequence;
-    setRa(String(ra_deg));
-    setDec(String(dec_deg));
-    void requestField(ra_deg, dec_deg, true, trigger);
   }
 
   async function requestField(r: number, d: number, catalog: boolean, trigger?: HTMLElement) {
@@ -249,7 +243,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
         setExample(null);
         setShowGuide(false);
         setIndex(0);
-        setZoom(1);
+        viewport.reset();
         setMode("single");
       }
     } catch (cause) {
@@ -321,19 +315,13 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     if (canCompare) chooseFrame((index + frameCount + direction) % frameCount);
   }
 
-  function keyboard(event: KeyboardEvent<HTMLElement>) {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-    event.preventDefault();
-    moveFrame(event.key === "ArrowLeft" ? -1 : 1);
-  }
-
-  const swipe = useSkySwipe(moveFrame);
+  const viewport = useSkyViewport(Boolean(frame && !timeline), canCompare ? moveFrame : undefined);
+  const { zoom } = viewport;
   const observedLabel = example?.synthetic ? t("Data ilustrativa") : t("Observação");
   const source = sourceLink(frame?.source_url ?? null);
   const cutout = sourceLink(frame?.cutout_url ?? null);
   const exampleDescription = example && exampleDescriptions(locale)[example.slug];
   const presets = examples.filter((item) => item.preset);
-  const selectedPreset = example?.preset ? example : null;
 
   return (
     <>
@@ -343,7 +331,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             <h2>{t("Alvos offline")}</h2>
             <p className="muted offline-note">{t("Abra um alvo com imagens salvas no site, mesmo quando a API estiver indisponível.")}</p>
             <label htmlFor="preset">{t("Campo de observação")}</label>
-            <select className="control-field" id="preset" value={selectedPreset?.slug ?? ""} aria-controls="resultado-explorador"
+            <select className="control-field" id="preset" value={example?.preset ? example.slug : ""} aria-controls="resultado-explorador"
               onChange={(event) => {
                 const preset = presets.find((item) => item.slug === event.currentTarget.value);
                 if (preset) applyExample(preset);
@@ -353,10 +341,6 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
                 {presets.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}
               </optgroup>
             </select>
-            {api && selectedPreset && <button type="button" className="button secondary" aria-disabled={busy} aria-controls="resultado-explorador"
-              onClick={(event) => openTargetTimeline(selectedPreset, event.currentTarget)}>
-              {t("Todas as épocas de {name}", { name: selectedPreset.name })}
-            </button>}
           </div>
           <form data-tour="explorar-busca" onSubmit={(event) => void search(event, (event.nativeEvent as SubmitEvent).submitter?.id !== "compare-pair")} noValidate>
             <h2>{t("Buscar por coordenadas")}</h2>
@@ -399,18 +383,18 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
                 <span>{example?.synthetic ? t("SIMULAÇÃO") : example ? t("EXEMPLO REAL") : t("IRSA · AO VIVO")}</span>
               </div>
               <div className="sky-wrap">
-                <figure id="sky-field" className="sky" tabIndex={canCompare ? 0 : undefined}
-                  style={{ "--sky-zoom": zoom } as CSSProperties}
-                  {...(canCompare ? { onKeyDown: keyboard, ...swipe } : {})}
-                  aria-label={canCompare ? t("Campo de comparação. Deslize na horizontal ou use as setas para alternar as épocas.") : t("Campo de observação")}>
-                  {frames.map((image, i) => (
-                    <Image key={image.frame_id} src={image.image_src} width={360} height={360} loading="eager" draggable={false}
-                      alt={t("Época {index}: {date}", { index: i + 1, date: formatDate(image.observed_at_utc, locale) })}
-                      className={index === i ? "" : "hidden-frame"} aria-hidden={index !== i} />
-                  ))}
+                <figure id="sky-field" className="sky" ref={viewport.ref} tabIndex={0} {...viewport.props}
+                  aria-label={t("Campo de observação")} aria-describedby="sky-zoom-hint">
+                  <div className="sky-image">
+                    {frames.map((image, i) => (
+                      <Image key={image.frame_id} src={image.image_src} width={360} height={360} loading="eager" draggable={false}
+                        alt={t("Época {index}: {date}", { index: i + 1, date: formatDate(image.observed_at_utc, locale) })}
+                        className={index === i ? "" : "hidden-frame"} aria-hidden={index !== i} />
+                    ))}
+                    {showGuide && <span className="sky-guide" aria-hidden="true" />}
+                  </div>
                   <span className="north instrument" aria-hidden="true">N ↑<br />E ←</span>
                   <span className="scale instrument" aria-hidden="true">{number.format(sequence.fov_arcmin / zoom / 6)}′</span>
-                  {showGuide && <span className="sky-guide" aria-hidden="true" />}
                 </figure>
               </div>
               <div className="plate-bottom instrument">
@@ -421,7 +405,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
 
             <div className="viewer-tools" data-tour="explorar-marcar">
               {!example?.synthetic && <ImageFormat mode={mode} rgbAvailable={canUseRgb} busy={rgbLoading} onChange={(next) => void changeFormat(next)} />}
-              <ImageZoom zoom={zoom} onChange={setZoom} controls="sky-field" />
+              <ImageZoom zoom={zoom} onStep={viewport.adjustZoom} controls="sky-field" />
               <button className="button secondary mark-target" type="button" aria-pressed={showGuide} aria-controls="sky-field" onClick={() => setShowGuide((visible) => !visible)}>
                 {guideName ? t("Marcar {name}", { name: guideName }) : t("Marcar alvo")}
               </button>
@@ -461,7 +445,8 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
               <p>{exampleDescription}</p>
             </details>}
             {!example && mode === "single" && frames[1] && <ComparisonReadout key={sequence.sequence_id} frames={[frames[0], frames[1]]} />}
-            {canCompare && <p className="viewer-hint">{t("Deslize na horizontal ou use ← → no visor para alternar.")}<Help id="epoca" label={t("uma época")} /></p>}
+            <p className="viewer-hint" id="sky-zoom-hint">{t("Clique duas vezes ou faça uma pinça para ampliar. Arraste a imagem ampliada ou use as setas para movê-la.")}</p>
+            {canCompare && zoom === 1 && <p className="viewer-hint">{t("Deslize na horizontal ou use ← → no visor para alternar.")}<Help id="epoca" label={t("uma época")} /></p>}
             <details className="sources" data-tour="explorar-origem">
               <summary>{t("Origem e processamento")}</summary>
               <dl>

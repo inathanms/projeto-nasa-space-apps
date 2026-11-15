@@ -5,13 +5,13 @@ import { setDiscoveryField } from "../../lib/discovery";
 import { forLocales } from "../../lib/i18n";
 
 import Image from "next/image";
-import { useEffect, useEffectEvent, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { formatDate, sourceLink, type Frame } from "../../lib/sequence";
 import { observationIdForExposure, rgbVisitExposures, type CatalogExposure, type Timeline } from "../../lib/timeline";
 import { apiErrorMessage, fetchExposure, fetchRgbFrame, isUnavailableExposure, shareCoverage, type RenderedExposure } from "../../lib/spherex-api";
 import ImageFormat, { type ImageMode } from "./image-format";
 import ImageZoom from "./image-zoom";
-import { useSkySwipe } from "./use-sky-swipe";
+import { useSkyViewport } from "./use-sky-viewport";
 
 const timeFormats = forLocales((language) => new Intl.DateTimeFormat(language, {
   hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23", timeZone: "UTC",
@@ -25,9 +25,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
   const timeUTC = timeFormats[locale];
   const imageCount = (count: number) => t(count === 1 ? "{count} imagem" : "{count} imagens", { count });
   const [mode, setMode] = useState<ImageMode>("single");
-  const [zoom, setZoom] = useState(1);
   const [showGuide, setShowGuide] = useState(false);
-  const fieldOfView = scaleFormats[locale].format(timeline.fov_arcmin / zoom);
   const rgbExposures = useMemo(() => rgbVisitExposures(timeline), [timeline]);
   const exposures = mode === "rgb" ? rgbExposures : timeline.exposures;
   const { days, dayOptions, indexById, byDetector } = useMemo(() => {
@@ -60,7 +58,6 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
   const [playing, setPlaying] = useState(false);
   const [message, setMessage] = useState("");
   const [reference, setReference] = useState<string>();
-  const sky = useRef<HTMLElement>(null);
   const cachedReference = useRef<{ id: string; image: RenderedExposure } | null>(null);
   const pending = useRef<AbortController | null>(null);
   const day = selected?.observed_at_utc.slice(0, 10) ?? "";
@@ -113,7 +110,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
       const nextFrame = grayscale?.frame ?? await fetchRgbFrame(api, timeline, item, controller.signal);
       if (!controller.signal.aborted) {
         if (grayscale) cachedReference.current = { id: item.image_id, image: grayscale };
-        if (trigger && document.activeElement === trigger) sky.current?.focus();
+        if (trigger && document.activeElement === trigger) viewport.ref.current?.focus();
         setCurrent({ selected: item, frame: nextFrame });
       }
     } catch (error) {
@@ -205,13 +202,9 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
     if (next && !busy && !playing) void choose(next, true);
   }
 
-  function keyboard(event: KeyboardEvent<HTMLElement>) {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-    event.preventDefault();
-    move(event.key === "ArrowLeft" ? -1 : 1);
-  }
-
-  const swipe = useSkySwipe(move);
+  const viewport = useSkyViewport(Boolean(frame), move);
+  const { zoom } = viewport;
+  const fieldOfView = scaleFormats[locale].format(timeline.fov_arcmin / zoom);
 
   return (
     <section className="viewer timeline-viewer" aria-label={t("Linha do tempo")}>
@@ -233,12 +226,12 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
             <span>{selected.collection} · {frame?.detector ?? selected.detector}</span>
           </div>
           <div className="sky-wrap">
-            <figure id="timeline-sky" className="sky timeline-sky" ref={sky} tabIndex={0} onKeyDown={keyboard} {...swipe}
-              style={{ "--sky-zoom": zoom } as CSSProperties}
-              aria-label={t("Recorte selecionado. Deslize na horizontal ou use as setas para navegar pelas exposições.")}>
-              {frame ? <Image src={frame.image_src} width={128} height={128} loading="eager" draggable={false} alt={t("Recorte SPHEREx da exposição selecionada")} />
-                : <div className="timeline-placeholder">{busy ? t("Carregando recorte…") : t("Selecione uma exposição e abra o recorte.")}</div>}
-              {frame && showGuide && <span className="sky-guide" aria-hidden="true" />}
+            <figure id="timeline-sky" className="sky timeline-sky" ref={viewport.ref} tabIndex={0} {...viewport.props}
+              aria-label={t("Recorte selecionado")} aria-describedby={frame ? "timeline-zoom-hint" : undefined}>
+              {frame ? <div className="sky-image">
+                <Image src={frame.image_src} width={128} height={128} loading="eager" draggable={false} alt={t("Recorte SPHEREx da exposição selecionada")} />
+                {showGuide && <span className="sky-guide" aria-hidden="true" />}
+              </div> : <div className="timeline-placeholder">{busy ? t("Carregando recorte…") : t("Selecione uma exposição e abra o recorte.")}</div>}
               {frame && <><span className="north instrument" aria-hidden="true">N ↑<br />E ←</span><span className="scale instrument" aria-hidden="true">{scaleFormats[locale].format(timeline.fov_arcmin / zoom / 6)}′</span></>}
             </figure>
           </div>
@@ -248,12 +241,15 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
         </div>
         <div className="viewer-tools">
           <ImageFormat mode={mode} rgbAvailable={Boolean(api && rgbExposures.length)} busy={busy || playing} onChange={changeFormat} />
-          {frame && <ImageZoom zoom={zoom} onChange={setZoom} controls="timeline-sky" />}
+          {frame && <ImageZoom zoom={zoom} onStep={viewport.adjustZoom} controls="timeline-sky" />}
           <button className="button secondary mark-target" type="button" aria-pressed={showGuide} aria-controls="timeline-sky"
             onClick={() => setShowGuide((visible) => !visible)}>
             {targetName ? t("Marcar {name}", { name: targetName }) : t("Marcar alvo")}
           </button>
         </div>
+        {frame && <p className="viewer-hint" id="timeline-zoom-hint">
+          {t("Clique duas vezes ou faça uma pinça para ampliar. Arraste a imagem ampliada ou use as setas para movê-la.")}
+        </p>}
         <div className="timeline-inputs">
           <label>{t("Dia de observação")}
             <select className="control-field" value={day} disabled={busy || playing} onChange={(event) => {

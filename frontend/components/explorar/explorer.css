@@ -21,7 +21,7 @@
 .controls input, .controls select, .timeline-inputs select { width: 100%; min-height: var(--touch); padding: 7px 10px; }
 .controls input { font-family: var(--mono); }
 .controls input[aria-invalid="true"] { border-color: var(--error); }
-.controls form button, .preset button { margin-top: 10px; width: 100%; }
+.controls form button { margin-top: 10px; width: 100%; }
 .controls form { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--rule); }
 .controls .muted { margin-top: 7px; }
 .controls .search-feedback:empty, .timeline-status:empty { margin: 0; }
@@ -52,12 +52,19 @@
   isolation: isolate;
   overflow: clip;
 }
-.sky img { grid-area: 1 / 1; display: block; width: 100%; height: auto; aspect-ratio: 1; scale: var(--sky-zoom, 1); }
+.sky:has(.sky-image) { cursor: zoom-in; }
+.sky[data-zoomed="true"] { touch-action: none; cursor: grab; }
+.sky[data-zoomed="true"]:active { cursor: grabbing; }
+.sky-image {
+  grid-area: 1 / 1; position: relative; display: grid; min-width: 0; min-height: 0; transform-origin: top left;
+  transform: translate(var(--sky-x), var(--sky-y)) scale(var(--sky-zoom));
+}
+.sky-image img { grid-area: 1 / 1; display: block; width: 100%; height: auto; aspect-ratio: 1; user-select: none; }
 .hidden-frame { visibility: hidden; }
 .north, .scale { position: absolute; color: var(--cream); background: var(--night-deep); padding: 2px 6px; }
 .north { inset: 13px 13px auto auto; }
 .scale { inset: auto auto 12px 12px; border-bottom: 1px solid var(--sun); width: calc(100% / 6); text-align: center; }
-.sky-guide { position: absolute; inset: 44%; pointer-events: none; scale: var(--sky-zoom, 1); }
+.sky-guide { position: absolute; inset: 44%; pointer-events: none; }
 .sky-guide::before, .sky-guide::after { content: ""; position: absolute; width: 25%; height: 25%; border: 2px solid var(--sun); }
 .sky-guide::before { inset: 0 auto auto 0; border-right: 0; border-bottom: 0; }
 .sky-guide::after { inset: auto 0 0 auto; border-left: 0; border-top: 0; }

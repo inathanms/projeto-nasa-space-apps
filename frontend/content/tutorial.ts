@@ -153,11 +153,11 @@ const steps: Source[] = [
     target: "obs-diario",
     pt: {
       title: "Diário de bordo",
-      body: "Ele avisa quando a mira está chegando perto de um alvo. Ao descobrir um, abra a ficha para ver as coordenadas e acessar as imagens.",
+      body: "Ele avisa quando a mira se aproxima de um alvo. Na primeira descoberta, a ficha abre com as coordenadas e um link para as imagens.",
     },
     en: {
       title: "Logbook",
-      body: "It tells you when your aim is getting close to a target. When you discover one, open its details to see the coordinates and access the images.",
+      body: "It tells you when your aim is close to a target. When you first discover one, its details open with the coordinates and a link to the images.",
     },
   },
   {
