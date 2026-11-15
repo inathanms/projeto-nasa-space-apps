@@ -33,7 +33,8 @@ const OPTIONS: Partial<Record<Step, Option[]>> = {
   report: [{ label: "reportDone", next: "done" }],
 };
 
-const TOOL_ROUTES = ["/explorar/", "/observatorio/"];
+// Só no Explorador: no Observatório a mira é didática, não há imagem real para relatar.
+const TOOL_ROUTES = ["/explorar/"];
 const EMPTY_HEADER: ReportHeader = { code: "XXX", contact: "", observers: "", measurer: "", telescope: "" };
 
 function CopyButton({ text, copy }: { text: string; copy: DiscoveryCopy }) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale } from "../ui/LocaleProvider";
+import RocketLoader from "../ui/RocketLoader";
 import { forLocales } from "../../lib/i18n";
 
 import dynamic from "next/dynamic";
@@ -9,7 +10,7 @@ import Help from "../ui/Help";
 import { setDiscoveryField } from "../../lib/discovery";
 import { useEffect, useEffectEvent, useRef, useState, type FormEvent } from "react";
 import { formatDate, sourceLink, type Example, type Sequence } from "../../lib/sequence";
-import { isTimeline, type CatalogExposure, type LiveTimeline, type Timeline } from "../../lib/timeline";
+import { isTimeline, PLAY_INTERVAL_MS, type CatalogExposure, type LiveTimeline, type Timeline } from "../../lib/timeline";
 import { exampleAliases, exampleDescriptions } from "../../content/examples";
 import { apiErrorMessage, fetchComparison, fetchEpochs, fetchRgbFrame } from "../../lib/spherex-api";
 import { parseCoordinate } from "../../lib/coordinates";
@@ -30,12 +31,12 @@ const TimelineViewer = dynamic(() => import("./timeline-viewer"), {
 
 function OrbitLoading() {
   const { t } = useLocale();
-  return <p className="orbit muted" role="status">{t("Carregando a visualização da órbita…")}</p>;
+  return <p className="orbit muted" role="status"><RocketLoader label={t("Carregando a visualização da órbita…")} /></p>;
 }
 
 function TimelineLoading() {
   const { t } = useLocale();
-  return <p className="muted" role="status">{t("Carregando a linha do tempo…")}</p>;
+  return <p className="muted" role="status"><RocketLoader label={t("Carregando a linha do tempo…")} /></p>;
 }
 
 const numbers = forLocales((language) => new Intl.NumberFormat(language, { maximumFractionDigits: 5 }));
@@ -138,7 +139,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
 
   useEffect(() => {
     if (!playing || !canCompare) return;
-    const timer = window.setInterval(() => setIndex((previous) => (previous + 1) % frameCount), 900);
+    const timer = window.setInterval(() => setIndex((previous) => (previous + 1) % frameCount), PLAY_INTERVAL_MS);
     return () => window.clearInterval(timer);
   }, [playing, canCompare, frameCount]);
 
@@ -366,7 +367,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             {api && <button id="compare-pair" className="button secondary" type="submit" aria-disabled={busy}
               aria-controls="resultado-explorador">{t("Buscar par para comparação")}</button>}
             {!api && <p className="muted offline-note">{t("A busca ao vivo requer uma API configurada neste ambiente.")}</p>}
-            <p role="status" className="muted search-feedback">{busy ? t("Carregando observações…") : ""}</p>
+            <p role="status" className="muted search-feedback">{busy ? <RocketLoader inline label={t("Carregando observações…")} /> : ""}</p>
             <p id="search-error" className="error search-feedback" role="alert">{error}</p>
           </form>
         </aside>
@@ -411,7 +412,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
                 {guideName ? t("Marcar {name}", { name: guideName }) : t("Marcar alvo")}
               </button>
             </div>
-            {rgbLoading && <p className="viewer-hint" role="status">{t("Carregando composição RGB…")}</p>}
+            {rgbLoading && <p className="viewer-hint" role="status"><RocketLoader inline label={t("Carregando composição RGB…")} /></p>}
             {rgbError && <p className="error" role="alert">{rgbError}</p>}
             {canCompare ? <div className="transport" data-tour="explorar-epocas">
               <label className="epoch-range">
@@ -472,7 +473,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
                 <div className="plate-top instrument"><span>{t("Campo selecionado")}</span></div>
                 <div className="sky-wrap">
                   <div className="sky timeline-placeholder">
-                    <p>{busy ? t("Carregando observações…") : api
+                    <p>{busy ? <RocketLoader label={t("Carregando observações…")} /> : api
                       ? t("Busque épocas para abrir os recortes deste campo.")
                       : t("A consulta a este campo precisa de uma API configurada.")}</p>
                   </div>

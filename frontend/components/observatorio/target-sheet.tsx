@@ -62,10 +62,12 @@ export default function TargetSheet({ target, focusOnOpen, onClose }: {
           <h3>{t("Contexto histórico")}</h3>
           <p>{info.historia}</p>
         </section>}
-        {info?.curiosidade && <section>
-          <h3>{t("Curiosidade")}</h3>
-          <p>{info.curiosidade}</p>
-        </section>}
+        {info?.curiosidades?.length ? <section>
+          <h3>{info.curiosidades.length > 1 ? t("Curiosidades") : t("Curiosidade")}</h3>
+          {info.curiosidades.length > 1
+            ? <ul>{info.curiosidades.map((fact) => <li key={fact}>{fact}</li>)}</ul>
+            : <p>{info.curiosidades[0]}</p>}
+        </section> : null}
         {note && <p className="target-sheet-look"><strong>{t("O que observar nas imagens:")}</strong> {note}</p>}
         <Link className="button secondary" href={href(`/explorar/?exemplo=${encodeURIComponent(target.slug)}`)}>
           {t("Abrir imagens no Explorador")}

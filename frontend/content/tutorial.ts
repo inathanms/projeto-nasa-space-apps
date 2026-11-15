@@ -113,6 +113,19 @@ const steps: Source[] = [
     },
   },
   {
+    // O assistente de descoberta só existe no Explorador.
+    route: "/explorar/",
+    target: "discovery-bubble",
+    pt: {
+      title: "Achou algo diferente?",
+      body: "Se notar algo estranho, toque aqui. O assistente te ajuda a conferir se já é conhecido e, se for novo, a montar o relatório para o Minor Planet Center.",
+    },
+    en: {
+      title: "Found something odd?",
+      body: "If you notice something strange, tap here. The assistant helps you check whether it's already known and, if it's new, build the report for the Minor Planet Center.",
+    },
+  },
+  {
     route: "/observatorio/",
     target: "obs-alvos",
     pt: {
@@ -141,11 +154,11 @@ const steps: Source[] = [
     target: "obs-dec",
     pt: {
       title: "Mire na vertical",
-      body: "A declinação move a mira para o norte ou para o sul, como a latitude. Achou algo? “Importar para o explorador” leva essas coordenadas para ver as fotos reais.",
+      body: "A declinação move a mira para o norte ou para o sul, como a latitude de um mapa.",
     },
     en: {
       title: "Aim vertically",
-      body: "Declination moves the aim north or south, like latitude. Found something? “Import to explorer” takes these coordinates over to see the real images.",
+      body: "Declination moves the aim north or south, like latitude on a map.",
     },
   },
   {
@@ -153,11 +166,11 @@ const steps: Source[] = [
     target: "obs-diario",
     pt: {
       title: "Diário de bordo",
-      body: "Ele avisa quando a mira se aproxima de um alvo. Na primeira descoberta, a ficha abre com as coordenadas e um link para as imagens.",
+      body: "Ele avisa quando a mira se aproxima de um alvo. Quando a mira para, aparece uma prévia da imagem daquela região; “Importar para o explorador”, logo abaixo, leva as coordenadas para ver as fotos reais. Na primeira descoberta, a ficha do astro abre com a história e curiosidades.",
     },
     en: {
       title: "Logbook",
-      body: "It tells you when your aim is close to a target. When you first discover one, its details open with the coordinates and a link to the images.",
+      body: "It tells you when your aim is close to a target. When the aim stops, a preview of that region appears; “Import to Explorer”, right below it, takes the coordinates over to see the real images. On your first discovery, the target's fact sheet opens with its history and fun facts.",
     },
   },
   {
@@ -170,17 +183,6 @@ const steps: Source[] = [
     en: {
       title: "Control time",
       body: "Move forward or back in time to watch Earth rotate in the simulation.",
-    },
-  },
-  {
-    target: "discovery-bubble",
-    pt: {
-      title: "Achou algo diferente?",
-      body: "Se notar algo estranho, toque aqui. O assistente te ajuda a conferir se já é conhecido e, se for novo, a montar o relatório para o Minor Planet Center.",
-    },
-    en: {
-      title: "Found something odd?",
-      body: "If you notice something strange, tap here. The assistant helps you check whether it's already known and, if it's new, build the report for the Minor Planet Center.",
     },
   },
   {

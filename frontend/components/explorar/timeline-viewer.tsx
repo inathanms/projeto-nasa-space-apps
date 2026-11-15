@@ -1,13 +1,14 @@
 "use client";
 
 import { useLocale } from "../ui/LocaleProvider";
+import RocketLoader from "../ui/RocketLoader";
 import { setDiscoveryField } from "../../lib/discovery";
 import { forLocales } from "../../lib/i18n";
 
 import Image from "next/image";
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { formatDate, sourceLink, type Frame } from "../../lib/sequence";
-import { observationIdForExposure, rgbVisitExposures, type CatalogExposure, type Timeline } from "../../lib/timeline";
+import { observationIdForExposure, PLAY_INTERVAL_MS, rgbVisitExposures, type CatalogExposure, type Timeline } from "../../lib/timeline";
 import { apiErrorMessage, fetchExposure, fetchRgbFrame, isUnavailableExposure, shareCoverage, type RenderedExposure } from "../../lib/spherex-api";
 import ImageFormat, { type ImageMode } from "./image-format";
 import ImageZoom from "./image-zoom";
@@ -164,7 +165,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
             item === anchor ? Promise.resolve(initialFrame) : fetchExposure(
               api, timeline, item, controller.signal, initialFrame.scale,
             ),
-            new Promise<void>((resolve) => window.setTimeout(resolve, played ? 900 : 0)),
+            new Promise<void>((resolve) => window.setTimeout(resolve, played ? PLAY_INTERVAL_MS : 0)),
           ]);
         } catch (error) {
           if (!isUnavailableExposure(error)) throw error;
@@ -231,7 +232,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
               {frame ? <div className="sky-image">
                 <Image src={frame.image_src} width={128} height={128} loading="eager" draggable={false} alt={t("Recorte SPHEREx da exposição selecionada")} />
                 {showGuide && <span className="sky-guide" aria-hidden="true" />}
-              </div> : <div className="timeline-placeholder">{busy ? t("Carregando recorte…") : t("Selecione uma exposição e abra o recorte.")}</div>}
+              </div> : <div className="timeline-placeholder">{busy ? <RocketLoader label={t("Carregando recorte…")} /> : t("Selecione uma exposição e abra o recorte.")}</div>}
               {frame && <><span className="north instrument" aria-hidden="true">N ↑<br />E ←</span><span className="scale instrument" aria-hidden="true">{scaleFormats[locale].format(timeline.fov_arcmin / zoom / 6)}′</span></>}
             </figure>
           </div>
@@ -284,7 +285,7 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
           ? t("Escala de brilho fixada pela referência nas imagens do mesmo detector com cobertura em comum.")
           : t("A reprodução usa a escala de brilho da exposição selecionada nos recortes do mesmo detector.")}</p>}
         {!api && <p className="viewer-hint">{t("Catálogo salvo. Os quadros do exemplo ficam disponíveis aqui. Para as demais exposições, abra o link do FITS.")}</p>}
-        <p role="status" className="viewer-hint timeline-status">{busy ? t("Carregando recorte…") : message}</p>
+        <p role="status" className="viewer-hint timeline-status">{busy ? <RocketLoader inline label={t("Carregando recorte…")} /> : message}</p>
         <p aria-live={playing ? "off" : "polite"} aria-atomic="true" className="sr-only">
           {t("Exposição selecionada em {date}, {time} UTC, detector {detector}.", { date: formatDate(selected.observed_at_utc, locale), time: timeUTC.format(new Date(selected.observed_at_utc)), detector: selected.detector })}
         </p>

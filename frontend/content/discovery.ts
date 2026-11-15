@@ -28,7 +28,7 @@ const pt = {
   unsureNext: "Ainda acho que é algo real",
 
   field: "Estas são as informações do campo que você está vendo. Use-as nas consultas:",
-  noField: "Abra um campo no Explorador (ou mire no Observatório) para eu preencher as coordenadas automaticamente.",
+  noField: "Abra um campo no Explorador para eu preencher as coordenadas automaticamente.",
   fieldName: "Campo",
   fieldDate: "Data (UTC)",
 
@@ -103,7 +103,7 @@ const en: DiscoveryCopy = {
   unsureNext: "I still think it's real",
 
   field: "Here is the information for the field you're viewing. Use it in the searches:",
-  noField: "Open a field in the Explorer (or aim in the Observatory) so I can fill in the coordinates for you.",
+  noField: "Open a field in the Explorer so I can fill in the coordinates for you.",
   fieldName: "Field",
   fieldDate: "Date (UTC)",
 

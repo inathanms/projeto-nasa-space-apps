@@ -1,5 +1,8 @@
 import { isRecord, type Frame } from "./sequence";
 
+/** Tempo entre as imagens quando o "play" está ligado (Explorador e linha do tempo). */
+export const PLAY_INTERVAL_MS = 500;
+
 export type CatalogExposure = Pick<Frame, "frame_id" | "observed_at_utc" | "collection" |
   "source_url" | "cutout_url"> & {
   image_id: string;
