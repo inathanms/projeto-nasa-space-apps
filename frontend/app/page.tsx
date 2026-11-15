@@ -5,6 +5,7 @@ import CtaFinal from "../components/landing/CtaFinal";
 import CtaFixo from "../components/landing/CtaFixo";
 import Dados from "../components/landing/Dados";
 import Hero from "../components/landing/Hero";
+import HeroMotion from "../components/landing/HeroMotion";
 import PorQue from "../components/landing/PorQue";
 import Sobre from "../components/landing/Sobre";
 import { metadados } from "../content/landing";
@@ -23,8 +24,8 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main id="conteudo">
-      <Hero />
+    <main id="conteudo" tabIndex={-1}>
+      <HeroMotion><Hero /></HeroMotion>
       <PorQue />
       <ComoFunciona />
       <Alvos />

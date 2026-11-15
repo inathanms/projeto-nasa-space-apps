@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { marca, nav } from "../../content/landing";
 import Menu from "./Menu";
+import ToolLinks from "./ToolLinks";
 
 export default function Nav() {
   return (
@@ -18,17 +19,17 @@ export default function Nav() {
           {nav.links.map(({ href, label }) => <Link href={href} key={href}>{label}</Link>)}
         </nav>
         <nav className="site-links tool-links" aria-label={nav.rotuloMenu}>
-          {nav.ferramentas.map(({ href, label }) => <Link href={href} key={href}>{label}</Link>)}
+          <ToolLinks />
         </nav>
-        <Link className="button primary header-cta" href={nav.cta.href}>
-          {nav.cta.label} <span aria-hidden="true">→</span>
-        </Link>
         <Menu label={nav.menu}>
           <nav aria-label={nav.rotuloMenu}>
-            {nav.ferramentas.map(({ href, label }) => <Link href={href} key={href}>{label}</Link>)}
+            <ToolLinks />
             {nav.links.map(({ href, label }) => <Link href={href} key={href} className="landing-links">{label}</Link>)}
           </nav>
         </Menu>
+        <Link className="button primary header-cta" href={nav.cta.href}>
+          {nav.cta.label} <span aria-hidden="true">→</span>
+        </Link>
       </div>
     </header>
   );

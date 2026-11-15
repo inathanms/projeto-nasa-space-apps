@@ -10,7 +10,7 @@ export default function Page() {
     slug, name, ra: sequence.ra_deg, dec: sequence.dec_deg, time: sequence.frames[0].observed_at_utc,
   }));
   return (
-    <main className="orbital" id="conteudo">
+    <main className="orbital" id="conteudo" tabIndex={-1}>
       <header className="shell orbital-title">
         <h1>{routes.observatorio.title}</h1>
         <p>{routes.observatorio.description}</p>

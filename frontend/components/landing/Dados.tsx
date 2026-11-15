@@ -5,7 +5,7 @@ import s from "./landing.module.css";
 
 export default function Dados() {
   return (
-    <section id="dados" className={`${s.section} ${s.night2}`} aria-labelledby="dados-titulo">
+    <section id="dados" className={`${s.section} ${s.night2}`} aria-labelledby="dados-titulo" tabIndex={-1}>
       <div className={`wrap ${s.data}`}>
         <div>
           <p className={s.kicker}>{dados.kicker}</p>

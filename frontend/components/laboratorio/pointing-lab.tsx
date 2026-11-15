@@ -13,6 +13,7 @@ type Target = Angles & { name: string };
 const INITIAL: Angles = { ra: 35, dec: 28 };
 const clampDec = (value: number) => Math.max(-90, Math.min(90, value));
 const wrapRA = (value: number) => value >= 0 && value < 360 ? value : ((value % 360) + 360) % 360;
+const angle = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 6 });
 
 function AngleInput({ name, value, change }: {
   name: "RA" | "Dec"; value: number; change: (value: number) => void;
@@ -20,6 +21,10 @@ function AngleInput({ name, value, change }: {
   const [draft, setDraft] = useState<string | null>(null);
   const ascension = name === "RA";
   const label = ascension ? "Ascensão reta" : "Declinação";
+  const coordinate = draft === null ? value : parseCoordinate(draft);
+  const invalid = draft !== null && !Number.isFinite(coordinate);
+  const description = `angle-${name}-format`;
+  const feedback = `angle-${name}-feedback`;
   function update(raw: string) {
     setDraft(raw);
     const coordinate = parseCoordinate(raw);
@@ -31,21 +36,31 @@ function AngleInput({ name, value, change }: {
         <label htmlFor={`angle-${name}`}><strong>{name}</strong> {label}</label>
         <span className="pointing-number">
           <input id={`angle-${name}`} inputMode="decimal" value={draft ?? value}
-            onChange={(event) => update(event.target.value)} onBlur={() => setDraft(null)}
-            onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} />
+            aria-describedby={invalid ? `${description} ${feedback}` : description} aria-invalid={invalid}
+            onChange={(event) => update(event.target.value)} onBlur={() => { if (!invalid) setDraft(null); }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setDraft(null);
+              if (event.key === "Enter" && !invalid) event.currentTarget.blur();
+            }} />
           <span aria-hidden="true">°</span>
         </span>
       </div>
       <input type="range" aria-label={`Ajustar ${label.toLowerCase()}`}
         min={ascension ? 0 : -90} max={ascension ? 359.9 : 90}
-        step="0.1" value={value} onChange={(event) => change(event.target.valueAsNumber)} />
+        step="0.1" value={value} aria-valuetext={`${angle.format(value)} graus`}
+        onChange={(event) => { setDraft(null); change(event.target.valueAsNumber); }} />
       <div className="pointing-limits" aria-hidden="true"><span>{ascension ? "0°" : "−90°"}</span><span>{ascension ? "360°" : "+90°"}</span></div>
+      <p id={description} className="sr-only">
+        Em graus decimais. {ascension ? "A ascensão reta dá a volta em 360 graus." : "A declinação é limitada a menos 90 e mais 90 graus."}
+      </p>
+      <p id={feedback} className="error pointing-feedback" role="status">{invalid ? "Digite um número em graus, por exemplo 35,5." : ""}</p>
     </div>
   );
 }
 
 export default function PointingLab({ targets }: { targets: Target[] }) {
   const [angles, setAngles] = useState(INITIAL);
+  const [resetCount, setResetCount] = useState(0);
   const [dragging, setDragging] = useState(false);
   const pointer = useRef<{ id: number; x: number; y: number } | null>(null);
 
@@ -74,6 +89,11 @@ export default function PointingLab({ targets }: { targets: Target[] }) {
     setDragging(false);
   }
 
+  function selectAngles(next: Angles) {
+    setAngles(next);
+    setResetCount((previous) => previous + 1);
+  }
+
   const query = new URLSearchParams({
     ra_deg: String(Number(angles.ra.toFixed(6)) % 360),
     dec_deg: String(Number(angles.dec.toFixed(6))),
@@ -82,6 +102,7 @@ export default function PointingLab({ targets }: { targets: Target[] }) {
     <div className="pointing-grid">
       <figure className="pointing-figure">
         <SceneCanvas ra={angles.ra} dec={angles.dec} role="img" aria-label="Globo terrestre com eixo polar, equador e linha de visão do telescópio"
+          aria-describedby="pointing-description"
           className={dragging ? "pointing-canvas dragging" : "pointing-canvas"}
           onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={stopDrag}
           onPointerCancel={stopDrag} onLostPointerCapture={stopDrag} />
@@ -93,15 +114,15 @@ export default function PointingLab({ targets }: { targets: Target[] }) {
       </figure>
       <section className="pointing-controls" aria-labelledby="pointing-controls-title">
         <h2 id="pointing-controls-title">Coordenadas celestes</h2>
-        <p className="muted">Arraste na horizontal para mudar a RA e na vertical para mudar a Dec. Os campos aceitam valores em graus decimais.</p>
-        <AngleInput name="RA" value={angles.ra} change={(ra) => setAngles((previous) => ({ ...previous, ra: wrapRA(ra) }))} />
-        <AngleInput name="Dec" value={angles.dec} change={(dec) => setAngles((previous) => ({ ...previous, dec: clampDec(dec) }))} />
+        <p className="muted" id="pointing-description">Digite as coordenadas em graus decimais ou use as setas nos controles deslizantes. No globo, arraste na horizontal para mudar a RA e na vertical para mudar a declinação.</p>
+        <AngleInput key={`ra-${resetCount}`} name="RA" value={angles.ra} change={(ra) => setAngles((previous) => ({ ...previous, ra: wrapRA(ra) }))} />
+        <AngleInput key={`dec-${resetCount}`} name="Dec" value={angles.dec} change={(dec) => setAngles((previous) => ({ ...previous, dec: clampDec(dec) }))} />
         {targets.length > 0 && <label className="pointing-target">
           Campos de exemplo
           <select value={targets.find((target) => target.ra === angles.ra && target.dec === angles.dec)?.name ?? ""}
             onChange={(event) => {
               const target = targets.find((item) => item.name === event.target.value);
-              if (target) setAngles({ ra: target.ra, dec: target.dec });
+              if (target) selectAngles({ ra: target.ra, dec: target.dec });
             }}>
             <option value="" disabled>Escolher um campo</option>
             {targets.map((target) => <option key={target.name} value={target.name}>{target.name}</option>)}
@@ -109,7 +130,7 @@ export default function PointingLab({ targets }: { targets: Target[] }) {
         </label>}
         <div className="pointing-actions">
           <Link className="button primary" href={`/explorar/?${query}`}>Usar no explorador</Link>
-          <button className="button secondary" type="button" onClick={() => setAngles(INITIAL)}>Restaurar</button>
+          <button className="button secondary" type="button" onClick={() => selectAngles(INITIAL)}>Restaurar</button>
         </div>
         <p className="pointing-note">Modelo didático com a Terra como referência. A linha representa uma direção no céu e o telescópio é esquemático.</p>
         <p className="pointing-credit">Textura da Terra · <a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/">NASA Earth Observatory / Blue Marble</a></p>

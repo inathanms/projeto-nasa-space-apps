@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { hero, nav } from "../../content/landing";
 import HeroArt from "./HeroArt";
+import { HeroMotionToggle } from "./HeroMotion";
 import PlutoPlates from "./PlutoPlates";
 import styles from "./landing.module.css";
 
@@ -30,7 +31,7 @@ export default function Hero() {
             </Link>
             <Link className="button secondary" href={hero.exemplo.href}>{hero.exemplo.label}</Link>
           </div>
-          <ul className={styles.heroNotes}>
+          <ul className={styles.heroNotes} role="list">
             {hero.selos.map((selo) => (
               <li key={selo}>
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"
@@ -41,9 +42,10 @@ export default function Hero() {
               </li>
             ))}
           </ul>
-          <ul className={`${styles.heroNotes} ${styles.heroProof}`}>
+          <ul className={`${styles.heroNotes} ${styles.heroProof}`} role="list">
             {hero.provas.map(({ forte, texto }) => <li key={forte}><strong>{forte}</strong> {texto}</li>)}
           </ul>
+          <HeroMotionToggle />
         </div>
         <PlutoPlates />
       </div>

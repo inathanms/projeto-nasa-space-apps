@@ -17,11 +17,11 @@
 .orbital-targets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(7px, 1.4vw, 20px); }
 .orbital-target {
   min-height: 75px; display: grid; place-content: center; justify-items: center; gap: 7px;
-  border: 1px solid var(--orbital-edge); border-radius: var(--radius-card); background: var(--orbital-panel);
+  border: 1px solid var(--control-border); border-radius: var(--radius-card); background: var(--orbital-panel);
   color: var(--ink); font-size: .85rem; text-align: center; padding: 6px; position: relative;
 }
 .orbital-target:hover, .orbital-target[aria-pressed=true] { border-color: var(--accent); background: var(--selected); }
-.orbital-target[aria-pressed=true] { color: var(--accent); }
+.orbital-target[aria-pressed=true] { color: var(--accent); box-shadow: inset 0 0 0 1px currentColor; }
 .orbital-found-mark { position: absolute; top: 5px; right: 7px; color: var(--accent); font-size: .72rem; }
 .orbital-symbol { display: inline-block; width: 17px; height: 17px; border: 1px solid currentColor; border-radius: 50%; position: relative; }
 .orbital-symbol::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: currentColor; }
@@ -45,13 +45,13 @@
 .orbital-value { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: .88rem; }
 .orbital-ra .orbital-value { flex-wrap: wrap; }
 .orbital-value label { font-weight: 650; }
-.orbital-value output { font: 1.08rem var(--mono); color: var(--range-color); white-space: nowrap; }
+.orbital-value span { font: 1.08rem var(--mono); color: var(--range-color); white-space: nowrap; }
 .orbital-ra input, .orbital-dec input, .orbital-transport input { width: 100%; min-width: 0; min-height: var(--touch); margin: 0; accent-color: var(--range-color, var(--accent)); }
 .orbital-scale { display: flex; justify-content: space-between; color: var(--mute); font: .72rem var(--mono); }
 .orbital-ra[data-adjusted=true], .orbital-dec[data-adjusted=true] { border-color: var(--range-color); }
 .orbital-adjusted { color: var(--range-color); font-size: .72rem; line-height: 1.35; }
 .orbital-dec .button { justify-content: center; justify-self: start; }
-.orbital-scope-label { position: absolute; top: 32%; left: 46%; transform: translateX(-50%); white-space: nowrap; pointer-events: none; font-weight: 650; }
+.orbital-scope-label { position: absolute; top: 32%; left: 46%; transform: translateX(-50%); width: max-content; max-width: 55%; pointer-events: none; font-weight: 650; padding: 3px 7px; border-radius: 4px; background: var(--orbital-bg); }
 .orbital-scope-label span { color: var(--mute); font-size: .75rem; font-weight: 400; }
 .orbital-logbook {
   position: absolute; left: 46%; bottom: 16px; transform: translateX(-50%);
@@ -76,8 +76,9 @@
 }
 .orbital-logbook .orbital-acquisition-name { color: var(--ink); font-size: .9rem; }
 .orbital-logbook .orbital-pause-note { color: var(--accent); margin-top: 5px; }
+.orbital-logbook .orbital-pause-note:empty { margin: 0; }
 .orbital-correction { display: flex; flex-wrap: wrap; gap: 2px 16px; list-style: none; margin: 4px 0 0; padding: 0; color: var(--ink); }
-.orbital-correction li { display: flex; gap: 5px; white-space: nowrap; }
+.orbital-correction li { display: flex; flex-wrap: wrap; gap: 5px; }
 .orbital-correction span { font: .72rem/1.65 var(--mono); }
 @keyframes orbital-logbook-pulse {
   0% { transform: scale(.45); opacity: .16; }
@@ -107,21 +108,28 @@
 .orbital-time h2 { font-size: .98rem; }
 .orbital-time-modes, .orbital-datetime, .orbital-transport { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .orbital-time button, .orbital-datetime input {
-  min-height: var(--touch); border: 1px solid var(--orbital-edge); border-radius: 6px; color: var(--ink);
+  min-height: var(--touch); border: 1px solid var(--control-border); border-radius: 6px; color: var(--ink);
   background: var(--orbital-bg); font-size: .82rem; padding: 5px 9px;
 }
-.orbital-time button[aria-pressed=true] { border-color: var(--accent); color: var(--accent); }
+.orbital-time button[aria-pressed=true] { border-color: var(--accent); color: var(--accent); text-decoration: underline; }
 .orbital-datetime input { width: auto; max-width: 100%; min-width: 0; font-variant-numeric: tabular-nums; }
 .orbital-datetime .orbital-mjd { width: 13ch; }
+.orbital-datetime input[aria-invalid="true"] { border-color: var(--error); }
+.orbital-mjd-error { grid-column: 1 / -1; margin: 0; }
+.orbital-mjd-error:empty { position: absolute; }
 .orbital-transport { gap: 8px; }
 .orbital-transport button { flex: 0 0 var(--touch); padding: 0; display: grid; place-items: center; font-size: 1.4rem; }
 .orbital-transport .orbital-play { border-radius: 50%; min-height: var(--touch); }
 .orbital-play-icon { width: 0; height: 0; border: 6px solid transparent; border-left: 8px solid currentColor; border-right: 0; margin-left: 2px; }
 .orbital-pause-icon { width: 9px; height: 12px; border-inline: 3px solid currentColor; }
+.orbital-day-arrow { width: 8px; height: 8px; border: solid currentColor; border-width: 2px 2px 0 0; transform: rotate(45deg); }
+.orbital-day-arrow.back { transform: rotate(-135deg); }
 .orbital-credit {
   width: min(var(--content-width), calc(100% - 2 * var(--gutter))); margin-inline: auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 14px;
   padding-block: 10px 14px; color: var(--mute); font-size: .72rem;
 }
+.orbital-credit { align-items: center; }
+.orbital-credit a { display: inline-flex; align-items: center; min-height: var(--touch); }
 @media (max-width: 1040px) {
   .orbital-ra { left: 13%; }
   .orbital-time { grid-template-columns: auto auto minmax(0, 1fr); }
@@ -146,4 +154,6 @@
   .orbital-targets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .orbital-target { min-height: 52px; grid-auto-flow: column; align-items: center; gap: 6px; font-size: .78rem; }
   .orbital-dec .button { white-space: normal; text-align: center; font-size: .75rem; padding-inline: 7px; }
+  .orbital-time { grid-template-columns: minmax(0, 1fr); }
+  .orbital-time-modes { flex-wrap: wrap; }
 }

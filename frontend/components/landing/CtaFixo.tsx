@@ -7,6 +7,7 @@ import styles from "./landing.module.css";
 
 export default function CtaFixo() {
   const [visible, setVisible] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   useEffect(() => {
     const hero = document.getElementById("inicio");
@@ -23,10 +24,10 @@ export default function CtaFixo() {
     return () => observer.disconnect();
   }, []);
 
-  if (!visible) return null;
+  if (!visible && !focused) return null;
   return (
     <div className={styles.fixed}>
-      <Link className="button primary" href={ctaFixo.href}>
+      <Link className="button primary" href={ctaFixo.href} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
         {ctaFixo.label} <span aria-hidden="true">→</span>
       </Link>
     </div>

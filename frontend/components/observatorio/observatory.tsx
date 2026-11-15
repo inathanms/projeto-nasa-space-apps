@@ -43,6 +43,10 @@ export default function Observatory({ targets }: { targets: Target[] }) {
   const signal = nearestTarget(ra, dec, targets, (item) => discovered.includes(item.slug) || item.slug === lockedTarget?.slug);
   const raAdjusted = acquisition !== null && acquisition.before.ra !== acquisition.item.ra;
   const decAdjusted = acquisition !== null && acquisition.before.dec !== acquisition.item.dec;
+  const mjdValue = mjdDraft === null ? NaN : Number(mjdDraft.trim().replace(",", "."));
+  const mjdTime = Math.round((mjdValue - MJD_AT_UNIX) * DAY);
+  const mjdInvalid = mjdDraft !== null && (!/^\d{5}(?:[.,]\d+)?$/.test(mjdDraft.trim()) ||
+    !Number.isFinite(mjdTime) || mjdTime < LIMIT_START || mjdTime > LIMIT_END);
 
   useEffect(() => {
     try {
@@ -164,6 +168,11 @@ export default function Observatory({ targets }: { targets: Target[] }) {
     ra_deg: String(Number(ra.toFixed(6)) % 360),
     dec_deg: String(Number(dec.toFixed(6))),
   });
+  if (lockedTarget && target === lockedTarget.slug && ra === lockedTarget.ra && dec === lockedTarget.dec) {
+    query.set("exemplo", lockedTarget.slug);
+  } else {
+    query.set("modo", "consultar");
+  }
 
   return (
     <>
@@ -188,13 +197,14 @@ export default function Observatory({ targets }: { targets: Target[] }) {
         <Link className="button secondary orbital-return" href="/laboratorio/">Abrir o laboratório</Link>
       </div>
 
-      <section className="orbital-stage" aria-label="Cena didática de apontamento" data-aim-paused={aimPaused}>
+      <section className="orbital-stage" aria-label="Cena didática de apontamento" aria-describedby="orbital-guide" data-aim-paused={aimPaused}>
+        <p className="sr-only" id="orbital-guide">Use os controles de ascensão reta e declinação para mover a mira. O diário de bordo indica a direção de um alvo próximo e anuncia as descobertas.</p>
         <SceneCanvas ra={ra} dec={dec} time={time} variant="orbital" role="img" aria-label="Terra à esquerda e telescópio no centro com linha de visão"
           onPointerDown={startDrag} onPointerMove={moveDrag}
           onLostPointerCapture={() => { pointer.current = null; }} />
         <div className="orbital-ra" data-adjusted={raAdjusted}>
-          <div className="orbital-value"><label htmlFor="orbital-ra">Ascensão reta</label><output htmlFor="orbital-ra">{angleLabel.format(ra)}°</output></div>
-          <input id="orbital-ra" type="range" min={0} max={359.9} step={.1} value={ra} {...rangeGuard}
+          <div className="orbital-value"><label htmlFor="orbital-ra">Ascensão reta</label><span aria-hidden="true">{angleLabel.format(ra)}°</span></div>
+          <input id="orbital-ra" type="range" min={0} max={359.9} step={.1} value={ra} aria-valuetext={`${exactAngle.format(ra)} graus`} {...rangeGuard}
             onChange={(event) => { if (!rangeGesture.current?.interrupted) setAngles(event.currentTarget.valueAsNumber, dec); }} />
           <div className="orbital-scale" aria-hidden="true"><span>0°</span><span>360°</span></div>
           {raAdjusted && <small className="orbital-adjusted">RA ajustada automaticamente</small>}
@@ -202,8 +212,8 @@ export default function Observatory({ targets }: { targets: Target[] }) {
         <p className="orbital-scope-label">SPHEREx <span>· modelo didático</span></p>
         {acquisition && <span key={acquisition.item.slug} className="orbital-discovery-pulse" aria-hidden="true" />}
         <div className="orbital-dec" data-adjusted={decAdjusted}>
-          <div className="orbital-value"><label htmlFor="orbital-dec">Inclinação · Dec</label><output htmlFor="orbital-dec">{angleLabel.format(dec)}°</output></div>
-          <input id="orbital-dec" type="range" min={-90} max={90} step={.1} value={dec} {...rangeGuard}
+          <div className="orbital-value"><label htmlFor="orbital-dec">Declinação · Dec</label><span aria-hidden="true">{angleLabel.format(dec)}°</span></div>
+          <input id="orbital-dec" type="range" min={-90} max={90} step={.1} value={dec} aria-valuetext={`${exactAngle.format(dec)} graus`} {...rangeGuard}
             onChange={(event) => { if (!rangeGesture.current?.interrupted) setAngles(ra, event.currentTarget.valueAsNumber); }} />
           <div className="orbital-scale" aria-hidden="true"><span>−90°</span><span>0°</span><span>+90°</span></div>
           {decAdjusted && <small className="orbital-adjusted">Dec ajustada automaticamente</small>}
@@ -221,7 +231,9 @@ export default function Observatory({ targets }: { targets: Target[] }) {
               </ul>}
             </>}
           </div>
-          {acquisition && <p className="orbital-pause-note" role="status">{aimPaused ? "Mira travada por um instante." : "Mira liberada. Continue explorando."}</p>}
+          <p className="orbital-pause-note" role="status">
+            {acquisition ? aimPaused ? "Mira travada por um instante." : "Mira liberada. Continue explorando." : ""}
+          </p>
           {!acquisition && <>
             <div className="orbital-signal">
               <div className="orbital-signal-label">
@@ -253,18 +265,20 @@ export default function Observatory({ targets }: { targets: Target[] }) {
             <input type="time" aria-label="Hora UTC" step={1} value={iso.slice(11, 19)}
               onChange={(event) => changeTime(Date.parse(`${iso.slice(0, 10)}T${event.currentTarget.value}Z`))} />
           </> : <input className="orbital-mjd" type="text" inputMode="decimal" aria-label="Data Juliana Modificada"
+              aria-invalid={mjdInvalid} aria-describedby={mjdInvalid ? "orbital-mjd-error" : undefined}
               value={mjdDraft ?? (time / DAY + MJD_AT_UNIX).toFixed(6)}
               onBlur={() => setMjdDraft(null)}
               onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }}
               onChange={(event) => {
-                const raw = event.currentTarget.value;
+                const raw = event.currentTarget.value.trim();
                 setMjdDraft(raw);
                 setPlaying(false);
-                if (/^\d{5}(?:[.,]\d+)?$/.test(raw)) changeTime(Math.round((Number(raw.replace(",", ".")) - MJD_AT_UNIX) * DAY));
+                const next = Math.round((Number(raw.replace(",", ".")) - MJD_AT_UNIX) * DAY);
+                if (/^\d{5}(?:[.,]\d+)?$/.test(raw) && next >= LIMIT_START && next <= LIMIT_END) changeTime(next);
               }} />}
         </div>
         <div className="orbital-transport">
-          <button type="button" aria-label="Voltar um dia" onClick={() => changeTime(time - DAY)}><span aria-hidden="true">‹</span></button>
+          <button type="button" aria-label="Voltar um dia" onClick={() => changeTime(time - DAY)}><span className="orbital-day-arrow back" aria-hidden="true" /></button>
           <button type="button" className="orbital-play" aria-label={playing ? "Pausar tempo" : "Reproduzir tempo"}
             onClick={() => { setMjdDraft(null); setPlaying(!playing); }}>
             <span className={playing ? "orbital-pause-icon" : "orbital-play-icon"} aria-hidden="true" />
@@ -272,8 +286,11 @@ export default function Observatory({ targets }: { targets: Target[] }) {
           <input type="range" aria-label="Percorrer tempo da simulação" min={timeBounds.start} max={timeBounds.end}
             step="any" value={time} aria-valuetext={iso}
             onChange={(event) => changeTime(Math.round(event.currentTarget.valueAsNumber))} />
-          <button type="button" aria-label="Avançar um dia" onClick={() => changeTime(time + DAY)}><span aria-hidden="true">›</span></button>
+          <button type="button" aria-label="Avançar um dia" onClick={() => changeTime(time + DAY)}><span className="orbital-day-arrow" aria-hidden="true" /></button>
         </div>
+        <p className="error orbital-mjd-error" id="orbital-mjd-error" role="status">
+          {mjdInvalid ? "Informe uma data MJD com cinco dígitos e decimais opcionais, entre os anos 1900 e 2100." : ""}
+        </p>
       </section>
       <footer className="orbital-credit">
         <span>Simulação de apontamento e rotação, sem telemetria orbital.</span>

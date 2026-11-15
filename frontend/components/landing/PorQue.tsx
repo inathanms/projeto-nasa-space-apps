@@ -4,7 +4,7 @@ import s from "./landing.module.css";
 
 export default function PorQue() {
   return (
-    <section id="por-que" className={s.section} aria-labelledby="por-que-titulo">
+    <section id="por-que" className={s.section} aria-labelledby="por-que-titulo" tabIndex={-1}>
       <div className="wrap">
         <p className={s.kicker}>{porQue.kicker}</p>
         <h2 id="por-que-titulo" className={s.h2}>{porQue.titulo}</h2>

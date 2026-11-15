@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 import { tumbleweedRoll } from "../../lib/tumbleweed";
+import { useHeroMotion } from "./HeroMotion";
 import s from "./landing.module.css";
 
 // Galhos gerados de forma determinística (mesmo resultado no build e no cliente).
@@ -47,6 +48,9 @@ function windKeyframes(start: number, direction: 1 | -1, travel: number, center:
 }
 
 export default function Tumbleweed() {
+  const { paused } = useHeroMotion();
+  const playback = useRef<() => void>(undefined);
+  const motionEnabled = useEffectEvent(() => !paused);
   const strip = useRef<HTMLDivElement>(null);
   const lane = useRef<HTMLDivElement>(null);
   const shadow = useRef<HTMLDivElement>(null);
@@ -71,11 +75,12 @@ export default function Tumbleweed() {
 
     function updatePlayback() {
       for (const animation of animations) {
-        if (visible && !document.hidden) animation.play();
+        if (visible && !document.hidden && motionEnabled()) animation.play();
         else animation.pause();
       }
     }
 
+    playback.current = updatePlayback;
     const build = () => {
       if (motion.matches) {
         animations.forEach((animation) => animation.cancel());
@@ -139,9 +144,12 @@ export default function Tumbleweed() {
       resize.disconnect();
       motion.removeEventListener("change", build);
       document.removeEventListener("visibilitychange", updatePlayback);
+      playback.current = undefined;
       animations.forEach((animation) => animation.cancel());
     };
   }, []);
+
+  useEffect(() => { playback.current?.(); }, [paused]);
 
   return (
     <div className={s.tumbleStrip} aria-hidden="true" ref={strip}>

@@ -7,7 +7,7 @@ export const metadata = metadataFor(routes.explorar);
 
 export default function Page() {
   return (
-    <main id="conteudo" className="shell explorer">
+    <main id="conteudo" className="shell explorer" tabIndex={-1}>
       <header className="explorer-head">
         <h1>{routes.explorar.title}</h1>
         <p>{routes.explorar.description}</p>

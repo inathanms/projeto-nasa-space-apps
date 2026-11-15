@@ -12,7 +12,7 @@ export default function Page() {
   }));
 
   return (
-    <main id="conteudo" className="shell pointing-lab">
+    <main id="conteudo" className="shell pointing-lab" tabIndex={-1}>
       <header className="pointing-heading">
         <h1>{routes.laboratorio.title}</h1>
         <p>{routes.laboratorio.description}</p>

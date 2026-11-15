@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const EYES = "https://eyes.nasa.gov/apps/solar-system/#/sc_spherex";
 const OPTIONS = "featured=false&detailPanel=false&logo=false&search=false&shareButton=false&menu=false&collapseSettingsOptions=true&locked=true&hideExternalLinks=true";
@@ -43,22 +44,27 @@ export default function SpherexOrbit({ observedAt }: { observedAt?: string | nul
               : "Modelo 3D da sonda em órbita da Terra, no horário atual."}
             {" "}A SPHEREx percorre uma órbita polar e varre o céu em faixas, por isso o mesmo campo é observado em datas diferentes.
           </p>
+          <p className="muted orbit-alternative">
+            Numa órbita polar, a sonda passa perto dos polos a cada volta. Enquanto a Terra gira, as faixas observadas cobrem diferentes partes do céu.
+          </p>
+          <Link className="orbit-accessible-link" href="/observatorio/">Usar o modelo de apontamento com teclado</Link>
         </div>
-        <button type="button" className="button secondary" aria-expanded={open} aria-controls="orbit-frame" onClick={() => {
+        <button type="button" className="button secondary" aria-expanded={open} aria-controls="orbit-frame" aria-describedby="orbit-input" onClick={() => {
           if (!open) setView({ src: targetSrc, label: targetLabel });
           setOpen(!open);
         }}>
           {open ? "Fechar visualização" : "Mostrar órbita 3D"} <span aria-hidden="true">{open ? "×" : "↗"}</span>
         </button>
       </div>
+      <p className="muted" id="orbit-input">A visualização 3D da NASA usa mouse ou toque.</p>
       <div id="orbit-frame" hidden={!open}>
         {open && (
           <>
             <div className="orbit-frame">
-              <iframe key={view.src} src={view.src} title="Visualização 3D interativa da sonda SPHEREx no NASA Eyes on the Solar System" loading="lazy" allowFullScreen />
+              <iframe key={view.src} src={view.src} title="Visualização 3D interativa da sonda SPHEREx no NASA Eyes on the Solar System"
+                tabIndex={-1} loading="lazy" allowFullScreen />
             </div>
             <p className="muted">
-              Visualização interativa por mouse ou toque, sem suporte a teclado.{" "}
               <a href={externalUrl} target="_blank" rel="noreferrer">Abrir no site do Eyes ↗</a>
               {" "}· Crédito: NASA/JPL-Caltech.
             </p>
