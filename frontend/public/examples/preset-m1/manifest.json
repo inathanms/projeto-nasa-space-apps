@@ -1,0 +1,57 @@
+{
+  "sequence_id": "preset-m1",
+  "ra_deg": 83.6331,
+  "dec_deg": 22.0145,
+  "fov_arcmin": 30.0,
+  "collections": [
+    "spherex_qr3"
+  ],
+  "fetched_at_utc": null,
+  "generated_at_utc": "2026-11-15T15:11:50Z",
+  "processing_version": "NASA/JPL-Caltech/IPAC · SPHEREx via IRSA · r1",
+  "is_synthetic": false,
+  "frames": [
+    {
+      "frame_id": "2026W37_2A_0487_1",
+      "observed_at_utc": "2026-09-12T19:42:50Z",
+      "collection": "spherex_qr3",
+      "detector": "D2",
+      "wavelength_um": 1.3766,
+      "bandwidth_um": 0.5466,
+      "calibration_version": "—",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": null,
+      "image_src": "/examples/preset-m1/single-01.png"
+    }
+  ],
+  "rgb_frames": [
+    {
+      "frame_id": "2026W37_2A_0218_1",
+      "observed_at_utc": "2026-09-11T12:45:12Z",
+      "collection": "spherex_qr3",
+      "detector": "D3 / D2 / D1",
+      "wavelength_um": 1.3766,
+      "bandwidth_um": 0.5466,
+      "calibration_version": "—",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": null,
+      "image_src": "/examples/preset-m1/rgb-01.png",
+      "wavelength_bands_um": [
+        [
+          1.6301,
+          2.4346
+        ],
+        [
+          1.1033,
+          1.6499
+        ],
+        [
+          0.7455,
+          1.1167
+        ]
+      ]
+    }
+  ]
+}

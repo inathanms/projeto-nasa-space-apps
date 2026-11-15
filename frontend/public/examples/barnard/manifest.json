@@ -1,0 +1,42 @@
+{
+  "sequence_id": "barnard",
+  "ra_deg": 269.446,
+  "dec_deg": 4.768,
+  "fov_arcmin": 6,
+  "collections": [
+    "spherex_dr1",
+    "spherex_qr3"
+  ],
+  "fetched_at_utc": "2026-11-14T12:52:04.263721Z",
+  "generated_at_utc": "2026-11-14T12:52:04.345391Z",
+  "processing_version": "spherex-tan-v1",
+  "frames": [
+    {
+      "frame_id": "ivo://irsa.ipac/spherex_dr1?2025W35_2A_0418_1/D2",
+      "observed_at_utc": "2025-08-30T16:10:28.376000Z",
+      "collection": "spherex_dr1",
+      "detector": "D2",
+      "wavelength_um": 1.4961300433297549,
+      "bandwidth_um": 0.03649424489958183,
+      "calibration_version": "7.0.5",
+      "source_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W35_2A/l2b-v27-2026-231/2/level2_2025W35_2A_0418_1D2_spx_l2b-v27-2026-231.fits",
+      "cutout_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W35_2A/l2b-v27-2026-231/2/level2_2025W35_2A_0418_1D2_spx_l2b-v27-2026-231.fits?center=269.44600000%2C4.76800000&size=0.1&gzip=false",
+      "valid_fraction": 0.88092041015625,
+      "image_src": "/examples/barnard/frame-1.png"
+    },
+    {
+      "frame_id": "ivo://irsa.ipac/spherex_qr3?2026W34_1A_0363_1/D2",
+      "observed_at_utc": "2026-08-18T20:48:38.781000Z",
+      "collection": "spherex_qr3",
+      "detector": "D2",
+      "wavelength_um": 1.511109838345582,
+      "bandwidth_um": 0.03709313921717278,
+      "calibration_version": "7.0.5",
+      "source_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0363_1D2_spx_l2b-v27-2026-243.fits",
+      "cutout_url": "https://irsa.ipac.caltech.edu/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0363_1D2_spx_l2b-v27-2026-243.fits?center=269.44600000%2C4.76800000&size=0.1&gzip=false",
+      "valid_fraction": 0.88092041015625,
+      "image_src": "/examples/barnard/frame-2.png"
+    }
+  ],
+  "is_synthetic": false
+}

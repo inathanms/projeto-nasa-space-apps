@@ -1,0 +1,17 @@
+.licenses-page { display: grid; gap: 32px; padding-block: clamp(30px, 5vw, 64px) var(--section-space); }
+.licenses-page h2 { margin-bottom: 10px; font-size: 1.3rem; }
+.licenses-page p { color: var(--mute); max-width: 68ch; line-height: 1.55; margin-block: 8px; }
+.licenses-page header .button { margin-top: 8px; }
+.licenses-page a:not(.button) { color: var(--accent); }
+.license-credits { display: grid; gap: 4px; list-style: none; padding: 0; margin: 0; }
+.license-credits li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; }
+.license-credits a { display: inline-flex; align-items: center; min-height: var(--touch); }
+.license-credits span, .license-dependencies summary span { color: var(--mute); }
+.license-dependencies { margin-top: 10px; border-block-start: 1px solid var(--rule); }
+.license-dependencies summary { cursor: pointer; padding-block: 12px; min-height: var(--touch); font-weight: 650; }
+.license-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: .875rem; overflow-wrap: anywhere; }
+.license-table :is(th, td) { padding: 8px 6px; vertical-align: top; text-align: start; border-bottom: 1px solid var(--rule); }
+.license-table thead th:first-child { width: 43%; }
+.license-table thead th:nth-child(2) { width: 21%; }
+.license-table tbody th { font-weight: 500; }
+.license-table small { display: block; color: var(--mute); }

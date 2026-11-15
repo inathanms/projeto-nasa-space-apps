@@ -2,6 +2,11 @@
 __pycache__
 *.pyc
 .env
+.git
 .pytest_cache
 .ruff_cache
+.coverage
 tests
+*.md
+Dockerfile
+.dockerignore

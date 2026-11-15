@@ -1,0 +1,83 @@
+{
+  "sequence_id": "preset-m42",
+  "ra_deg": 83.8221,
+  "dec_deg": -5.3911,
+  "fov_arcmin": 60.0,
+  "collections": [
+    "spherex_qr3"
+  ],
+  "fetched_at_utc": null,
+  "generated_at_utc": "2026-11-15T15:11:50Z",
+  "processing_version": "NASA/JPL-Caltech/IPAC · SPHEREx via IRSA · r1",
+  "is_synthetic": false,
+  "frames": [
+    {
+      "frame_id": "2026W38_1A_0049_1",
+      "observed_at_utc": "2026-09-14T05:42:07Z",
+      "collection": "spherex_qr3",
+      "detector": "D3",
+      "wavelength_um": 2.03235,
+      "bandwidth_um": 0.8045,
+      "calibration_version": "—",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": null,
+      "image_src": "/examples/preset-m42/single-01.png"
+    },
+    {
+      "frame_id": "2026W39_2A_0304_1",
+      "observed_at_utc": "2026-09-25T22:05:46Z",
+      "collection": "spherex_qr3",
+      "detector": "D3",
+      "wavelength_um": 2.03235,
+      "bandwidth_um": 0.8045,
+      "calibration_version": "—",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": null,
+      "image_src": "/examples/preset-m42/single-02.png"
+    },
+    {
+      "frame_id": "2026W40_1A_0767_1",
+      "observed_at_utc": "2026-10-01T10:01:40Z",
+      "collection": "spherex_qr3",
+      "detector": "D3",
+      "wavelength_um": 2.03235,
+      "bandwidth_um": 0.8045,
+      "calibration_version": "—",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": null,
+      "image_src": "/examples/preset-m42/single-03.png"
+    }
+  ],
+  "rgb_frames": [
+    {
+      "frame_id": "2026W40_1A_0767_1",
+      "observed_at_utc": "2026-10-01T10:01:40Z",
+      "collection": "spherex_qr3",
+      "detector": "D3 / D2 / D1",
+      "wavelength_um": 1.3766,
+      "bandwidth_um": 0.5466,
+      "calibration_version": "—",
+      "source_url": null,
+      "cutout_url": null,
+      "valid_fraction": null,
+      "image_src": "/examples/preset-m42/rgb-03.png",
+      "wavelength_bands_um": [
+        [
+          1.6301,
+          2.4346
+        ],
+        [
+          1.1033,
+          1.6499
+        ],
+        [
+          0.7455,
+          1.1167
+        ]
+      ]
+    }
+  ]
+}
