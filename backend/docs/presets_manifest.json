@@ -1,0 +1,2155 @@
+{
+  "generated_at": "2026-11-15T15:11:50Z",
+  "api": "http://localhost:8001",
+  "params": {
+    "modes": [
+      "single",
+      "rgb"
+    ],
+    "max_visits": 3,
+    "upscale": 1,
+    "lock_scale": true,
+    "collection": null
+  },
+  "presets": [
+    {
+      "id": "m31",
+      "name": "Galáxia de Andrômeda",
+      "catalog": "M31 / NGC 224",
+      "kind": "galáxia",
+      "ra": 10.6847,
+      "dec": 41.2692,
+      "size": 2.0,
+      "note": "Grande: ~3° no céu. Núcleo muito brilhante.",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 1,
+          "visit_start_time": "2026-07-14T06:42:18Z",
+          "observation_id": "2026W29_1A_0252_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-07-14T06:42:18Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W29_1A_0252_1/ed8ce3db6f4aaa133e0f2285d32c0f73.png",
+          "key": "dev/images/r1/spherex_qr3/2026W29_1A_0252_1/ed8ce3db6f4aaa133e0f2285d32c0f73.png",
+          "scale": {
+            "min": [
+              0.021127120405435563
+            ],
+            "max": [
+              12.133628177642771
+            ]
+          },
+          "width": 1171,
+          "height": 1171,
+          "valid_pixel_fraction": 0.7935,
+          "scale_locked": false,
+          "query": "ra=10.6847&dec=41.2692&observation_id=2026W29_1A_0252_1&mode=single&size=2.0&upscale=1&detector=D2"
+        },
+        {
+          "mode": "single",
+          "visit_index": 3,
+          "visit_start_time": "2026-08-04T12:32:09Z",
+          "observation_id": "2026W32_1A_0745_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-08-06T05:15:21Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W32_1A_0745_1/35df8e0f3c09054ebfaa71c57138006b.png",
+          "key": "dev/images/r1/spherex_qr3/2026W32_1A_0745_1/35df8e0f3c09054ebfaa71c57138006b.png",
+          "scale": {
+            "min": [
+              0.0211271
+            ],
+            "max": [
+              12.1336
+            ]
+          },
+          "width": 1171,
+          "height": 1171,
+          "valid_pixel_fraction": 0.9832,
+          "scale_locked": true,
+          "query": "ra=10.6847&dec=41.2692&observation_id=2026W32_1A_0745_1&mode=single&size=2.0&upscale=1&detector=D2&scale_min=0.021127120405435563&scale_max=12.133628177642771"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 3,
+          "visit_start_time": "2026-08-04T12:32:09Z",
+          "observation_id": "2026W32_1A_0308_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-08-04T12:32:09Z",
+          "cache_status": "hit",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W32_1A_0308_1/9cba9de2ba25229229a7954f1486e0de.png",
+          "key": "dev/images/r1/spherex_qr3/2026W32_1A_0308_1/9cba9de2ba25229229a7954f1486e0de.png",
+          "scale": {
+            "min": [
+              0.017488738670945168,
+              0.024653516709804535,
+              0.02583177797496319
+            ],
+            "max": [
+              19.042713623046996,
+              10.552252769470215,
+              8.40840463638289
+            ]
+          },
+          "width": 1171,
+          "height": 1171,
+          "valid_pixel_fraction": 0.4333,
+          "scale_locked": false,
+          "query": "ra=10.6847&dec=41.2692&observation_id=2026W32_1A_0308_1&mode=rgb&size=2.0&upscale=1"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 10.6847,
+          "dec": 41.2692
+        },
+        "normalized_ra": 10.683917,
+        "normalized_dec": 41.269917,
+        "collection": "spherex_qr3",
+        "total_observations": 68,
+        "total_visits": 4,
+        "truncated": false,
+        "single_detector": "D2",
+        "eligible_visits": {
+          "single": [
+            1,
+            3
+          ],
+          "rgb": [
+            3
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            1,
+            3
+          ],
+          "rgb": [
+            3
+          ]
+        }
+      }
+    },
+    {
+      "id": "m42",
+      "name": "Nebulosa de Órion",
+      "catalog": "M42 / NGC 1976",
+      "kind": "nebulosa",
+      "ra": 83.8221,
+      "dec": -5.3911,
+      "size": 1.0,
+      "note": "Núcleo saturado (fica com um furo). RGB com gradiente verde.",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 2,
+          "visit_start_time": "2026-09-14T05:42:07Z",
+          "observation_id": "2026W38_1A_0049_1",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-09-14T05:42:07Z",
+          "cache_status": "hit",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W38_1A_0049_1/b73bd629115e02cf84437c59da49d33d.png",
+          "key": "dev/images/r1/spherex_qr3/2026W38_1A_0049_1/b73bd629115e02cf84437c59da49d33d.png",
+          "scale": {
+            "min": [
+              0.08784118503332138
+            ],
+            "max": [
+              32.10864213943496
+            ]
+          },
+          "width": 585,
+          "height": 585,
+          "valid_pixel_fraction": 0.5877,
+          "scale_locked": false,
+          "query": "ra=83.8221&dec=-5.3911&observation_id=2026W38_1A_0049_1&mode=single&size=1.0&upscale=1&detector=D3"
+        },
+        {
+          "mode": "single",
+          "visit_index": 3,
+          "visit_start_time": "2026-09-25T22:05:46Z",
+          "observation_id": "2026W39_2A_0304_1",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-09-25T22:05:46Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W39_2A_0304_1/87cea9d91de0c0ae9bb4c768bfa97561.png",
+          "key": "dev/images/r1/spherex_qr3/2026W39_2A_0304_1/87cea9d91de0c0ae9bb4c768bfa97561.png",
+          "scale": {
+            "min": [
+              0.0878412
+            ],
+            "max": [
+              32.1086
+            ]
+          },
+          "width": 585,
+          "height": 585,
+          "valid_pixel_fraction": 0.5857,
+          "scale_locked": true,
+          "query": "ra=83.8221&dec=-5.3911&observation_id=2026W39_2A_0304_1&mode=single&size=1.0&upscale=1&detector=D3&scale_min=0.08784118503332138&scale_max=32.10864213943496"
+        },
+        {
+          "mode": "single",
+          "visit_index": 4,
+          "visit_start_time": "2026-10-01T10:01:40Z",
+          "observation_id": "2026W40_1A_0767_1",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-10-01T10:01:40Z",
+          "cache_status": "hit",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W40_1A_0767_1/ed0d26e3426b8b3830a24071b444f50b.png",
+          "key": "dev/images/r1/spherex_qr3/2026W40_1A_0767_1/ed0d26e3426b8b3830a24071b444f50b.png",
+          "scale": {
+            "min": [
+              0.0878412
+            ],
+            "max": [
+              32.1086
+            ]
+          },
+          "width": 585,
+          "height": 585,
+          "valid_pixel_fraction": 0.3244,
+          "scale_locked": true,
+          "query": "ra=83.8221&dec=-5.3911&observation_id=2026W40_1A_0767_1&mode=single&size=1.0&upscale=1&detector=D3&scale_min=0.08784118503332138&scale_max=32.10864213943496"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 4,
+          "visit_start_time": "2026-10-01T10:01:40Z",
+          "observation_id": "2026W40_1A_0767_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-10-01T10:01:40Z",
+          "cache_status": "hit",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W40_1A_0767_1/3767f82d39a859286f931dfefdd152ec.png",
+          "key": "dev/images/r1/spherex_qr3/2026W40_1A_0767_1/3767f82d39a859286f931dfefdd152ec.png",
+          "scale": {
+            "min": [
+              0.10929270833730698,
+              0.11102625213563443,
+              0.10428179614245892
+            ],
+            "max": [
+              94.1340277099611,
+              20.559039726257115,
+              22.6230366230011
+            ]
+          },
+          "width": 585,
+          "height": 585,
+          "valid_pixel_fraction": 0.2023,
+          "scale_locked": false,
+          "query": "ra=83.8221&dec=-5.3911&observation_id=2026W40_1A_0767_1&mode=rgb&size=1.0&upscale=1"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 83.8221,
+          "dec": -5.3911
+        },
+        "normalized_ra": 83.822792,
+        "normalized_dec": -5.3915,
+        "collection": "spherex_qr3",
+        "total_observations": 70,
+        "total_visits": 5,
+        "truncated": false,
+        "single_detector": "D3",
+        "eligible_visits": {
+          "single": [
+            2,
+            3,
+            4
+          ],
+          "rgb": [
+            4
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            2,
+            3,
+            4
+          ],
+          "rgb": [
+            4
+          ]
+        }
+      }
+    },
+    {
+      "id": "m1",
+      "name": "Nebulosa do Caranguejo",
+      "catalog": "M1 / NGC 1952",
+      "kind": "remanescente de supernova",
+      "ra": 83.6331,
+      "dec": 22.0145,
+      "size": 0.5,
+      "note": "Pequena: ~7′.",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 0,
+          "visit_start_time": "2026-09-11T12:45:12Z",
+          "observation_id": "2026W37_2A_0487_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-09-12T19:42:50Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W37_2A_0487_1/67b7bad7bc42af2e77f97f3f7ab2f7b0.png",
+          "key": "dev/images/r1/spherex_qr3/2026W37_2A_0487_1/67b7bad7bc42af2e77f97f3f7ab2f7b0.png",
+          "scale": {
+            "min": [
+              0.04390056170523167
+            ],
+            "max": [
+              7.423572278022739
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.987,
+          "scale_locked": false,
+          "query": "ra=83.6331&dec=22.0145&observation_id=2026W37_2A_0487_1&mode=single&size=0.5&upscale=1&detector=D2"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 0,
+          "visit_start_time": "2026-09-11T12:45:12Z",
+          "observation_id": "2026W37_2A_0218_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-09-11T12:45:12Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W37_2A_0218_1/5245e1ebefa65830863deb24e3534480.png",
+          "key": "dev/images/r1/spherex_qr3/2026W37_2A_0218_1/5245e1ebefa65830863deb24e3534480.png",
+          "scale": {
+            "min": [
+              0.02012405900284648,
+              0.04390056170523167,
+              0.046913032084703446
+            ],
+            "max": [
+              9.074997859001149,
+              7.423572278022739,
+              5.377741627693204
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.9574,
+          "scale_locked": false,
+          "query": "ra=83.6331&dec=22.0145&observation_id=2026W37_2A_0218_1&mode=rgb&size=0.5&upscale=1"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 83.6331,
+          "dec": 22.0145
+        },
+        "normalized_ra": 83.633167,
+        "normalized_dec": 22.015292,
+        "collection": "spherex_qr3",
+        "total_observations": 52,
+        "total_visits": 1,
+        "truncated": false,
+        "single_detector": "D2",
+        "eligible_visits": {
+          "single": [
+            0
+          ],
+          "rgb": [
+            0
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            0
+          ],
+          "rgb": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "m51",
+      "name": "Galáxia do Redemoinho",
+      "catalog": "M51 / NGC 5194",
+      "kind": "galáxia",
+      "ra": 202.4696,
+      "dec": 47.1953,
+      "size": 0.5,
+      "note": "",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 0,
+          "visit_start_time": "2026-05-15T14:57:22Z",
+          "observation_id": "2026W20_2A_0275_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-05-16T05:35:49Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W20_2A_0275_1/566330955675b7d8b1319c052d62dc5f.png",
+          "key": "dev/images/r1/spherex_qr3/2026W20_2A_0275_1/566330955675b7d8b1319c052d62dc5f.png",
+          "scale": {
+            "min": [
+              0.012321608187630773
+            ],
+            "max": [
+              3.74199875831606
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.988,
+          "scale_locked": false,
+          "query": "ra=202.4696&dec=47.1953&observation_id=2026W20_2A_0275_1&mode=single&size=0.5&upscale=1&detector=D2"
+        },
+        {
+          "mode": "single",
+          "visit_index": 3,
+          "visit_start_time": "2026-06-06T21:24:08Z",
+          "observation_id": "2026W23_2A_0607_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-06-07T18:35:41Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W23_2A_0607_1/f9a3d0f266dc35fcaf416323258f73d8.png",
+          "key": "dev/images/r1/spherex_qr3/2026W23_2A_0607_1/f9a3d0f266dc35fcaf416323258f73d8.png",
+          "scale": {
+            "min": [
+              0.0123216
+            ],
+            "max": [
+              3.742
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.9883,
+          "scale_locked": true,
+          "query": "ra=202.4696&dec=47.1953&observation_id=2026W23_2A_0607_1&mode=single&size=0.5&upscale=1&detector=D2&scale_min=0.012321608187630773&scale_max=3.74199875831606"
+        },
+        {
+          "mode": "single",
+          "visit_index": 4,
+          "visit_start_time": "2026-06-19T10:55:27Z",
+          "observation_id": "2026W25_2A_0201_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-06-19T10:55:27Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W25_2A_0201_1/24b4bfe499080f6dbb8ebf74a47fa1c4.png",
+          "key": "dev/images/r1/spherex_qr3/2026W25_2A_0201_1/24b4bfe499080f6dbb8ebf74a47fa1c4.png",
+          "scale": {
+            "min": [
+              0.0123216
+            ],
+            "max": [
+              3.742
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.9883,
+          "scale_locked": true,
+          "query": "ra=202.4696&dec=47.1953&observation_id=2026W25_2A_0201_1&mode=single&size=0.5&upscale=1&detector=D2&scale_min=0.012321608187630773&scale_max=3.74199875831606"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 0,
+          "visit_start_time": "2026-05-15T14:57:22Z",
+          "observation_id": "2026W20_2A_0183_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-05-15T14:57:22Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W20_2A_0183_1/229bb6d32146f3f552c0c1c1103f5e08.png",
+          "key": "dev/images/r1/spherex_qr3/2026W20_2A_0183_1/229bb6d32146f3f552c0c1c1103f5e08.png",
+          "scale": {
+            "min": [
+              -0.0030142521020025017,
+              0.012321608187630773,
+              -0.0049584962846711276
+            ],
+            "max": [
+              2.39555073976518,
+              3.74199875831606,
+              1.9228987407684321
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.7761,
+          "scale_locked": false,
+          "query": "ra=202.4696&dec=47.1953&observation_id=2026W20_2A_0183_1&mode=rgb&size=0.5&upscale=1"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 202.4696,
+          "dec": 47.1953
+        },
+        "normalized_ra": 202.469958,
+        "normalized_dec": 47.196125,
+        "collection": "spherex_qr3",
+        "total_observations": 59,
+        "total_visits": 5,
+        "truncated": false,
+        "single_detector": "D2",
+        "eligible_visits": {
+          "single": [
+            0,
+            2,
+            3,
+            4
+          ],
+          "rgb": [
+            0
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            0,
+            3,
+            4
+          ],
+          "rgb": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "m101",
+      "name": "Galáxia do Cata-vento",
+      "catalog": "M101 / NGC 5457",
+      "kind": "galáxia",
+      "ra": 210.8023,
+      "dec": 54.349,
+      "size": 0.5,
+      "note": "Posição usada nos testes (observation_id 2026W20_2A_0464_3).",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 0,
+          "visit_start_time": "2026-05-17T10:53:45Z",
+          "observation_id": "2026W20_2A_0464_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-05-17T10:53:45Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W20_2A_0464_1/ba8e31db73aa011ff6b4e1c87174e057.png",
+          "key": "dev/images/r1/spherex_qr3/2026W20_2A_0464_1/ba8e31db73aa011ff6b4e1c87174e057.png",
+          "scale": {
+            "min": [
+              0.004303843155503273
+            ],
+            "max": [
+              1.770799088478092
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.6844,
+          "scale_locked": false,
+          "query": "ra=210.8023&dec=54.349&observation_id=2026W20_2A_0464_1&mode=single&size=0.5&upscale=1&detector=D2"
+        },
+        {
+          "mode": "single",
+          "visit_index": 3,
+          "visit_start_time": "2026-06-06T08:19:42Z",
+          "observation_id": "2026W23_2A_0336_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-06-06T08:19:42Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W23_2A_0336_1/2254593944850ba77c9d4abfbe305e4d.png",
+          "key": "dev/images/r1/spherex_qr3/2026W23_2A_0336_1/2254593944850ba77c9d4abfbe305e4d.png",
+          "scale": {
+            "min": [
+              0.00430384
+            ],
+            "max": [
+              1.7708
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.9772,
+          "scale_locked": true,
+          "query": "ra=210.8023&dec=54.349&observation_id=2026W23_2A_0336_1&mode=single&size=0.5&upscale=1&detector=D2&scale_min=0.004303843155503273&scale_max=1.770799088478092"
+        },
+        {
+          "mode": "single",
+          "visit_index": 6,
+          "visit_start_time": "2026-06-22T20:21:33Z",
+          "observation_id": "2026W26_1A_0178_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-06-22T20:21:33Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W26_1A_0178_1/a1b2a161ef0682cf1f3f035824c5523c.png",
+          "key": "dev/images/r1/spherex_qr3/2026W26_1A_0178_1/a1b2a161ef0682cf1f3f035824c5523c.png",
+          "scale": {
+            "min": [
+              0.00430384
+            ],
+            "max": [
+              1.7708
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.6737,
+          "scale_locked": true,
+          "query": "ra=210.8023&dec=54.349&observation_id=2026W26_1A_0178_1&mode=single&size=0.5&upscale=1&detector=D2&scale_min=0.004303843155503273&scale_max=1.770799088478092"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 2,
+          "visit_start_time": "2026-05-30T23:08:02Z",
+          "observation_id": "2026W22_2A_0431_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-05-30T23:08:02Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W22_2A_0431_1/2cad173442172e3af11146d785eec893.png",
+          "key": "dev/images/r1/spherex_qr3/2026W22_2A_0431_1/2cad173442172e3af11146d785eec893.png",
+          "scale": {
+            "min": [
+              0.002723423698917031,
+              0.00614667572081089,
+              0.0051260974630713465
+            ],
+            "max": [
+              2.0276594901084772,
+              1.5209007358550968,
+              1.1907043361663818
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.7454,
+          "scale_locked": false,
+          "query": "ra=210.8023&dec=54.349&observation_id=2026W22_2A_0431_1&mode=rgb&size=0.5&upscale=1"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 5,
+          "visit_start_time": "2026-06-18T00:38:42Z",
+          "observation_id": "2026W25_1A_0614_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-06-18T00:38:42Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W25_1A_0614_1/f934b05573b7feb238016c4c1c3e7223.png",
+          "key": "dev/images/r1/spherex_qr3/2026W25_1A_0614_1/f934b05573b7feb238016c4c1c3e7223.png",
+          "scale": {
+            "min": [
+              0.00272342,
+              0.00614668,
+              0.0051261
+            ],
+            "max": [
+              2.02766,
+              1.5209,
+              1.1907
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.9537,
+          "scale_locked": true,
+          "query": "ra=210.8023&dec=54.349&observation_id=2026W25_1A_0614_1&mode=rgb&size=0.5&upscale=1&scale_mins=0.002723423698917031%2C0.00614667572081089%2C0.0051260974630713465&scale_maxs=2.0276594901084772%2C1.5209007358550968%2C1.1907043361663818"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 210.8023,
+          "dec": 54.349
+        },
+        "normalized_ra": 210.8015,
+        "normalized_dec": 54.348917,
+        "collection": "spherex_qr3",
+        "total_observations": 66,
+        "total_visits": 7,
+        "truncated": false,
+        "single_detector": "D2",
+        "eligible_visits": {
+          "single": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "rgb": [
+            2,
+            5
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            0,
+            3,
+            6
+          ],
+          "rgb": [
+            2,
+            5
+          ]
+        }
+      }
+    },
+    {
+      "id": "m57",
+      "name": "Nebulosa do Anel",
+      "catalog": "M57 / NGC 6720",
+      "kind": "nebulosa planetária",
+      "ra": 283.3963,
+      "dec": 33.0292,
+      "size": 0.3,
+      "note": "Muito pequena (~1′): poucos pixels de 6,15″.",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 2,
+          "visit_start_time": "2026-09-19T11:57:57Z",
+          "observation_id": "2026W38_2A_0414_4",
+          "detectors": [
+            "D1"
+          ],
+          "wavelength_min_um": [
+            0.7455
+          ],
+          "wavelength_max_um": [
+            1.1167
+          ],
+          "observation_time": "2026-09-19T11:57:57Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W38_2A_0414_4/e9d0b2e526145b770235a8efcaf62cba.png",
+          "key": "dev/images/r1/spherex_qr3/2026W38_2A_0414_4/e9d0b2e526145b770235a8efcaf62cba.png",
+          "scale": {
+            "min": [
+              0.02893791552633047
+            ],
+            "max": [
+              4.182323408126862
+            ]
+          },
+          "width": 176,
+          "height": 176,
+          "valid_pixel_fraction": 0.4852,
+          "scale_locked": false,
+          "query": "ra=283.3963&dec=33.0292&observation_id=2026W38_2A_0414_4&mode=single&size=0.3&upscale=1&detector=D1"
+        },
+        {
+          "mode": "single",
+          "visit_index": 3,
+          "visit_start_time": "2026-09-27T13:42:30Z",
+          "observation_id": "2026W39_2A_0643_1",
+          "detectors": [
+            "D1"
+          ],
+          "wavelength_min_um": [
+            0.7455
+          ],
+          "wavelength_max_um": [
+            1.1167
+          ],
+          "observation_time": "2026-09-27T13:42:30Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W39_2A_0643_1/120c03e449c141ead050a667e3076b62.png",
+          "key": "dev/images/r1/spherex_qr3/2026W39_2A_0643_1/120c03e449c141ead050a667e3076b62.png",
+          "scale": {
+            "min": [
+              0.0289379
+            ],
+            "max": [
+              4.18232
+            ]
+          },
+          "width": 176,
+          "height": 176,
+          "valid_pixel_fraction": 0.9797,
+          "scale_locked": true,
+          "query": "ra=283.3963&dec=33.0292&observation_id=2026W39_2A_0643_1&mode=single&size=0.3&upscale=1&detector=D1&scale_min=0.02893791552633047&scale_max=4.182323408126862"
+        },
+        {
+          "mode": "single",
+          "visit_index": 4,
+          "visit_start_time": "2026-09-29T16:10:26Z",
+          "observation_id": "2026W40_1A_0370_1",
+          "detectors": [
+            "D1"
+          ],
+          "wavelength_min_um": [
+            0.7455
+          ],
+          "wavelength_max_um": [
+            1.1167
+          ],
+          "observation_time": "2026-09-29T16:10:26Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W40_1A_0370_1/c14b8c6f3eee5b57044510ce8f9dafaf.png",
+          "key": "dev/images/r1/spherex_qr3/2026W40_1A_0370_1/c14b8c6f3eee5b57044510ce8f9dafaf.png",
+          "scale": {
+            "min": [
+              0.0289379
+            ],
+            "max": [
+              4.18232
+            ]
+          },
+          "width": 176,
+          "height": 176,
+          "valid_pixel_fraction": 0.985,
+          "scale_locked": true,
+          "query": "ra=283.3963&dec=33.0292&observation_id=2026W40_1A_0370_1&mode=single&size=0.3&upscale=1&detector=D1&scale_min=0.02893791552633047&scale_max=4.182323408126862"
+        }
+      ],
+      "errors": [
+        {
+          "step": "image",
+          "mode": "rgb",
+          "error": "rgb indisponível em todas as visitas",
+          "permanent": true
+        }
+      ],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 283.3963,
+          "dec": 33.0292
+        },
+        "normalized_ra": 283.397125,
+        "normalized_dec": 33.028917,
+        "collection": "spherex_qr3",
+        "total_observations": 63,
+        "total_visits": 5,
+        "truncated": false,
+        "single_detector": "D1",
+        "eligible_visits": {
+          "single": [
+            2,
+            3,
+            4
+          ],
+          "rgb": []
+        },
+        "selected_visit_indexes": {
+          "single": [
+            2,
+            3,
+            4
+          ],
+          "rgb": []
+        }
+      }
+    },
+    {
+      "id": "m27",
+      "name": "Nebulosa do Haltere",
+      "catalog": "M27 / NGC 6853",
+      "kind": "nebulosa planetária",
+      "ra": 299.9013,
+      "dec": 22.7211,
+      "size": 0.3,
+      "note": "Pequena (~8′).",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 0,
+          "visit_start_time": "2026-06-03T08:18:56Z",
+          "observation_id": "2026W23_1A_0416_3",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-06-03T08:18:56Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W23_1A_0416_3/53ff60d696cde7c2a122122b6ae7f804.png",
+          "key": "dev/images/r1/spherex_qr3/2026W23_1A_0416_3/53ff60d696cde7c2a122122b6ae7f804.png",
+          "scale": {
+            "min": [
+              0.2308946917951107
+            ],
+            "max": [
+              16.400424766540485
+            ]
+          },
+          "width": 176,
+          "height": 176,
+          "valid_pixel_fraction": 0.798,
+          "scale_locked": false,
+          "query": "ra=299.9013&dec=22.7211&observation_id=2026W23_1A_0416_3&mode=single&size=0.3&upscale=1&detector=D3"
+        },
+        {
+          "mode": "single",
+          "visit_index": 2,
+          "visit_start_time": "2026-09-26T14:57:08Z",
+          "observation_id": "2026W39_2A_0454_1",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-09-26T14:57:08Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W39_2A_0454_1/202b1d40b67eb93f779c9bdc51c82321.png",
+          "key": "dev/images/r1/spherex_qr3/2026W39_2A_0454_1/202b1d40b67eb93f779c9bdc51c82321.png",
+          "scale": {
+            "min": [
+              0.230895
+            ],
+            "max": [
+              16.4004
+            ]
+          },
+          "width": 176,
+          "height": 176,
+          "valid_pixel_fraction": 0.9695,
+          "scale_locked": true,
+          "query": "ra=299.9013&dec=22.7211&observation_id=2026W39_2A_0454_1&mode=single&size=0.3&upscale=1&detector=D3&scale_min=0.2308946917951107&scale_max=16.400424766540485"
+        },
+        {
+          "mode": "single",
+          "visit_index": 3,
+          "visit_start_time": "2026-09-28T20:40:18Z",
+          "observation_id": "2026W40_1A_0326_1",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-09-29T11:22:21Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W40_1A_0326_1/d9601b3ee194fc2eecdf19b852aad8dc.png",
+          "key": "dev/images/r1/spherex_qr3/2026W40_1A_0326_1/d9601b3ee194fc2eecdf19b852aad8dc.png",
+          "scale": {
+            "min": [
+              0.230895
+            ],
+            "max": [
+              16.4004
+            ]
+          },
+          "width": 176,
+          "height": 176,
+          "valid_pixel_fraction": 0.9751,
+          "scale_locked": true,
+          "query": "ra=299.9013&dec=22.7211&observation_id=2026W40_1A_0326_1&mode=single&size=0.3&upscale=1&detector=D3&scale_min=0.2308946917951107&scale_max=16.400424766540485"
+        }
+      ],
+      "errors": [
+        {
+          "step": "image",
+          "mode": "rgb",
+          "error": "rgb indisponível em todas as visitas",
+          "permanent": true
+        }
+      ],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 299.9013,
+          "dec": 22.7211
+        },
+        "normalized_ra": 299.901333,
+        "normalized_dec": 22.720833,
+        "collection": "spherex_qr3",
+        "total_observations": 34,
+        "total_visits": 4,
+        "truncated": false,
+        "single_detector": "D3",
+        "eligible_visits": {
+          "single": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "rgb": []
+        },
+        "selected_visit_indexes": {
+          "single": [
+            0,
+            2,
+            3
+          ],
+          "rgb": []
+        }
+      }
+    },
+    {
+      "id": "m45",
+      "name": "Plêiades",
+      "catalog": "M45",
+      "kind": "aglomerado aberto",
+      "ra": 56.85,
+      "dec": 24.117,
+      "size": 2.0,
+      "note": "Grande (~2°). Estrelas brilhantes dominam.",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 0,
+          "visit_start_time": "2026-08-17T08:24:29Z",
+          "observation_id": "2026W34_2A_0062_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-08-20T19:25:36Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W34_2A_0062_1/6c95d3f84e95ea42e912f11ce7abbb45.png",
+          "key": "dev/images/r1/spherex_qr3/2026W34_2A_0062_1/6c95d3f84e95ea42e912f11ce7abbb45.png",
+          "scale": {
+            "min": [
+              0.013263225723057985
+            ],
+            "max": [
+              3.61462671637539
+            ]
+          },
+          "width": 1171,
+          "height": 1171,
+          "valid_pixel_fraction": 0.9339,
+          "scale_locked": false,
+          "query": "ra=56.85&dec=24.117&observation_id=2026W34_2A_0062_1&mode=single&size=2.0&upscale=1&detector=D2"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 0,
+          "visit_start_time": "2026-08-17T08:24:29Z",
+          "observation_id": "2026W34_1A_0070_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-08-17T08:24:29Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W34_1A_0070_1/1b750eae85a023c1e8bfc3070bccdc89.png",
+          "key": "dev/images/r1/spherex_qr3/2026W34_1A_0070_1/1b750eae85a023c1e8bfc3070bccdc89.png",
+          "scale": {
+            "min": [
+              0.0003738921246258548,
+              0.013263225723057985,
+              0.030164455398917198
+            ],
+            "max": [
+              3.572944035530119,
+              3.61462671637539,
+              4.673769350051865
+            ]
+          },
+          "width": 1171,
+          "height": 1171,
+          "valid_pixel_fraction": 0.4469,
+          "scale_locked": false,
+          "query": "ra=56.85&dec=24.117&observation_id=2026W34_1A_0070_1&mode=rgb&size=2.0&upscale=1"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 56.85,
+          "dec": 24.117
+        },
+        "normalized_ra": 56.849917,
+        "normalized_dec": 24.116542,
+        "collection": "spherex_qr3",
+        "total_observations": 56,
+        "total_visits": 1,
+        "truncated": false,
+        "single_detector": "D2",
+        "eligible_visits": {
+          "single": [
+            0
+          ],
+          "rgb": [
+            0
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            0
+          ],
+          "rgb": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "m16",
+      "name": "Nebulosa da Águia",
+      "catalog": "M16 / NGC 6611",
+      "kind": "nebulosa",
+      "ra": 274.7,
+      "dec": -13.82,
+      "size": 0.75,
+      "note": "",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 0,
+          "visit_start_time": "2026-08-25T22:19:14Z",
+          "observation_id": "2026W36_1A_0082_1",
+          "detectors": [
+            "D1"
+          ],
+          "wavelength_min_um": [
+            0.7455
+          ],
+          "wavelength_max_um": [
+            1.1167
+          ],
+          "observation_time": "2026-08-31T08:38:27Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W36_1A_0082_1/938c76ddf3b0a36b57c1f84bd3fa5611.png",
+          "key": "dev/images/r1/spherex_qr3/2026W36_1A_0082_1/938c76ddf3b0a36b57c1f84bd3fa5611.png",
+          "scale": {
+            "min": [
+              0.21590330302715302
+            ],
+            "max": [
+              10.407723693847739
+            ]
+          },
+          "width": 439,
+          "height": 439,
+          "valid_pixel_fraction": 0.3074,
+          "scale_locked": false,
+          "query": "ra=274.7&dec=-13.82&observation_id=2026W36_1A_0082_1&mode=single&size=0.75&upscale=1&detector=D1"
+        },
+        {
+          "mode": "single",
+          "visit_index": 1,
+          "visit_start_time": "2026-10-04T00:49:28Z",
+          "observation_id": "2026W40_2A_0662_1",
+          "detectors": [
+            "D1"
+          ],
+          "wavelength_min_um": [
+            0.7455
+          ],
+          "wavelength_max_um": [
+            1.1167
+          ],
+          "observation_time": "2026-10-04T00:49:28Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W40_2A_0662_1/e4854850134f24485629cdda94f097eb.png",
+          "key": "dev/images/r1/spherex_qr3/2026W40_2A_0662_1/e4854850134f24485629cdda94f097eb.png",
+          "scale": {
+            "min": [
+              0.215903
+            ],
+            "max": [
+              10.4077
+            ]
+          },
+          "width": 439,
+          "height": 439,
+          "valid_pixel_fraction": 0.5927,
+          "scale_locked": true,
+          "query": "ra=274.7&dec=-13.82&observation_id=2026W40_2A_0662_1&mode=single&size=0.75&upscale=1&detector=D1&scale_min=0.21590330302715302&scale_max=10.407723693847739"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 0,
+          "visit_start_time": "2026-08-25T22:19:14Z",
+          "observation_id": "2026W35_1A_0408_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-08-25T22:19:14Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W35_1A_0408_1/4cf8c6ee36323c30229ccdd25df5b964.png",
+          "key": "dev/images/r1/spherex_qr3/2026W35_1A_0408_1/4cf8c6ee36323c30229ccdd25df5b964.png",
+          "scale": {
+            "min": [
+              0.8729975759983063,
+              0.46169656872749326,
+              0.21590330302715302
+            ],
+            "max": [
+              30.469080829620427,
+              12.586348457336465,
+              10.407723693847739
+            ]
+          },
+          "width": 439,
+          "height": 439,
+          "valid_pixel_fraction": 0.2948,
+          "scale_locked": false,
+          "query": "ra=274.7&dec=-13.82&observation_id=2026W35_1A_0408_1&mode=rgb&size=0.75&upscale=1"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 274.7,
+          "dec": -13.82
+        },
+        "normalized_ra": 274.7,
+        "normalized_dec": -13.820417,
+        "collection": "spherex_qr3",
+        "total_observations": 83,
+        "total_visits": 2,
+        "truncated": false,
+        "single_detector": "D1",
+        "eligible_visits": {
+          "single": [
+            0,
+            1
+          ],
+          "rgb": [
+            0
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            0,
+            1
+          ],
+          "rgb": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "m8",
+      "name": "Nebulosa da Lagoa",
+      "catalog": "M8 / NGC 6523",
+      "kind": "nebulosa",
+      "ra": 270.904,
+      "dec": -24.387,
+      "size": 1.0,
+      "note": "",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 0,
+          "visit_start_time": "2026-08-27T02:07:10Z",
+          "observation_id": "2026W35_1A_0641_1",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-08-27T02:07:10Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W35_1A_0641_1/50caca02c67f22e61f33e27cd7b456ab.png",
+          "key": "dev/images/r1/spherex_qr3/2026W35_1A_0641_1/50caca02c67f22e61f33e27cd7b456ab.png",
+          "scale": {
+            "min": [
+              3.130773513317108
+            ],
+            "max": [
+              42.07955116271974
+            ]
+          },
+          "width": 585,
+          "height": 585,
+          "valid_pixel_fraction": 0.9193,
+          "scale_locked": false,
+          "query": "ra=270.904&dec=-24.387&observation_id=2026W35_1A_0641_1&mode=single&size=1.0&upscale=1&detector=D3"
+        },
+        {
+          "mode": "single",
+          "visit_index": 2,
+          "visit_start_time": "2026-09-22T03:41:17Z",
+          "observation_id": "2026W39_1A_0259_1",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-09-22T03:41:17Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W39_1A_0259_1/defcf453a31450659215d1d5521069c1.png",
+          "key": "dev/images/r1/spherex_qr3/2026W39_1A_0259_1/defcf453a31450659215d1d5521069c1.png",
+          "scale": {
+            "min": [
+              3.13077
+            ],
+            "max": [
+              42.0796
+            ]
+          },
+          "width": 585,
+          "height": 585,
+          "valid_pixel_fraction": 0.9167,
+          "scale_locked": true,
+          "query": "ra=270.904&dec=-24.387&observation_id=2026W39_1A_0259_1&mode=single&size=1.0&upscale=1&detector=D3&scale_min=3.130773513317108&scale_max=42.07955116271974"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 0,
+          "visit_start_time": "2026-08-27T02:07:10Z",
+          "observation_id": "2026W35_1A_0641_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-08-27T02:07:10Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W35_1A_0641_1/01d80a2f5242e3906fa2d31fd1b8fbe4.png",
+          "key": "dev/images/r1/spherex_qr3/2026W35_1A_0641_1/01d80a2f5242e3906fa2d31fd1b8fbe4.png",
+          "scale": {
+            "min": [
+              3.130773513317108,
+              1.530583610534668,
+              0.5454493832588196
+            ],
+            "max": [
+              42.07955116271974,
+              35.288761672973614,
+              17.069053726196373
+            ]
+          },
+          "width": 585,
+          "height": 585,
+          "valid_pixel_fraction": 0.8905,
+          "scale_locked": false,
+          "query": "ra=270.904&dec=-24.387&observation_id=2026W35_1A_0641_1&mode=rgb&size=1.0&upscale=1"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 270.904,
+          "dec": -24.387
+        },
+        "normalized_ra": 270.904083,
+        "normalized_dec": -24.386458,
+        "collection": "spherex_qr3",
+        "total_observations": 55,
+        "total_visits": 3,
+        "truncated": false,
+        "single_detector": "D3",
+        "eligible_visits": {
+          "single": [
+            0,
+            2
+          ],
+          "rgb": [
+            0
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            0,
+            2
+          ],
+          "rgb": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "m81",
+      "name": "Galáxia de Bode",
+      "catalog": "M81 / NGC 3031",
+      "kind": "galáxia",
+      "ra": 148.8883,
+      "dec": 69.0653,
+      "size": 0.75,
+      "note": "",
+      "images": [],
+      "errors": [
+        {
+          "step": "epochs",
+          "error": "sem cobertura nesta posição"
+        }
+      ],
+      "status": "no_coverage",
+      "search": {
+        "epochs_query": {
+          "ra": 148.8883,
+          "dec": 69.0653
+        },
+        "normalized_ra": 148.888083,
+        "normalized_dec": 69.0645,
+        "collection": "spherex_qr3",
+        "total_observations": 0,
+        "total_visits": 0,
+        "truncated": false
+      }
+    },
+    {
+      "id": "m104",
+      "name": "Galáxia do Sombreiro",
+      "catalog": "M104 / NGC 4594",
+      "kind": "galáxia",
+      "ra": 189.9975,
+      "dec": -11.6231,
+      "size": 0.5,
+      "note": "",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 0,
+          "visit_start_time": "2026-05-29T14:52:32Z",
+          "observation_id": "2026W22_2A_0512_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-05-31T09:14:49Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W22_2A_0512_1/61a37c2b620c31036c8c328d885681f5.png",
+          "key": "dev/images/r1/spherex_qr3/2026W22_2A_0512_1/61a37c2b620c31036c8c328d885681f5.png",
+          "scale": {
+            "min": [
+              0.013709733933210374
+            ],
+            "max": [
+              5.5639006805417655
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.9864,
+          "scale_locked": false,
+          "query": "ra=189.9975&dec=-11.6231&observation_id=2026W22_2A_0512_1&mode=single&size=0.5&upscale=1&detector=D2"
+        },
+        {
+          "mode": "single",
+          "visit_index": 1,
+          "visit_start_time": "2026-06-20T03:20:00Z",
+          "observation_id": "2026W25_2A_0357_2",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-06-20T03:20:00Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W25_2A_0357_2/a32f8457eab8d519113249e4500006c8.png",
+          "key": "dev/images/r1/spherex_qr3/2026W25_2A_0357_2/a32f8457eab8d519113249e4500006c8.png",
+          "scale": {
+            "min": [
+              0.0137097
+            ],
+            "max": [
+              5.5639
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.7496,
+          "scale_locked": true,
+          "query": "ra=189.9975&dec=-11.6231&observation_id=2026W25_2A_0357_2&mode=single&size=0.5&upscale=1&detector=D2&scale_min=0.013709733933210374&scale_max=5.5639006805417655"
+        },
+        {
+          "mode": "single",
+          "visit_index": 3,
+          "visit_start_time": "2026-07-09T08:30:46Z",
+          "observation_id": "2026W28_1A_0861_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-07-09T08:30:46Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W28_1A_0861_1/c8e86b11fc3ea5d7ed9692e671ebd21d.png",
+          "key": "dev/images/r1/spherex_qr3/2026W28_1A_0861_1/c8e86b11fc3ea5d7ed9692e671ebd21d.png",
+          "scale": {
+            "min": [
+              0.0137097
+            ],
+            "max": [
+              5.5639
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.9854,
+          "scale_locked": true,
+          "query": "ra=189.9975&dec=-11.6231&observation_id=2026W28_1A_0861_1&mode=single&size=0.5&upscale=1&detector=D2&scale_min=0.013709733933210374&scale_max=5.5639006805417655"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 0,
+          "visit_start_time": "2026-05-29T14:52:32Z",
+          "observation_id": "2026W22_2A_0189_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-05-29T14:52:32Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W22_2A_0189_1/1e3ea699abbe4a7bc2e9654532d5d720.png",
+          "key": "dev/images/r1/spherex_qr3/2026W22_2A_0189_1/1e3ea699abbe4a7bc2e9654532d5d720.png",
+          "scale": {
+            "min": [
+              0.001595301222987473,
+              0.013709733933210374,
+              0.010856901509687305
+            ],
+            "max": [
+              3.898476676940922,
+              5.5639006805417655,
+              4.6286420893669495
+            ]
+          },
+          "width": 293,
+          "height": 293,
+          "valid_pixel_fraction": 0.9312,
+          "scale_locked": false,
+          "query": "ra=189.9975&dec=-11.6231&observation_id=2026W22_2A_0189_1&mode=rgb&size=0.5&upscale=1"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 189.9975,
+          "dec": -11.6231
+        },
+        "normalized_ra": 189.997417,
+        "normalized_dec": -11.6235,
+        "collection": "spherex_qr3",
+        "total_observations": 58,
+        "total_visits": 4,
+        "truncated": false,
+        "single_detector": "D2",
+        "eligible_visits": {
+          "single": [
+            0,
+            1,
+            3
+          ],
+          "rgb": [
+            0
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            0,
+            1,
+            3
+          ],
+          "rgb": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "sgra",
+      "name": "Centro Galáctico (Sgr A*)",
+      "catalog": "Sgr A*",
+      "kind": "centro galáctico",
+      "ra": 266.4168,
+      "dec": -29.0078,
+      "size": 1.0,
+      "note": "Campo muito denso e brilhante.",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 0,
+          "visit_start_time": "2026-08-25T01:16:30Z",
+          "observation_id": "2026W35_1A_0523_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-08-26T11:28:04Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W35_1A_0523_1/5cc26fa0580c4c751ff1d9d19357a55c.png",
+          "key": "dev/images/r1/spherex_qr3/2026W35_1A_0523_1/5cc26fa0580c4c751ff1d9d19357a55c.png",
+          "scale": {
+            "min": [
+              0.6822704410552979
+            ],
+            "max": [
+              19.865628204345697
+            ]
+          },
+          "width": 585,
+          "height": 585,
+          "valid_pixel_fraction": 0.9789,
+          "scale_locked": false,
+          "query": "ra=266.4168&dec=-29.0078&observation_id=2026W35_1A_0523_1&mode=single&size=1.0&upscale=1&detector=D2"
+        },
+        {
+          "mode": "single",
+          "visit_index": 1,
+          "visit_start_time": "2026-09-22T06:55:46Z",
+          "observation_id": "2026W39_1A_0289_1",
+          "detectors": [
+            "D2"
+          ],
+          "wavelength_min_um": [
+            1.1033
+          ],
+          "wavelength_max_um": [
+            1.6499
+          ],
+          "observation_time": "2026-09-22T06:55:46Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W39_1A_0289_1/b430f413a4975e036c5e8c217d6d8512.png",
+          "key": "dev/images/r1/spherex_qr3/2026W39_1A_0289_1/b430f413a4975e036c5e8c217d6d8512.png",
+          "scale": {
+            "min": [
+              0.68227
+            ],
+            "max": [
+              19.8656
+            ]
+          },
+          "width": 585,
+          "height": 585,
+          "valid_pixel_fraction": 0.9789,
+          "scale_locked": true,
+          "query": "ra=266.4168&dec=-29.0078&observation_id=2026W39_1A_0289_1&mode=single&size=1.0&upscale=1&detector=D2&scale_min=0.6822704410552979&scale_max=19.865628204345697"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 0,
+          "visit_start_time": "2026-08-25T01:16:30Z",
+          "observation_id": "2026W35_1A_0207_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-08-25T01:16:30Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W35_1A_0207_1/65cd94827ac5507d7ee867bca941ee38.png",
+          "key": "dev/images/r1/spherex_qr3/2026W35_1A_0207_1/65cd94827ac5507d7ee867bca941ee38.png",
+          "scale": {
+            "min": [
+              2.1326845979690554,
+              0.6822704410552979,
+              0.2823741218447685
+            ],
+            "max": [
+              53.698591651916594,
+              19.865628204345697,
+              11.21362532138832
+            ]
+          },
+          "width": 585,
+          "height": 585,
+          "valid_pixel_fraction": 0.904,
+          "scale_locked": false,
+          "query": "ra=266.4168&dec=-29.0078&observation_id=2026W35_1A_0207_1&mode=rgb&size=1.0&upscale=1"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 266.4168,
+          "dec": -29.0078
+        },
+        "normalized_ra": 266.416292,
+        "normalized_dec": -29.0075,
+        "collection": "spherex_qr3",
+        "total_observations": 55,
+        "total_visits": 2,
+        "truncated": false,
+        "single_detector": "D2",
+        "eligible_visits": {
+          "single": [
+            0,
+            1
+          ],
+          "rgb": [
+            0
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            0,
+            1
+          ],
+          "rgb": [
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "ngc3372",
+      "name": "Nebulosa da Carina",
+      "catalog": "NGC 3372",
+      "kind": "nebulosa",
+      "ra": 161.264,
+      "dec": -59.684,
+      "size": 1.5,
+      "note": "",
+      "images": [
+        {
+          "mode": "single",
+          "visit_index": 0,
+          "visit_start_time": "2026-06-03T04:15:36Z",
+          "observation_id": "2026W23_1A_0389_1",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-06-03T04:15:36Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W23_1A_0389_1/a6fb39f780fb2dd1f3402fde0c461591.png",
+          "key": "dev/images/r1/spherex_qr3/2026W23_1A_0389_1/a6fb39f780fb2dd1f3402fde0c461591.png",
+          "scale": {
+            "min": [
+              0.5730208885669709
+            ],
+            "max": [
+              23.30367677688597
+            ]
+          },
+          "width": 878,
+          "height": 878,
+          "valid_pixel_fraction": 0.8821,
+          "scale_locked": false,
+          "query": "ra=161.264&dec=-59.684&observation_id=2026W23_1A_0389_1&mode=single&size=1.5&upscale=1&detector=D3"
+        },
+        {
+          "mode": "single",
+          "visit_index": 3,
+          "visit_start_time": "2026-06-15T16:00:12Z",
+          "observation_id": "2026W25_1A_0124_1",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-06-15T16:00:12Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W25_1A_0124_1/025fcb7175bb7d6c9642d44478464c90.png",
+          "key": "dev/images/r1/spherex_qr3/2026W25_1A_0124_1/025fcb7175bb7d6c9642d44478464c90.png",
+          "scale": {
+            "min": [
+              0.573021
+            ],
+            "max": [
+              23.3037
+            ]
+          },
+          "width": 878,
+          "height": 878,
+          "valid_pixel_fraction": 0.8383,
+          "scale_locked": true,
+          "query": "ra=161.264&dec=-59.684&observation_id=2026W25_1A_0124_1&mode=single&size=1.5&upscale=1&detector=D3&scale_min=0.5730208885669709&scale_max=23.30367677688597"
+        },
+        {
+          "mode": "single",
+          "visit_index": 6,
+          "visit_start_time": "2026-07-12T01:54:11Z",
+          "observation_id": "2026W28_2A_0492_1",
+          "detectors": [
+            "D3"
+          ],
+          "wavelength_min_um": [
+            1.6301
+          ],
+          "wavelength_max_um": [
+            2.4346
+          ],
+          "observation_time": "2026-07-12T01:54:11Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W28_2A_0492_1/08eb3664501847b888a0470af41b28a4.png",
+          "key": "dev/images/r1/spherex_qr3/2026W28_2A_0492_1/08eb3664501847b888a0470af41b28a4.png",
+          "scale": {
+            "min": [
+              0.573021
+            ],
+            "max": [
+              23.3037
+            ]
+          },
+          "width": 878,
+          "height": 878,
+          "valid_pixel_fraction": 0.806,
+          "scale_locked": true,
+          "query": "ra=161.264&dec=-59.684&observation_id=2026W28_2A_0492_1&mode=single&size=1.5&upscale=1&detector=D3&scale_min=0.5730208885669709&scale_max=23.30367677688597"
+        },
+        {
+          "mode": "rgb",
+          "visit_index": 4,
+          "visit_start_time": "2026-06-21T05:41:03Z",
+          "observation_id": "2026W25_2A_0592_1",
+          "detectors": [
+            "D3",
+            "D2",
+            "D1"
+          ],
+          "wavelength_min_um": [
+            1.6301,
+            1.1033,
+            0.7455
+          ],
+          "wavelength_max_um": [
+            2.4346,
+            1.6499,
+            1.1167
+          ],
+          "observation_time": "2026-06-21T05:41:03Z",
+          "cache_status": "miss",
+          "url": "https://pub-bd4c3f2ed3564736831e7a0ad52b75a2.r2.dev/dev/images/r1/spherex_qr3/2026W25_2A_0592_1/80e97a204af23abc955082bf35a39719.png",
+          "key": "dev/images/r1/spherex_qr3/2026W25_2A_0592_1/80e97a204af23abc955082bf35a39719.png",
+          "scale": {
+            "min": [
+              0.606420835852623,
+              0.6336259758472442,
+              0.5393474769592285
+            ],
+            "max": [
+              27.472914953231754,
+              23.871314868926987,
+              20.468238554000774
+            ]
+          },
+          "width": 878,
+          "height": 878,
+          "valid_pixel_fraction": 0.784,
+          "scale_locked": false,
+          "query": "ra=161.264&dec=-59.684&observation_id=2026W25_2A_0592_1&mode=rgb&size=1.5&upscale=1"
+        }
+      ],
+      "errors": [],
+      "status": "done",
+      "search": {
+        "epochs_query": {
+          "ra": 161.264,
+          "dec": -59.684
+        },
+        "normalized_ra": 161.26325,
+        "normalized_dec": -59.684042,
+        "collection": "spherex_qr3",
+        "total_observations": 81,
+        "total_visits": 8,
+        "truncated": false,
+        "single_detector": "D3",
+        "eligible_visits": {
+          "single": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "rgb": [
+            4
+          ]
+        },
+        "selected_visit_indexes": {
+          "single": [
+            0,
+            3,
+            6
+          ],
+          "rgb": [
+            4
+          ]
+        }
+      }
+    }
+  ]
+}
