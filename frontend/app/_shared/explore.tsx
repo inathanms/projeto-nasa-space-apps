@@ -4,9 +4,11 @@ import { type Locale } from "../../lib/i18n";
 import { getExamples } from "../../lib/examples";
 import "../../components/explorar/explorer.css";
 
+const proxy = "/api/spherex-dev";
+const configuredApi = process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/+$/, "");
 const apiBase = process.env.VERCEL_GIT_COMMIT_REF === "develop"
-  ? "/api/spherex-dev"
-  : process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/+$/, "") || undefined;
+  ? proxy
+  : configuredApi || (process.env.NODE_ENV === "development" ? proxy : undefined);
 
 export default function Page({ locale }: { locale: Locale }) {
   const routes = getRoutes(locale);
