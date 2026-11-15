@@ -1,19 +1,24 @@
-from collections.abc import Iterable
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, Response
+from fastapi.responses import JSONResponse, RedirectResponse
 
-from app.api.deps import SettingsDep, get_image_service
+from app import processing
+from app.api.deps import SettingsDep, get_image_cache_service
 from app.api.errors import error_responses
-from app.api.schemas import ImageQuery
-from app.domain.models import Collection, ImageMode
-from app.processing.reprojection import PIXEL_SCALE_ARCSEC
-from app.processing.timeutils import mjd_to_iso
-from app.services.image_service import ImageRequest, ImageResult, ImageService
+from app.api.image_headers import metadata_headers, position_headers
+from app.api.schemas import ImageJsonResponse, ImageQuery, ResponseFormat
+from app.cache.normalize import normalize_request
+from app.config import Settings
+from app.domain.models import Collection
+from app.services.image_cache_service import CacheOutcome, CacheStatus, ImageCacheService
+from app.services.image_service import ImageRequest, ImageResult
 
 router = APIRouter(tags=["image"])
 
 CACHE_CONTROL = "public, max-age=86400"
+# 302 of response_format=redirect (spec cache 4.2).
+REDIRECT_CACHE_CONTROL = "public, max-age=86400"
 
 _PER_CHANNEL = " In mode=rgb: 3 comma-separated values, R,G,B order."
 
@@ -117,78 +122,127 @@ IMAGE_HEADERS: list[tuple[str, str, Any, str]] = [
         "true",
         "string",
     ),
+    (
+        "X-Cache",
+        (
+            "HIT: served from the image cache; MISS: rendered now (and stored); BYPASS: cache "
+            "disabled or storage unavailable, rendered without the cache."
+        ),
+        "HIT",
+        "string",
+    ),
+    (
+        "X-Center-Ra",
+        (
+            "RA of the image center, degrees, 6 decimals: the requested ra rounded to the "
+            "POSITION_QUANTUM_ARCSEC grid (default 6.15 arcsec), which is what was rendered."
+        ),
+        "210.801500",
+        "string",
+    ),
+    (
+        "X-Center-Dec",
+        "Dec of the image center, degrees, 6 decimals (normalized like X-Center-Ra).",
+        "54.348917",
+        "string",
+    ),
+    (
+        "X-Render-Version",
+        "Version of the rendering algorithm that produced the image.",
+        "r1",
+        "string",
+    ),
 ]
 EXPOSED_HEADERS = [name for name, *_ in IMAGE_HEADERS]
 
+_HEADER_DOCS = {
+    name: {"description": desc, "schema": {"type": kind, "example": example}}
+    for name, desc, example, kind in IMAGE_HEADERS
+}
+
 _PNG_RESPONSE: dict[int | str, dict[str, Any]] = {
     200: {
+        "model": ImageJsonResponse,
         "description": (
-            "RGBA PNG of the requested region. Invalid or uncovered pixels are transparent. "
-            "Metadata (including the scale used) is returned in X-* headers."
+            "response_format=png (default): RGBA PNG of the requested region. Invalid or "
+            "uncovered pixels are transparent. Metadata (including the scale used) is returned "
+            "in X-* headers. response_format=json: the image URL and all metadata as JSON "
+            "(ImageJsonResponse); `url` is the public storage URL on hit/miss and this API's "
+            "/image?...&response_format=png on bypass."
         ),
-        "content": {"image/png": {"schema": {"type": "string", "format": "binary"}}},
-        "headers": {
-            name: {"description": desc, "schema": {"type": kind, "example": example}}
-            for name, desc, example, kind in IMAGE_HEADERS
-        }
+        "content": {
+            "image/png": {"schema": {"type": "string", "format": "binary"}},
+        },
+        "headers": _HEADER_DOCS
         | {
             "Cache-Control": {
                 "description": "Archive images never change, so responses are cacheable.",
                 "schema": {"type": "string", "example": CACHE_CONTROL},
             }
         },
-    }
+    },
+    302: {
+        "description": (
+            "response_format=redirect: Location is the public URL of the cached PNG (rendered "
+            "and stored first on a miss), or this API's /image?...&response_format=png on "
+            "bypass. Browsers and fetch follow the redirect and do not expose the X-* headers "
+            "of the 302; use response_format=json to read metadata."
+        ),
+        "headers": {
+            "Location": {
+                "description": "URL of the PNG.",
+                "schema": {"type": "string", "format": "uri"},
+            },
+            "Cache-Control": {
+                "description": "The 302 itself is cacheable for one day.",
+                "schema": {"type": "string", "example": REDIRECT_CACHE_CONTROL},
+            },
+        }
+        | _HEADER_DOCS,
+    },
 }
 
 
-def _join(values: Iterable[object]) -> str:
-    return ",".join(str(v) for v in values)
-
-
 def image_headers(result: ImageResult) -> dict[str, str]:
-    """Response headers; floats keep Python repr (e.g. 0.0, 10.0, 3.075).
+    """Response headers of a rendered PNG: the `X-*` metadata plus `Cache-Control`."""
+    return metadata_headers(result) | {"Cache-Control": CACHE_CONTROL}
 
-    Id and time come from the reference observation; per-channel values from each channel's
-    anchor image (the reference itself in mode=single).
-    """
-    refs = result.anchors
-    headers = {
-        "X-Mode": result.mode.value,
-        "X-Observation-Id": result.record.observation_id,
-        "X-Detector": _join(r.detector.value for r in refs),
-        "X-Observation-Time": mjd_to_iso(result.record.start_mjd),
-        "X-Wavelength-Min-Um": _join(r.wavelength_min_um for r in refs),
-        "X-Wavelength-Max-Um": _join(r.wavelength_max_um for r in refs),
-        "X-Scale-Min": _join(result.vmins),
-        "X-Scale-Max": _join(result.vmaxs),
-        "X-Image-Width": str(result.width),
-        "X-Image-Height": str(result.height),
-        "X-Upscale": str(result.upscale),
-        # Rounded so 6.15 / 3 reads 2.05, not 2.0500000000000003.
-        "X-Pixel-Scale-Arcsec": str(round(result.pixel_scale_arcsec, 6)),
-        "X-Native-Pixel-Scale-Arcsec": str(PIXEL_SCALE_ARCSEC),
-        "X-Valid-Pixel-Fraction": str(round(result.valid_fraction, 4)),
-        "Cache-Control": CACHE_CONTROL,
+
+def _outcome_headers(outcome: CacheOutcome, cache_control: str) -> dict[str, str]:
+    """`X-*` from the sidecar (same source on hit, miss and bypass) + `X-Cache` + caching."""
+    assert outcome.sidecar is not None
+    return outcome.sidecar.headers | {
+        "X-Cache": outcome.status.header,
+        "Cache-Control": cache_control,
     }
-    if result.mode == ImageMode.RGB:
-        span_days = max(r.end_mjd for r in refs) - min(r.start_mjd for r in refs)
-        headers["X-Channel-Observation-Ids"] = _join(r.observation_id for r in refs)
-        headers["X-Channel-Time-Span-Seconds"] = str(round(span_days * 86400, 3))
-    if result.stack:
-        used = [r for frames in result.used_frames for r in frames]
-        first_seen: dict[str, float] = {}
-        for r in used:
-            first_seen[r.observation_id] = min(
-                r.start_mjd, first_seen.get(r.observation_id, r.start_mjd)
-            )
-        ordered = sorted(first_seen, key=lambda obs: (first_seen[obs], obs))
-        span_days = max(r.end_mjd for r in used) - min(r.start_mjd for r in used)
-        headers["X-Stack-Count"] = _join(result.stack_counts)
-        headers["X-Stack-Observation-Ids"] = ",".join(ordered)
-        headers["X-Stack-Time-Span-Seconds"] = str(round(span_days * 86400, 3))
-        if result.stack_truncated:
-            headers["X-Stack-Truncated"] = "true"
-    return headers
+
+
+def _image_request(params: ImageQuery, settings: Settings) -> ImageRequest:
+    """Normalized request (REQ-501): rendering and cache key use the same values."""
+    request = ImageRequest(
+        ra=params.ra,
+        dec=params.dec,
+        observation_id=params.observation_id,
+        collection=params.collection or Collection(settings.irsa_default_collection),
+        detector=params.detector,
+        mode=params.mode,
+        detectors=params.detector_tuple,
+        size=params.size,
+        upscale=params.upscale,
+        align=params.align,
+        stack=params.stack,
+        fill_holes=params.fill_holes,
+        subtract_zodi=params.subtract_zodi,
+        stretch=params.stretch,
+        colormap=params.colormap,
+        percentile_low=params.percentile_low,
+        percentile_high=params.percentile_high,
+        scale_min=params.scale_min,
+        scale_max=params.scale_max,
+        scale_mins=params.scale_mins_tuple,
+        scale_maxs=params.scale_maxs_tuple,
+    )
+    return normalize_request(request, settings.position_quantum_arcsec)
 
 
 @router.get(
@@ -226,37 +280,62 @@ def image_headers(result: ImageResult) -> dict[str, str]:
         "download, when the cutout budget (MAX_CUTOUTS_PER_REQUEST, "
         "MAX_FETCH_PIXELS_PER_REQUEST) is exceeded even with one frame per channel; stacks "
         "are first reduced to fit (X-Stack-Truncated: true). 422 EMPTY_IMAGE when no valid "
-        "pixel remains (details.empty_channels in mode=rgb)."
+        "pixel remains (details.empty_channels in mode=rgb).\n\n"
+        "**Cache and `response_format`.** (ra, dec) are rounded to a grid of "
+        "POSITION_QUANTUM_ARCSEC (default 6.15 arcsec, one native pixel; at most half a pixel "
+        "of shift) and the other floats are rounded too, so nearby requests share one cached "
+        "image; X-Center-Ra/X-Center-Dec give the rendered center and X-Cache says HIT, MISS "
+        "or BYPASS. `response_format`:\n"
+        "- `png` (default): the PNG bytes, metadata in X-* headers.\n"
+        "- `json`: **recommended for the frontend**: returns the public URL of the image and "
+        "all its metadata (scale, observation, image size) in one call.\n"
+        "- `redirect`: 302 to the image URL, for using the API directly in `<img src>`. "
+        "Browsers and `fetch` follow the redirect and **do not expose** the X-* headers of "
+        "the 302; to get metadata (e.g. the scale), use `json`. The 302 carries "
+        "`Cache-Control: public, max-age=86400`.\n\n"
+        "When the cache is disabled or the storage is unavailable (BYPASS), `json` returns and "
+        "`redirect` points to this API's `/image?...&response_format=png` URL."
     ),
     responses=_PNG_RESPONSE | error_responses(404, 422, 502, 503, 504),
 )
 async def get_image(
     params: Annotated[ImageQuery, Query()],
     settings: SettingsDep,
-    service: Annotated[ImageService, Depends(get_image_service)],
+    service: Annotated[ImageCacheService, Depends(get_image_cache_service)],
+    background: BackgroundTasks,
 ) -> Response:
-    request = ImageRequest(
-        ra=params.ra,
-        dec=params.dec,
-        observation_id=params.observation_id,
-        collection=params.collection or Collection(settings.irsa_default_collection),
-        detector=params.detector,
-        mode=params.mode,
-        detectors=params.detector_tuple,
-        size=params.size,
-        upscale=params.upscale,
-        align=params.align,
-        stack=params.stack,
-        fill_holes=params.fill_holes,
-        subtract_zodi=params.subtract_zodi,
-        stretch=params.stretch,
-        colormap=params.colormap,
-        percentile_low=params.percentile_low,
-        percentile_high=params.percentile_high,
-        scale_min=params.scale_min,
-        scale_max=params.scale_max,
-        scale_mins=params.scale_mins_tuple,
-        scale_maxs=params.scale_maxs_tuple,
+    request = _image_request(params, settings)
+    fmt = params.response_format
+
+    if fmt == ResponseFormat.PNG:
+        outcome = await service.lookup_or_render(
+            request, need_png=True, persist_before_return=False
+        )
+        if outcome.persist is not None:
+            # Upload after the response (REQ-525); `persist` never raises.
+            background.add_task(outcome.persist)
+        return Response(
+            content=outcome.png,
+            media_type="image/png",
+            headers=_outcome_headers(outcome, CACHE_CONTROL),
+        )
+
+    if fmt == ResponseFormat.REDIRECT and not settings.cache_enabled:
+        # REQ-551/553: nothing to store, so do not render twice; the API URL renders on load.
+        headers = position_headers(request.ra, request.dec, processing.RENDER_VERSION) | {
+            "X-Cache": CacheStatus.BYPASS.header,
+            "Cache-Control": REDIRECT_CACHE_CONTROL,
+        }
+        return RedirectResponse(service.bypass_url(request), status_code=302, headers=headers)
+
+    # json/redirect need the public URL to exist before answering (REQ-525).
+    outcome = await service.lookup_or_render(request, need_png=False, persist_before_return=True)
+    assert outcome.sidecar is not None
+    if fmt == ResponseFormat.JSON:
+        return JSONResponse(
+            outcome.sidecar.to_json_response(outcome.url, outcome.status),
+            headers={"X-Cache": outcome.status.header},
+        )
+    return RedirectResponse(
+        outcome.url, status_code=302, headers=_outcome_headers(outcome, REDIRECT_CACHE_CONTROL)
     )
-    result = await service.render(request)
-    return Response(content=result.png, media_type="image/png", headers=image_headers(result))

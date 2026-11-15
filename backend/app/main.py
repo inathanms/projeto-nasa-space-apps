@@ -10,8 +10,13 @@ from fastapi.openapi.utils import get_openapi
 
 from app.api.errors import register_exception_handlers
 from app.api.routes import epochs, health, image
+from app.cache.lru import TTLCacheL1
+from app.cache.singleflight import SingleFlight
 from app.config import Settings, get_settings
 from app.logging import setup_logging
+from app.services.image_cache_service import drain_background
+from app.storage.circuit_breaker import CircuitBreaker, GuardedStore
+from app.storage.protocols import ObjectStore
 
 CREDIT = "Data: NASA/JPL-Caltech/IPAC — SPHEREx, via NASA/IPAC Infrared Science Archive (IRSA)"
 
@@ -36,6 +41,22 @@ def _add_parameter_examples(schema: dict[str, Any]) -> dict[str, Any]:
     return schema
 
 
+def build_object_store(settings: Settings) -> GuardedStore | None:
+    """One storage client per process (CON-501), guarded by the circuit breaker (REQ-552).
+
+    Only builds the client: no bucket call is made at startup (SEC-503).
+    """
+    if not settings.cache_enabled:
+        return None
+    from app.storage.s3_store import S3ObjectStore, build_s3_client
+
+    assert settings.s3_bucket is not None and settings.s3_public_base_url is not None
+    store = S3ObjectStore(
+        build_s3_client(settings), settings.s3_bucket, settings.s3_public_base_url
+    )
+    return GuardedStore(store, CircuitBreaker(open_seconds=settings.storage_circuit_open_seconds))
+
+
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     setup_logging(settings.log_level)
@@ -45,7 +66,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         async with httpx.AsyncClient(headers={"User-Agent": settings.http_user_agent}) as http:
             app.state.http = http
             app.state.render_semaphore = asyncio.Semaphore(settings.max_concurrent_renders)
-            yield
+            store: ObjectStore | None = build_object_store(settings)
+            app.state.store = store
+            app.state.breaker = store.breaker if isinstance(store, GuardedStore) else None
+            app.state.l1 = TTLCacheL1(
+                settings.memory_cache_max_items, settings.sia_cache_ttl_seconds
+            )
+            app.state.sia_singleflight = SingleFlight()
+            app.state.image_singleflight = SingleFlight()
+            app.state.image_cache_tasks = set()
+            try:
+                yield
+            finally:
+                await drain_background(app.state.image_cache_tasks)
 
     app = FastAPI(
         title="SPHEREye API",

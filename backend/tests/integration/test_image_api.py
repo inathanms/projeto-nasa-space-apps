@@ -80,9 +80,10 @@ def test_ac008_end_to_end_png_and_headers(make_client):
     assert float(h["x-valid-pixel-fraction"]) == pytest.approx(1.0)
     assert h["cache-control"] == "public, max-age=86400"
 
-    assert sia.calls.last.request.url.params["POS"] == "CIRCLE 210.80227 54.34895 0.001"
+    # REQ-501: the render uses the position rounded to the 6.15" grid.
+    assert sia.calls.last.request.url.params["POS"] == "CIRCLE 210.8015 54.348917 0.001"
     params = cutout.calls.last.request.url.params
-    assert params["center"] == "210.80227,54.34895"
+    assert params["center"] == "210.8015,54.348917"  # REQ-501: normalized position
     assert params["size"] == "220pix"  # ceil(0.25 * 1.5 * 3600 / 6.15)
 
 
@@ -254,7 +255,8 @@ def test_sia_resolution_uses_small_radius_and_collection(make_client):
     client, sia, _ = fake_client(make_client)
     client.get("/image", params={**IMAGE_PARAMS, "collection": "spherex_qr3_deep"})
     ra, dec, radius, collection, *_ = sia.calls[-1]
-    assert (ra, dec, radius, collection.value) == (210.80227, 54.34895, 0.001, "spherex_qr3_deep")
+    # REQ-501: normalized position (6.15" grid).
+    assert (ra, dec, radius, collection.value) == (210.8015, 54.348917, 0.001, "spherex_qr3_deep")
 
 
 def test_ac011_explicit_scale(make_client):
@@ -447,9 +449,11 @@ async def test_ac016_server_busy(make_app):
     async with app.router.lifespan_context(app):
         transport = httpx.ASGITransport(app=app)
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            # Two different images: with the cache on, identical requests share one render
+            # (single-flight, REQ-532) and would not compete for the semaphore.
             responses = await asyncio.gather(
                 client.get("/image", params=IMAGE_PARAMS),
-                client.get("/image", params=IMAGE_PARAMS),
+                client.get("/image", params={**IMAGE_PARAMS, "stretch": "linear"}),
             )
     assert sorted(r.status_code for r in responses) == [200, 503]
     busy = next(r for r in responses if r.status_code == 503)
@@ -483,6 +487,11 @@ def test_step_durations_are_logged(make_client, caplog):
     client, _, _ = fake_client(make_client)
     with caplog.at_level(logging.INFO):
         assert client.get("/image", params=IMAGE_PARAMS).status_code == 200
-    events = {r.event: r for r in caplog.records if getattr(r, "event", "").startswith("image_")}
+    events = {
+        r.event: r
+        for r in caplog.records
+        if getattr(r, "event", "").startswith("image_")
+        and not r.event.startswith("image_cache")  # cache events carry lookup_ms/upload_ms
+    }
     assert {"image_sia", "image_cutout", "image_processing"} <= set(events)
     assert all(isinstance(r.duration_ms, float) for r in events.values())

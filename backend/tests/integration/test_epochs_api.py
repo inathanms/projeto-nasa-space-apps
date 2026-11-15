@@ -26,7 +26,8 @@ def test_ac003_m101_grouping(make_client, sia_route):
 
     request = sia_route.calls.last.request
     assert request.url.params["COLLECTION"] == "spherex_qr3"
-    assert request.url.params["POS"] == "CIRCLE 210.80227 54.34895 0.001"
+    # REQ-501/505: (ra, dec) are rounded to the 6.15" grid before querying IRSA.
+    assert request.url.params["POS"] == "CIRCLE 210.8015 54.348917 0.001"
     assert request.url.params["MAXREC"] == "5000"
     assert "TIME" not in request.url.params
 
@@ -38,9 +39,9 @@ def test_ac003_m101_grouping(make_client, sia_route):
         "visits",
         "observations",
     }
-    assert body["query"] == {
-        "ra": 210.80227,
-        "dec": 54.34895,
+    assert body["query"] == {  # REQ-505: normalized position
+        "ra": 210.8015,
+        "dec": 54.348917,
         "radius": 0.001,
         "collection": "spherex_qr3",
         "detector": None,

@@ -29,5 +29,6 @@ def setup_logging(level: str) -> None:
     root.handlers = [h for h in root.handlers if h.get_name() != _HANDLER_NAME] + [handler]
     root.setLevel(level.upper())
     # httpx logs every request URL at INFO; upstream calls are already logged with timings.
-    for name in ("httpx", "httpcore"):
+    # The S3 SDK logs request params (object bodies) and signed headers at DEBUG (SEC-501).
+    for name in ("httpx", "httpcore", "boto3", "botocore", "s3transfer", "urllib3"):
         logging.getLogger(name).setLevel(logging.WARNING)

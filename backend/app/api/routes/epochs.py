@@ -15,6 +15,7 @@ from app.api.schemas import (
     VisitOut,
     iso_z,
 )
+from app.cache.normalize import normalize_dec, normalize_ra
 from app.domain.models import DEFAULT_RGB_DETECTORS, Collection, ImageRecord, Observation, Visit
 from app.processing.timeutils import iso_to_mjd, mjd_to_iso
 from app.services.epochs_service import EpochsService
@@ -72,7 +73,10 @@ def _visit(visit: Visit) -> VisitOut:
         "Queries the IRSA SIA2 service for SPHEREx images covering (ra, dec) and returns them "
         "grouped by observation (one image per detector) and by visit (observations separated "
         "by at most VISIT_GAP_DAYS). Times are ISO 8601 UTC and MJD, wavelengths in µm, "
-        "coordinates in ICRS degrees. An empty result is not an error."
+        "coordinates in ICRS degrees. An empty result is not an error.\n\n"
+        "(ra, dec) are first rounded to a grid of POSITION_QUANTUM_ARCSEC (default 6.15 "
+        "arcsec, one native pixel) so nearby positions share cached results; `query.ra` and "
+        "`query.dec` echo the normalized values that were actually searched."
     ),
     responses=error_responses(422, 502, 504),
 )
@@ -82,10 +86,13 @@ async def list_epochs(
     service: Annotated[EpochsService, Depends(get_epochs_service)],
 ) -> EpochsResponse:
     collection = params.collection or Collection(settings.irsa_default_collection)
+    # REQ-501/505: normalized always (cache on or off), one contract for both.
+    ra = normalize_ra(params.ra, settings.position_quantum_arcsec)
+    dec = normalize_dec(params.dec, settings.position_quantum_arcsec)
     start_iso, end_iso = iso_z(params.start_time), iso_z(params.end_time)
     result = await service.list_epochs(
-        ra=params.ra,
-        dec=params.dec,
+        ra=ra,
+        dec=dec,
         radius=params.radius,
         collection=collection,
         detector=params.detector,
@@ -94,8 +101,8 @@ async def list_epochs(
     )
     return EpochsResponse(
         query=EpochsQueryEcho(
-            ra=params.ra,
-            dec=params.dec,
+            ra=ra,
+            dec=dec,
             radius=params.radius,
             collection=collection,
             detector=params.detector,
