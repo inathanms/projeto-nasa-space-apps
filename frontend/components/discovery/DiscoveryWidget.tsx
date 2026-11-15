@@ -8,6 +8,7 @@ import {
   type DiscoveryField, type ReportHeader,
 } from "../../lib/discovery";
 import { localizedHref } from "../../lib/i18n";
+import { reducedMotion } from "../../lib/a11y";
 import Icon from "../landing/Icons";
 import { useLocale } from "../ui/LocaleProvider";
 
@@ -96,8 +97,7 @@ export default function DiscoveryWidget() {
   const visible = TOOL_ROUTES.some((route) => localizedHref(locale, route) === here);
 
   useEffect(() => {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    log.current?.scrollTo({ top: log.current.scrollHeight, behavior: reduceMotion ? "instant" : "smooth" });
+    log.current?.scrollTo({ top: log.current.scrollHeight, behavior: reducedMotion() ? "instant" : "smooth" });
   }, [history, open]);
 
   useEffect(() => {
