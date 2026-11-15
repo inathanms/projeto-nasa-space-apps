@@ -77,6 +77,40 @@
 .orbital-logbook .orbital-acquisition-name { color: var(--ink); font-size: .9rem; }
 .orbital-logbook .orbital-pause-note { color: var(--accent); margin-top: 5px; }
 .orbital-logbook .orbital-pause-note:empty { margin: 0; }
+/* Card com ficha disponível: clicável (o resto do tempo deixa o arrasto passar para o canvas). */
+.orbital-logbook[data-clickable=true] { pointer-events: auto; cursor: pointer; }
+.orbital-logbook[data-clickable=true]:hover { box-shadow: 0 0 0 1px var(--accent); }
+.orbital-sheet-link {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px; margin-top: 6px; padding: 0;
+  border: 0; background: none; color: var(--ink); font: 600 .82rem var(--sans); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--accent);
+}
+.orbital-sheet-link:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+/* Ficha do astro (modal) */
+.target-sheet {
+  width: min(560px, calc(100vw - 32px)); max-height: min(86dvh, 720px); padding: 0;
+  border: 1px solid var(--accent); border-radius: var(--radius-card);
+  background: var(--card); color: var(--ink); box-shadow: 0 24px 64px rgb(0 0 0 / .6);
+}
+.target-sheet::backdrop { background: rgb(4 12 14 / .72); }
+.target-sheet-body { display: grid; gap: 16px; padding: clamp(18px, 3vw, 26px); }
+.target-sheet-head { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.target-sheet-kicker { margin: 0 0 4px; color: var(--accent); font: .74rem/1.4 var(--mono); text-transform: uppercase; letter-spacing: .04em; }
+.target-sheet h2 { margin: 0; font-size: 1.45rem; }
+.target-sheet-close {
+  flex: none; width: var(--touch); height: var(--touch); border: 1px solid var(--control-border); border-radius: 50%;
+  background: transparent; color: var(--ink); font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+.target-sheet-close:hover { border-color: var(--accent); color: var(--accent); }
+.target-sheet-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 0; }
+.target-sheet-facts > div { padding: 10px 12px; border: 1px solid var(--rule); border-radius: var(--radius-control); background: var(--night-deep); }
+.target-sheet-facts dt { color: var(--mute); font-size: .74rem; }
+.target-sheet-facts dd { margin: 2px 0 0; font-size: .9rem; }
+.target-sheet h3 { margin: 0 0 4px; color: var(--sun); font-size: .9rem; }
+.target-sheet section p { margin: 0; color: var(--mute); font-size: .9rem; line-height: 1.55; }
+.target-sheet-look { margin: 0; padding: 12px 14px; border-left: 3px solid var(--accent); background: var(--selected); border-radius: 0 var(--radius-control) var(--radius-control) 0; font-size: .88rem; line-height: 1.5; }
+.target-sheet-look strong { color: var(--accent); }
 .orbital-correction { display: flex; flex-wrap: wrap; gap: 2px 16px; list-style: none; margin: 4px 0 0; padding: 0; color: var(--ink); }
 .orbital-correction li { display: flex; flex-wrap: wrap; gap: 5px; }
 .orbital-correction span { font: .72rem/1.65 var(--mono); }
@@ -130,6 +164,12 @@
 }
 .orbital-credit { align-items: center; }
 .orbital-credit a { display: inline-flex; align-items: center; min-height: var(--touch); }
+/* Celular, telas pequenas e telas de toque: o arrasto no canvas mexia RA e Dec juntos.
+   Nesses casos a mira só se move pelos sliders, e tocar no globo apenas rola a página. */
+@media (max-width: 760px), (pointer: coarse) {
+  .orbital-stage canvas { pointer-events: none; touch-action: auto; cursor: default; }
+}
+
 @media (max-width: 1040px) {
   .orbital-ra { left: 13%; }
   .orbital-time { grid-template-columns: auto auto minmax(0, 1fr); }

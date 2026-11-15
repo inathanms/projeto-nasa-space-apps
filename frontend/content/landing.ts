@@ -17,9 +17,9 @@ import { translators, type Locale } from "../lib/i18n";
 export function getLanding(locale: Locale) {
   const t = translators[locale];
   const marca = {
-    nome: "Oxen",
-    nomeDestaque: "Tech",
-    subtitulo: t("CÉU DO SERTÃO · SPHEREx"),
+    nome: "Spher",
+    nomeDestaque: "Eye",
+    subtitulo: "OxenTech · NASA Space Apps Challenge 2026",
     logoMark: "/brand/logo-oxentech-mark.png",
     logoIcon: "/brand/logo-oxentech-icon.png",
     logoAlt: t("Logo da OxenTech: cacto e boi-constelação sob o céu do sertão"),
@@ -38,7 +38,7 @@ export function getLanding(locale: Locale) {
     ferramentas: [
       { href: "/explorar/", label: t("Explorador") },
       { href: "/observatorio/", label: t("Observatório") },
-      { href: "/laboratorio/", label: t("Laboratório") },
+      // Laboratório em standby (redundante com o Observatório). A página /laboratorio continua existindo.
     ],
     cta: { href: "/explorar/", label: t("Explorar o céu") },
   };
@@ -78,7 +78,7 @@ export function getLanding(locale: Locale) {
     cards: [
       {
         icone: "invisivel" as IconKey,
-        titulo: t("Veja o invisível"),
+        titulo: t("Veja o “invisível”"),
         texto:
           t("Imagens infravermelhas reais, de estrelas frias e poeira que nenhum telescópio comum mostra."),
       },
@@ -178,7 +178,7 @@ export function getLanding(locale: Locale) {
     fluxo: [
       { icone: "satelite" as IconKey, titulo: "SPHEREx", texto: t("órbita a 700 km") },
       { icone: "arquivo" as IconKey, titulo: "IRSA", texto: t("arquivo NASA") },
-      { icone: "cacto" as IconKey, titulo: "OxenTech", texto: t("alinha e mostra") },
+      { icone: "cacto" as IconKey, titulo: "SpherEye", texto: t("alinha e mostra") },
     ],
   };
 
@@ -197,7 +197,6 @@ export function getLanding(locale: Locale) {
     acoes: [
       nav.cta,
       { href: "/observatorio/", label: t("Abrir o observatório") },
-      { href: "/laboratorio/", label: t("Ajustar a mira no laboratório") },
     ],
   };
 

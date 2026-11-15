@@ -189,3 +189,68 @@ body:where(:has(#inicio)) .site-menu nav .landing-links { display: inline-flex; 
   border-radius: var(--radius-control);
   min-height: var(--touch);
 }
+
+/* Ajuda "?": explicação curta para termos técnicos */
+.help { position: relative; display: inline-flex; vertical-align: middle; }
+.help .help-button {
+  display: inline-grid; place-items: center; width: var(--touch); height: var(--touch); margin: 0; padding: 0;
+  border: 0; border-radius: var(--radius-control); background: transparent; color: var(--accent); cursor: help;
+}
+.help-button span {
+  display: grid; place-items: center; width: 18px; height: 18px;
+  border: 1px solid var(--accent); border-radius: 50%; background: transparent; color: var(--accent);
+  font: 700 .7rem/1 var(--sans);
+}
+.help-button:hover span, .help-button[aria-expanded=true] span { background: var(--accent); color: var(--night-deep); }
+.help .help-button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.help-tip {
+  position: absolute; z-index: 20; top: 100%; width: min(280px, calc(100vw - 32px));
+  padding: 10px 12px; border: 1px solid var(--control-border); border-radius: var(--radius-control);
+  background: var(--night-deep); color: var(--ink); box-shadow: 0 8px 24px rgb(0 0 0 / .45);
+  font: 400 .85rem/1.45 var(--sans); text-align: left; text-transform: none; letter-spacing: normal; white-space: normal;
+}
+/* Tutorial guiado (spotlight) */
+.tour-help {
+  display: inline-flex; align-items: center; gap: 8px; min-height: var(--touch); padding: 0 14px 0 6px;
+  border: 1px solid var(--control-border); border-radius: var(--radius-pill); background: transparent;
+  color: var(--ink); font: 600 .85rem var(--sans); cursor: pointer;
+}
+.tour-help span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--night-deep); font-weight: 800; }
+.tour-help:hover { border-color: var(--accent); background: var(--selected); }
+.tour-help:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.tour-root {
+  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none;
+  padding: 0; margin: 0; border: 0; overflow: clip; background: transparent;
+}
+.tour-root::backdrop { background: transparent; }
+.tour-dim { position: absolute; inset: 0; background: rgb(3 10 12 / .72); }
+/* O box-shadow gigante escurece todo o resto da tela em volta do recorte. */
+.tour-spot {
+  position: fixed; border: 2px solid var(--accent); border-radius: var(--radius-card);
+  box-shadow: 0 0 0 9999px rgb(3 10 12 / .72); pointer-events: none;
+  transition: top .25s var(--ease-out), left .25s var(--ease-out), width .25s var(--ease-out), height .25s var(--ease-out);
+}
+.tour-tip {
+  position: fixed; z-index: 2001; padding: 16px 16px 12px;
+  max-height: calc(100dvh - 24px); overflow-y: auto;
+  border: 1px solid var(--accent); border-radius: var(--radius-card); background: var(--card); color: var(--ink);
+  box-shadow: 0 20px 60px rgb(0 0 0 / .6); transition: opacity .16s ease;
+}
+.tour-tip:focus { outline: none; }
+.tour-tip-step { margin: 0; color: var(--accent); font: 600 .72rem var(--mono); text-transform: uppercase; letter-spacing: .05em; }
+.tour-tip-title { margin: 4px 0 0; font-size: 1.1rem; }
+.tour-tip-body { margin: 6px 0 0; color: var(--mute); font-size: .9rem; line-height: 1.55; }
+.tour-tip-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.tour-tip-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.tour-tip-nav .button { min-height: var(--touch); padding: 8px 16px; font-size: .85rem; }
+.tour-skip { min-height: var(--touch); padding: 0 6px; border: 0; background: none; color: var(--mute); font: inherit; font-size: .85rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.tour-skip:hover { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) {
+  .tour-spot, .tour-tip { transition: none; }
+}
+@media (max-width: 550px) {
+  .tour-help { padding-right: 6px; }
+  .tour-help { font-size: 0; gap: 0; }
+  .tour-help span { font-size: .85rem; }
+}

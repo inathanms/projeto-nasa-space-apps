@@ -135,7 +135,7 @@ export default function PointingLab({ targets }: { targets: Target[] }) {
           </select>
         </label>}
         <div className="pointing-actions">
-          <Link className="button primary" href={href(`/explorar/?${query}`)}>{t("Usar no explorador")}</Link>
+          <Link className="button primary" href={href(`/explorar/?${query}`)}>{t("Importar para o explorador")}</Link>
           <button className="button secondary" type="button" onClick={() => selectAngles(INITIAL)}>{t("Restaurar")}</button>
         </div>
         <p className="pointing-note">{t("Modelo didático com a Terra como referência. A linha representa uma direção no céu e o telescópio é esquemático.")}</p>
