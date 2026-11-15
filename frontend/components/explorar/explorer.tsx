@@ -48,7 +48,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     date && Number.isFinite(Date.parse(date)) ? dateTime.format(new Date(date)) + " UTC" : "—";
   const [example, setExample] = useState<Example | null>(examples[0]);
   const [sequence, setSequence] = useState<Sequence | null>(examples[0].sequence);
-  const [selected, setSelected] = useState(examples[0].slug);
+  const [selected, setSelected] = useState("");
   const [ra, setRa] = useState(String(examples[0].sequence.ra_deg));
   const [dec, setDec] = useState(String(examples[0].sequence.dec_deg));
   const [index, setIndex] = useState(0);
@@ -140,7 +140,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     setMode("single");
     setError("");
     setInvalid("");
-    setSelected(preset.slug);
+    setSelected(preset.preset ? preset.slug : "");
     setExample(preset);
     setSequence(preset.sequence);
     setTimeline(null);
@@ -315,10 +315,8 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const source = sourceLink(frame?.source_url ?? null);
   const cutout = sourceLink(frame?.cutout_url ?? null);
   const exampleDescription = example && exampleDescriptions(locale)[example.slug];
-  const exampleGroups = [
-    { label: t("Alvos pré-configurados do SPHEREx"), items: examples.filter((item) => item.preset) },
-    { label: t("Outros exemplos"), items: examples.filter((item) => !item.preset) },
-  ];
+  const presets = examples.filter((item) => item.preset);
+  const selectedPreset = presets.find((item) => item.slug === selected);
 
   return (
     <>
@@ -329,14 +327,13 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             <p className="muted offline-note">{t("Abra um alvo com imagens salvas no site, mesmo quando a API estiver indisponível.")}</p>
             <label htmlFor="preset">{t("Campo de observação")}</label>
             <select className="control-field" id="preset" value={selected} onChange={(event) => setSelected(event.target.value)}>
-              {exampleGroups.map(({ label, items }) => (
-                <optgroup key={label} label={label}>
-                  {items.map((item) => <option key={item.slug} value={item.slug}>{item.name}{item.synthetic ? t(" · simulação") : ""}</option>)}
-                </optgroup>
-              ))}
+              <option value="" disabled>{t("Escolha um alvo")}</option>
+              <optgroup label={t("Alvos pré-configurados do SPHEREx")}>
+                {presets.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}
+              </optgroup>
             </select>
-            <button type="button" className="button secondary" aria-controls="resultado-explorador"
-              onClick={(event) => applyExample(examples.find((item) => item.slug === selected) ?? examples[0], event.currentTarget)}>{t("Abrir exemplo")} <span aria-hidden="true">↗</span></button>
+            <button type="button" className="button secondary" disabled={!selectedPreset} aria-controls="resultado-explorador"
+              onClick={(event) => { if (selectedPreset) applyExample(selectedPreset, event.currentTarget); }}>{t("Abrir exemplo")} <span aria-hidden="true">↗</span></button>
           </div>
           <form data-tour="explorar-busca" onSubmit={(event) => void search(event, (event.nativeEvent as SubmitEvent).submitter?.id !== "compare-pair")} noValidate>
             <h2>{t("Buscar por coordenadas")}</h2>
