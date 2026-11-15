@@ -245,7 +245,6 @@ body:where(:has(#inicio)) .site-menu nav .landing-links { display: inline-flex; 
 .tour-spot {
   position: fixed; border: 2px solid var(--accent); border-radius: var(--radius-card);
   box-shadow: 0 0 0 9999px rgb(3 10 12 / .72); pointer-events: none;
-  transition: top .25s var(--ease-out), left .25s var(--ease-out), width .25s var(--ease-out), height .25s var(--ease-out);
 }
 .tour-tip {
   position: fixed; z-index: 2001; padding: 16px 16px 12px;
@@ -263,7 +262,7 @@ body:where(:has(#inicio)) .site-menu nav .landing-links { display: inline-flex; 
 .tour-skip { min-height: var(--touch); padding: 0 6px; border: 0; background: none; color: var(--mute); font: inherit; font-size: .85rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .tour-skip:hover { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) {
-  .tour-spot, .tour-tip { transition: none; }
+  .tour-tip { transition: none; }
 }
 /* Widget de descoberta: bolinha flutuante + chat guiado */
 .discovery { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 1500; display: grid; justify-items: end; gap: 12px; }

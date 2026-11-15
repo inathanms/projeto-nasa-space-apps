@@ -16,6 +16,7 @@ import { parseCoordinate } from "../../lib/coordinates";
 import ComparisonReadout from "./comparison-readout";
 import ImageFormat, { type ImageMode } from "./image-format";
 import ImageZoom from "./image-zoom";
+import OfflineTargetBrief from "./offline-target-brief";
 import { useSkyViewport } from "./use-sky-viewport";
 
 const SpherexOrbit = dynamic(() => import("./spherex-orbit"), {
@@ -444,6 +445,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
               <summary>{t("Descrição da comparação")}</summary>
               <p>{exampleDescription}</p>
             </details>}
+            {example?.preset && <OfflineTargetBrief key={example.slug} example={example} />}
             {!example && mode === "single" && frames[1] && <ComparisonReadout key={sequence.sequence_id} frames={[frames[0], frames[1]]} />}
             <p className="viewer-hint" id="sky-zoom-hint">{t("Clique duas vezes ou faça uma pinça para ampliar. Arraste a imagem ampliada ou use as setas para movê-la.")}</p>
             {canCompare && zoom === 1 && <p className="viewer-hint">{t("Deslize na horizontal ou use ← → no visor para alternar.")}<Help id="epoca" label={t("uma época")} /></p>}

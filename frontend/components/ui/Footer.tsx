@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { getLanding } from "../../content/landing";
-import { translators, type Locale } from "../../lib/i18n";
+import { localizedHref, translators, type Locale } from "../../lib/i18n";
 import ToolLinks from "./ToolLinks";
 
 export default function Footer({ locale }: { locale: Locale }) {
@@ -11,6 +12,7 @@ export default function Footer({ locale }: { locale: Locale }) {
         <p>{footer.esquerda}</p>
         <nav aria-label={t("Ferramentas no rodapé")}>
           <ToolLinks links={nav.ferramentas} />
+          <Link href={localizedHref(locale, "/licencas/")}>{t("Licenças de código aberto")}</Link>
         </nav>
         <p>{footer.direita}</p>
         <p>{dados.credito}</p>

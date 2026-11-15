@@ -32,7 +32,7 @@ function Flag({ locale }: { locale: Locale }) {
 
 function destination(locale: Locale, path: string) {
   const primary = localizedHref("en", path).split(/[?#]/, 1)[0];
-  if (!["/", "/explore/", "/observatory/", "/lab/"].includes(primary)) {
+  if (!["/", "/explore/", "/observatory/", "/lab/", "/licenses/"].includes(primary)) {
     return locale === "pt" ? "/pt/404/" : "/404.html";
   }
   return localizedHref(locale, path);

@@ -106,6 +106,18 @@
 }
 .mark-target[aria-pressed="true"] { text-decoration: underline; }
 .viewer-hint { margin-top: 10px; color: var(--mute); font-size: .875rem; line-height: 1.5; }
+.offline-brief { border-top: 1px solid var(--rule); margin-top: 20px; padding-top: 16px; }
+.offline-brief h2 { font-size: 1.2rem; margin-bottom: 6px; }
+.offline-brief h3 { font-size: .95rem; margin: 14px 0 4px; }
+.offline-brief p { max-width: 64ch; color: var(--mute); font-size: .9rem; line-height: 1.55; }
+.offline-comparison { margin-top: 8px; }
+.offline-comparison summary { color: var(--accent); font-weight: 650; cursor: pointer; min-height: var(--touch); padding-block: 10px; }
+.offline-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.offline-pair figure { min-width: 0; margin: 0; }
+.offline-pair img { display: block; width: 100%; height: auto; aspect-ratio: 1; background: var(--night-deep); border: 1px solid var(--rule); border-radius: var(--radius-control); }
+.offline-pair figcaption { display: grid; gap: 2px; margin-top: 5px; color: var(--mute); font-size: .82rem; line-height: 1.4; overflow-wrap: anywhere; }
+.offline-pair figcaption strong { color: var(--ink); }
+.offline-reference { display: inline-flex; align-items: center; gap: 5px; min-height: var(--touch); color: var(--accent); font-size: .85rem; }
 .timeline-title { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .timeline-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 195px), 1fr)); gap: 10px; margin-top: 12px; }
 .timeline-inputs label { display: grid; min-width: 0; gap: 6px; }

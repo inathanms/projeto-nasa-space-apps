@@ -22,6 +22,7 @@ const routes = {
   explorar: "explore",
   observatorio: "observatory",
   laboratorio: "lab",
+  licencas: "licenses",
 } as const;
 
 export function localizedHref(locale: Locale, href: string) {

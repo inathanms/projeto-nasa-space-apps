@@ -17,6 +17,10 @@ export function getRoutes(locale: Locale) {
       title: t("Laboratório de apontamento"),
       description: t("Gire o globo e incline a linha de visão do telescópio. Use as coordenadas resultantes para buscar um campo no explorador."),
     },
+    licencas: {
+      title: t("Licenças de código aberto"),
+      description: t("Licenças, avisos e créditos dos componentes de terceiros usados pelo SPHEREye."),
+    },
   };
 }
 
