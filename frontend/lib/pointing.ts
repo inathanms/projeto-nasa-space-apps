@@ -30,15 +30,19 @@ export function scanPath(from: { ra: number; dec: number }, nextRA: number, next
   const deltaDec = nextDec - from.dec;
   // A slider jump can cross the capture zone without emitting a value inside it.
   const steps = Math.max(1, Math.ceil(Math.hypot(deltaRA, deltaDec)));
+  let hit: Target | null = null;
   for (let step = 1; step <= steps; step++) {
     const fraction = step / steps;
     const ra = step === steps ? nextRA : wrap(from.ra + deltaRA * fraction);
     const dec = step === steps ? nextDec : from.dec + deltaDec * fraction;
     if (locked && separation(ra, dec, locked) > RELEASE_RADIUS) locked = null;
-    const hit = nearestTarget(ra, dec, targets, (item) => item.slug === locked?.slug);
-    if (hit && hit.distance <= CAPTURE_RADIUS) return { hit: hit.item, before: { ra, dec }, locked };
+    if (!hit) {
+      const nearest = nearestTarget(ra, dec, targets, (item) => item.slug === locked?.slug);
+      if (nearest && nearest.distance <= CAPTURE_RADIUS) hit = nearest.item;
+    }
+    if (hit && !locked) break;
   }
-  return { hit: null, before: { ra: nextRA, dec: nextDec }, locked };
+  return { hit, locked };
 }
 
 export function axisHint(axis: string, offset: number, locale: Locale = "en") {

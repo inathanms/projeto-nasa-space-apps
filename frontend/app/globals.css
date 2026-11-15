@@ -280,6 +280,7 @@ body:where(:has(#inicio)) .site-menu nav .landing-links { display: inline-flex; 
 .discovery-head div { flex: 1; display: grid; }
 .discovery-head small { color: var(--mute); font-size: .78rem; }
 .discovery-avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--sun); color: var(--night-deep); }
+.discovery-avatar svg, .discovery-bubble-icon svg { display: block; width: 62%; height: 62%; }
 .discovery-icon { width: var(--touch); height: var(--touch); border: 1px solid var(--control-border); border-radius: 50%; background: transparent; color: var(--ink); font-size: 1.1rem; cursor: pointer; }
 .discovery-icon:hover { border-color: var(--accent); color: var(--accent); }
 .discovery-log { overflow-y: auto; padding: 14px; display: grid; align-content: start; gap: 10px; overscroll-behavior: contain; }

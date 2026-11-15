@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Help from "../ui/Help";
 import { setDiscoveryField } from "../../lib/discovery";
-import { useEffect, useEffectEvent, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
 import { formatDate, sourceLink, type Example, type Sequence } from "../../lib/sequence";
 import { isTimeline, type CatalogExposure, type LiveTimeline, type Timeline } from "../../lib/timeline";
 import { exampleAliases, exampleDescriptions } from "../../content/examples";
@@ -15,6 +15,7 @@ import { apiErrorMessage, fetchComparison, fetchEpochs, fetchRgbFrame } from "..
 import { parseCoordinate } from "../../lib/coordinates";
 import ComparisonReadout from "./comparison-readout";
 import ImageFormat, { type ImageMode } from "./image-format";
+import ImageZoom from "./image-zoom";
 import { useSkySwipe } from "./use-sky-swipe";
 
 const SpherexOrbit = dynamic(() => import("./spherex-orbit"), {
@@ -53,6 +54,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const [ra, setRa] = useState(String(examples[0].sequence.ra_deg));
   const [dec, setDec] = useState(String(examples[0].sequence.dec_deg));
   const [index, setIndex] = useState(0);
+  const [zoom, setZoom] = useState(1);
   const [rgbSource, setRgbSource] = useState<{ timeline: LiveTimeline; exposures: CatalogExposure[] }>();
   const [rgbLoading, setRgbLoading] = useState(false);
   const [rgbError, setRgbError] = useState("");
@@ -151,6 +153,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     setPlaying(false);
     setShowGuide(false);
     setIndex(0);
+    setZoom(1);
     setMode("single");
     setError("");
     setInvalid("");
@@ -247,6 +250,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
         setExample(null);
         setShowGuide(false);
         setIndex(0);
+        setZoom(1);
         setMode("single");
       }
     } catch (cause) {
@@ -394,7 +398,8 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
                 <span>{example?.synthetic ? t("SIMULAÇÃO") : example ? t("EXEMPLO REAL") : t("IRSA · AO VIVO")}</span>
               </div>
               <div className="sky-wrap">
-                <figure id="sky-field" className={mode === "single" && !example?.synthetic ? "sky sky-grayscale" : "sky"} tabIndex={canCompare ? 0 : undefined}
+                <figure id="sky-field" className="sky" tabIndex={canCompare ? 0 : undefined}
+                  style={{ "--sky-zoom": zoom } as CSSProperties}
                   {...(canCompare ? { onKeyDown: keyboard, ...swipe } : {})}
                   aria-label={canCompare ? t("Campo de comparação. Deslize na horizontal ou use as setas para alternar as épocas.") : t("Campo de observação")}>
                   {frames.map((image, i) => (
@@ -403,18 +408,19 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
                       className={index === i ? "" : "hidden-frame"} aria-hidden={index !== i} />
                   ))}
                   <span className="north instrument" aria-hidden="true">N ↑<br />E ←</span>
-                  <span className="scale instrument" aria-hidden="true">{number.format(sequence.fov_arcmin / 6)}′</span>
+                  <span className="scale instrument" aria-hidden="true">{number.format(sequence.fov_arcmin / zoom / 6)}′</span>
                   {showGuide && <span className="sky-guide" aria-hidden="true" />}
                 </figure>
               </div>
               <div className="plate-bottom instrument">
                 <span>RA {number.format(sequence.ra_deg)}° · DEC {number.format(sequence.dec_deg)}°</span>
-                <span>{number.format(sequence.fov_arcmin)}′ × {number.format(sequence.fov_arcmin)}′</span>
+                <span>{number.format(sequence.fov_arcmin / zoom)}′ × {number.format(sequence.fov_arcmin / zoom)}′</span>
               </div>
             </div>
 
             <div className="viewer-tools" data-tour="explorar-marcar">
               {!example?.synthetic && <ImageFormat mode={mode} rgbAvailable={canUseRgb} busy={rgbLoading} onChange={(next) => void changeFormat(next)} />}
+              <ImageZoom zoom={zoom} onChange={setZoom} controls="sky-field" />
               <button className="button secondary mark-target" type="button" aria-pressed={showGuide} aria-controls="sky-field" onClick={() => setShowGuide((visible) => !visible)}>
                 {guideName ? t("Marcar {name}", { name: guideName }) : t("Marcar alvo")}
               </button>
@@ -443,7 +449,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             </p>}
             {(example?.preset || !example) && canCompare && <p className="viewer-hint">{mode === "rgb"
               ? t("As composições RGB usam escalas de brilho próprias.")
-              : t("As imagens em tons de cinza usam a mesma escala de brilho entre épocas.")}</p>}
+              : t("Os recortes do mesmo detector usam a mesma escala de brilho entre épocas.")}</p>}
             <div aria-live={playing ? "off" : "polite"} aria-atomic="true" className="sr-only">{observedLabel}: {timestamp(frame.observed_at_utc)}</div>
             {example?.slug === "eps-indi-b" && canCompare && <p className="viewer-hint">
               {t("Procure Epsilon Indi B perto do centro. Ao alternar as épocas, a fonte se desloca ligeiramente para a esquerda e para baixo em relação às estrelas do campo.")}

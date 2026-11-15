@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "frontend/components/observatorio/observatory.css"
+        ],
+        "createdAt": "2026-11-15T18:08:03.512Z",
+        "reason": "Agente: a borda preexistente identifica a instrução específica O que observar nas imagens na ficha do astro, fora dos controles do Observatório."
+      }
+    ]
+  }
+}

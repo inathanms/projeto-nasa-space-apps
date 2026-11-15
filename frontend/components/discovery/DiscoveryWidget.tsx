@@ -8,6 +8,7 @@ import {
   type DiscoveryField, type ReportHeader,
 } from "../../lib/discovery";
 import { localizedHref } from "../../lib/i18n";
+import Icon from "../landing/Icons";
 import { useLocale } from "../ui/LocaleProvider";
 
 type Step = "intro" | "how" | "kind" | "unsure" | "check" | "known" | "bright" | "unknown" | "form" | "report" | "done";
@@ -199,7 +200,7 @@ export default function DiscoveryWidget() {
       {open && (
         <section id="discovery-panel" className="discovery-panel" role="dialog" aria-label={copy.title}>
           <header className="discovery-head">
-            <span className="discovery-avatar" aria-hidden="true">✦</span>
+            <span className="discovery-avatar" aria-hidden="true"><Icon name="cacto" /></span>
             <div>
               <strong>{copy.title}</strong>
               <small>{copy.subtitle}</small>
@@ -230,7 +231,7 @@ export default function DiscoveryWidget() {
       <button ref={trigger} type="button" className="discovery-bubble" data-tour="discovery-bubble" aria-expanded={open}
         aria-controls={open ? "discovery-panel" : undefined} aria-label={open ? copy.close : copy.open}
         onClick={open ? closeAssistant : () => setOpen(true)}>
-        <span className="discovery-bubble-icon" aria-hidden="true">{open ? "×" : "✦"}</span>
+        <span className="discovery-bubble-icon" aria-hidden="true">{open ? "×" : <Icon name="cacto" />}</span>
         {!open && <span className="discovery-bubble-label">{copy.bubble}</span>}
       </button>
     </div>

@@ -154,3 +154,56 @@ const en: Record<string, TargetInfo> = {
 };
 
 export const targetInfo: Record<Locale, Record<string, TargetInfo>> = { pt, en };
+
+const galaxy = { pt: "Galáxia", en: "Galaxy" };
+const nebula = { pt: "Nebulosa", en: "Nebula" };
+const planetary = { pt: "Nebulosa planetária", en: "Planetary nebula" };
+
+// Identificações e notas de observação do catálogo de presets SPHEREye.
+export const presetFacts: Partial<Record<string, {
+  catalog: string;
+  kind: Record<Locale, string>;
+  note?: Record<Locale, string>;
+}>> = {
+  "preset-m1": {
+    catalog: "M1 / NGC 1952",
+    kind: { pt: "Remanescente de supernova", en: "Supernova remnant" },
+    note: { pt: "Ocupa cerca de 7′ no céu.", en: "It spans about 7′ in the sky." },
+  },
+  "preset-m8": { catalog: "M8 / NGC 6523", kind: nebula },
+  "preset-m16": { catalog: "M16 / NGC 6611", kind: nebula },
+  "preset-m27": {
+    catalog: "M27 / NGC 6853",
+    kind: planetary,
+    note: { pt: "Ocupa cerca de 8′ no céu.", en: "It spans about 8′ in the sky." },
+  },
+  "preset-m31": {
+    catalog: "M31 / NGC 224",
+    kind: galaxy,
+    note: { pt: "A galáxia ocupa cerca de 3° no céu e tem um núcleo muito brilhante.", en: "The galaxy spans about 3° in the sky and has a very bright core." },
+  },
+  "preset-m42": {
+    catalog: "M42 / NGC 1976",
+    kind: nebula,
+    note: { pt: "O núcleo brilhante pode saturar e aparecer como uma lacuna no recorte.", en: "The bright core can saturate and appear as a gap in the cutout." },
+  },
+  "preset-m45": {
+    catalog: "M45",
+    kind: { pt: "Aglomerado aberto", en: "Open cluster" },
+    note: { pt: "O aglomerado ocupa cerca de 2° no céu, e estrelas brilhantes dominam o recorte.", en: "The cluster spans about 2° in the sky, and bright stars dominate the cutout." },
+  },
+  "preset-m51": { catalog: "M51 / NGC 5194", kind: galaxy },
+  "preset-m57": {
+    catalog: "M57 / NGC 6720",
+    kind: planetary,
+    note: { pt: "A nebulosa mede cerca de 1′ e ocupa poucos pixels no recorte.", en: "The nebula spans about 1′ and covers only a few pixels in the cutout." },
+  },
+  "preset-m101": { catalog: "M101 / NGC 5457", kind: galaxy },
+  "preset-m104": { catalog: "M104 / NGC 4594", kind: galaxy },
+  "preset-ngc3372": { catalog: "NGC 3372", kind: nebula },
+  "preset-sgra": {
+    catalog: "Sgr A*",
+    kind: { pt: "Centro galáctico", en: "Galactic center" },
+    note: { pt: "O campo é muito denso e brilhante.", en: "The field is very dense and bright." },
+  },
+};

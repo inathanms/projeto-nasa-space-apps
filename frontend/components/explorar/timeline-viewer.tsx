@@ -5,16 +5,18 @@ import { setDiscoveryField } from "../../lib/discovery";
 import { forLocales } from "../../lib/i18n";
 
 import Image from "next/image";
-import { useEffect, useEffectEvent, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { formatDate, sourceLink, type Frame } from "../../lib/sequence";
 import { observationIdForExposure, rgbVisitExposures, type CatalogExposure, type Timeline } from "../../lib/timeline";
 import { apiErrorMessage, fetchExposure, fetchRgbFrame, isUnavailableExposure, shareCoverage, type RenderedExposure } from "../../lib/spherex-api";
 import ImageFormat, { type ImageMode } from "./image-format";
+import ImageZoom from "./image-zoom";
 import { useSkySwipe } from "./use-sky-swipe";
 
 const timeFormats = forLocales((language) => new Intl.DateTimeFormat(language, {
   hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23", timeZone: "UTC",
 }));
+const scaleFormats = forLocales((language) => new Intl.NumberFormat(language, { maximumFractionDigits: 3 }));
 
 export default function TimelineViewer({ timeline, api, savedFrames, targetName, onClose }: {
   timeline: Timeline; api?: string; savedFrames: Frame[]; targetName?: string; onClose: () => void;
@@ -23,7 +25,9 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
   const timeUTC = timeFormats[locale];
   const imageCount = (count: number) => t(count === 1 ? "{count} imagem" : "{count} imagens", { count });
   const [mode, setMode] = useState<ImageMode>("single");
+  const [zoom, setZoom] = useState(1);
   const [showGuide, setShowGuide] = useState(false);
+  const fieldOfView = scaleFormats[locale].format(timeline.fov_arcmin / zoom);
   const rgbExposures = useMemo(() => rgbVisitExposures(timeline), [timeline]);
   const exposures = mode === "rgb" ? rgbExposures : timeline.exposures;
   const { days, dayOptions, indexById, byDetector } = useMemo(() => {
@@ -229,20 +233,22 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
             <span>{selected.collection} · {frame?.detector ?? selected.detector}</span>
           </div>
           <div className="sky-wrap">
-            <figure id="timeline-sky" className={mode === "single" ? "sky timeline-sky sky-grayscale" : "sky timeline-sky"} ref={sky} tabIndex={0} onKeyDown={keyboard} {...swipe}
+            <figure id="timeline-sky" className="sky timeline-sky" ref={sky} tabIndex={0} onKeyDown={keyboard} {...swipe}
+              style={{ "--sky-zoom": zoom } as CSSProperties}
               aria-label={t("Recorte selecionado. Deslize na horizontal ou use as setas para navegar pelas exposições.")}>
               {frame ? <Image src={frame.image_src} width={128} height={128} loading="eager" draggable={false} alt={t("Recorte SPHEREx da exposição selecionada")} />
                 : <div className="timeline-placeholder">{busy ? t("Carregando recorte…") : t("Selecione uma exposição e abra o recorte.")}</div>}
               {frame && showGuide && <span className="sky-guide" aria-hidden="true" />}
-              {frame && <><span className="north instrument" aria-hidden="true">N ↑<br />E ←</span><span className="scale instrument" aria-hidden="true">1′</span></>}
+              {frame && <><span className="north instrument" aria-hidden="true">N ↑<br />E ←</span><span className="scale instrument" aria-hidden="true">{scaleFormats[locale].format(timeline.fov_arcmin / zoom / 6)}′</span></>}
             </figure>
           </div>
           <div className="plate-bottom instrument">
-            <span>RA {timeline.ra_deg}° · DEC {timeline.dec_deg}°</span><span>6′ × 6′</span>
+            <span>RA {timeline.ra_deg}° · DEC {timeline.dec_deg}°</span><span>{fieldOfView}′ × {fieldOfView}′</span>
           </div>
         </div>
         <div className="viewer-tools">
           <ImageFormat mode={mode} rgbAvailable={Boolean(api && rgbExposures.length)} busy={busy || playing} onChange={changeFormat} />
+          {frame && <ImageZoom zoom={zoom} onChange={setZoom} controls="timeline-sky" />}
           <button className="button secondary mark-target" type="button" aria-pressed={showGuide} aria-controls="timeline-sky"
             onClick={() => setShowGuide((visible) => !visible)}>
             {targetName ? t("Marcar {name}", { name: targetName }) : t("Marcar alvo")}

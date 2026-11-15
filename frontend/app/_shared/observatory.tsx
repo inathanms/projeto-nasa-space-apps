@@ -6,7 +6,7 @@ import "../../components/observatorio/observatory.css";
 
 export default function Page({ locale }: { locale: Locale }) {
   const routes = getRoutes(locale);
-  const targets = getExamples(locale).filter((example) => !example.synthetic).map(({ slug, name, sequence }) => ({
+  const targets = getExamples(locale, { includePresets: true }).filter((example) => example.preset).map(({ slug, name, sequence }) => ({
     slug, name, ra: sequence.ra_deg, dec: sequence.dec_deg, time: sequence.frames[0].observed_at_utc,
   }));
   return (
