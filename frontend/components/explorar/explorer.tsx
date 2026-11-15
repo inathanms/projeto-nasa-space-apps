@@ -51,6 +51,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const [ra, setRa] = useState(String(examples[0].sequence.ra_deg));
   const [dec, setDec] = useState(String(examples[0].sequence.dec_deg));
   const [index, setIndex] = useState(0);
+  const [mode, setMode] = useState<"single" | "rgb">("single");
   const [playing, setPlaying] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -64,7 +65,11 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const timelineTrigger = useRef<HTMLElement | null>(null);
   const raInput = useRef<HTMLInputElement>(null);
   const decInput = useRef<HTMLInputElement>(null);
-  const frame = sequence?.frames[index];
+  const rgbFrames = sequence?.rgb_frames;
+  const frames = (mode === "rgb" ? rgbFrames : undefined) ?? sequence?.frames;
+  const frame = frames?.[index];
+  const frameCount = frames?.length ?? 0;
+  const canCompare = frameCount > 1;
   // Os exemplos reais são centrados no alvo, então a moldura central vale para todos.
   // O campo simulado não tem um astro centralizado, por isso fica de fora.
   const guideTarget = example && !example.synthetic ? example : null;
@@ -108,10 +113,10 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   }, [examples]);
 
   useEffect(() => {
-    if (!playing) return;
-    const timer = window.setInterval(() => setIndex((previous) => 1 - previous), 900);
+    if (!playing || !canCompare) return;
+    const timer = window.setInterval(() => setIndex((previous) => (previous + 1) % frameCount), 900);
     return () => window.clearInterval(timer);
-  }, [playing]);
+  }, [playing, canCompare, frameCount]);
 
   useEffect(() => {
     if (revealFrom.current && document.activeElement === revealFrom.current) results.current?.focus();
@@ -126,6 +131,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     setPlaying(false);
     setShowGuide(false);
     setIndex(0);
+    setMode("single");
     setError("");
     setInvalid("");
     setSelected(preset.slug);
@@ -192,6 +198,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
         setShowGuide(false);
         setPlaying(false);
         setIndex(0);
+        setMode("single");
       }
     } catch (cause) {
       if (active.current === request) {
@@ -247,22 +254,46 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     setIndex(next);
   }
 
+  function moveFrame(direction: -1 | 1) {
+    if (canCompare) chooseFrame((index + frameCount + direction) % frameCount);
+  }
+
   function keyboard(event: KeyboardEvent<HTMLElement>) {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
     event.preventDefault();
-    chooseFrame(1 - index);
+    moveFrame(event.key === "ArrowLeft" ? -1 : 1);
   }
 
-  const swipe = useSkySwipe(() => chooseFrame(1 - index));
+  const swipe = useSkySwipe(moveFrame);
   const observedLabel = example?.synthetic ? t("Data ilustrativa") : t("Observação");
   const source = sourceLink(frame?.source_url ?? null);
   const cutout = sourceLink(frame?.cutout_url ?? null);
   const exampleDescription = example && exampleDescriptions(locale)[example.slug];
+  const exampleGroups = [
+    { label: t("Alvos pré-configurados do SPHEREx"), items: examples.filter((item) => item.preset) },
+    { label: t("Outros exemplos"), items: examples.filter((item) => !item.preset) },
+  ];
 
   return (
     <>
       <div className="explorer-grid">
         <aside className="controls" aria-label={t("Escolha do campo")}>
+          <div className="preset" data-tour="explorar-exemplos">
+            <h2>{t("Alvos offline")}</h2>
+            <p className="muted offline-note">{t("Abra um alvo com imagens salvas no site, mesmo quando a API estiver indisponível.")}</p>
+            <label htmlFor="preset">{t("Campo de observação")}</label>
+            <select className="control-field" id="preset" value={selected} onChange={(event) => setSelected(event.target.value)}>
+              {exampleGroups.map(({ label, items }) => (
+                <optgroup key={label} label={label}>
+                  {items.map((item) => <option key={item.slug} value={item.slug}>{item.name}{item.synthetic ? t(" · simulação") : ""}</option>)}
+                </optgroup>
+              ))}
+            </select>
+            <button type="button" className="button secondary" aria-controls="resultado-explorador"
+              onClick={(event) => applyExample(examples.find((item) => item.slug === selected) ?? examples[0], event.currentTarget)}>{t("Abrir exemplo")} <span aria-hidden="true">↗</span></button>
+            <button type="button" className="button secondary" aria-disabled={busy} aria-controls="resultado-explorador"
+              onClick={(event) => void openSavedTimeline(event.currentTarget)}>{t("Épocas de Epsilon Indi B")}</button>
+          </div>
           <form data-tour="explorar-busca" onSubmit={(event) => void search(event, (event.nativeEvent as SubmitEvent).submitter?.id !== "compare-pair")} noValidate>
             <h2>{t("Buscar por coordenadas")}</h2>
             <p className="muted" id="coordinate-format">{t("Use graus decimais no sistema ICRS.")}<Help id="icrs" label={t("o sistema ICRS")} /></p>
@@ -289,17 +320,6 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             <p role="status" className="muted search-feedback">{busy ? t("Carregando observações…") : ""}</p>
             <p id="search-error" className="error search-feedback" role="alert">{error}</p>
           </form>
-          <div className="preset" data-tour="explorar-exemplos">
-            <h2>{t("Exemplo offline")}</h2>
-            <label htmlFor="preset">{t("Campo de observação")}</label>
-            <select className="control-field" id="preset" value={selected} onChange={(event) => setSelected(event.target.value)}>
-              {examples.map((item) => <option key={item.slug} value={item.slug}>{item.name}{item.synthetic ? t(" · simulação") : ""}</option>)}
-            </select>
-            <button type="button" className="button secondary" aria-controls="resultado-explorador"
-              onClick={(event) => applyExample(examples.find((item) => item.slug === selected) ?? examples[0], event.currentTarget)}>{t("Abrir exemplo")} <span aria-hidden="true">↗</span></button>
-            <button type="button" className="button secondary" aria-disabled={busy} aria-controls="resultado-explorador"
-              onClick={(event) => void openSavedTimeline(event.currentTarget)}>{t("Épocas de Epsilon Indi B")}</button>
-          </div>
         </aside>
 
         <div id="resultado-explorador" className="viewer" ref={results} tabIndex={-1} role="group" aria-label={t("Resultado do Explorador")}>
@@ -307,54 +327,71 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             timeline={timeline} api={api}
             savedFrames={examples.find((item) => item.sequence.ra_deg === timeline.ra_deg && item.sequence.dec_deg === timeline.dec_deg)?.sequence.frames ?? []}
             onClose={closeTimeline} />
-          : sequence && frame ? <section aria-label={t("Visor de comparação")} className="viewer">
+          : sequence && frames && frame ? <section aria-label={t("Visor de comparação")} className="viewer">
             <div className="plate" data-tour="explorar-visor">
               <div className="plate-top instrument">
                 <span className="plate-name">{example?.name ?? t("Campo consultado")}</span>
                 <span>{example?.synthetic ? t("SIMULAÇÃO") : example ? t("EXEMPLO REAL") : t("IRSA · AO VIVO")}</span>
               </div>
               <div className="sky-wrap">
-                <figure id="sky-field" className="sky" tabIndex={0} onKeyDown={keyboard} {...swipe} aria-label={t("Campo de comparação. Deslize na horizontal ou use as setas para alternar as épocas.")}>
-                  {sequence.frames.map((image, i) => (
+                <figure id="sky-field" className="sky" tabIndex={canCompare ? 0 : undefined}
+                  {...(canCompare ? { onKeyDown: keyboard, ...swipe } : {})}
+                  aria-label={canCompare ? t("Campo de comparação. Deslize na horizontal ou use as setas para alternar as épocas.") : t("Campo de observação")}>
+                  {frames.map((image, i) => (
                     <Image key={image.frame_id} src={image.image_src} width={360} height={360} loading="eager" draggable={false}
                       alt={t("Época {index}: {date}", { index: i + 1, date: formatDate(image.observed_at_utc, locale) })}
                       className={index === i ? "" : "hidden-frame"} aria-hidden={index !== i} />
                   ))}
                   <span className="north instrument" aria-hidden="true">N ↑<br />E ←</span>
-                  <span className="scale instrument" aria-hidden="true">1′</span>
+                  <span className="scale instrument" aria-hidden="true">{number.format(sequence.fov_arcmin / 6)}′</span>
                   {hasGuide && showGuide && <span className="sky-guide" aria-hidden="true" />}
                 </figure>
               </div>
               <div className="plate-bottom instrument">
                 <span>RA {number.format(sequence.ra_deg)}° · DEC {number.format(sequence.dec_deg)}°</span>
-                <span>{sequence.fov_arcmin}′ × {sequence.fov_arcmin}′</span>
+                <span>{number.format(sequence.fov_arcmin)}′ × {number.format(sequence.fov_arcmin)}′</span>
               </div>
             </div>
 
-            <div className="transport" data-tour="explorar-epocas">
+            {rgbFrames && <label className="preset-format">
+              <span>{t("Formato da imagem")}</span>
+              <select className="control-field" value={mode} onChange={(event) => {
+                setMode(event.currentTarget.value === "rgb" ? "rgb" : "single");
+                chooseFrame(0);
+              }}>
+                <option value="single">{t("Tons de cinza")}</option>
+                <option value="rgb">{t("Composição RGB")}</option>
+              </select>
+            </label>}
+            {canCompare ? <div className="transport" data-tour="explorar-epocas">
               <label className="epoch-range">
                 <span>{t("Época exibida")}</span>
-                <input type="range" min={0} max={1} step={1} value={index}
+                <input type="range" min={0} max={frameCount - 1} step={1} value={index}
                   aria-valuetext={formatDate(frame.observed_at_utc, locale)}
                   onChange={(event) => chooseFrame(event.currentTarget.valueAsNumber)} />
               </label>
               <div className="epochs" role="group" aria-label={t("Época exibida")}>
-                {sequence.frames.map((item, i) => (
+                {frames.map((item, i) => (
                   <button className="epoch" type="button" key={item.frame_id} aria-pressed={index === i} onClick={() => chooseFrame(i)}>
-                    <span className="instrument">{t("ÉPOCA 0")}{i + 1}</span><span>{formatDate(item.observed_at_utc, locale)}</span>
+                    <span className="instrument">{t("ÉPOCA {index}", { index: String(i + 1).padStart(2, "0") })}</span><span>{formatDate(item.observed_at_utc, locale)}</span>
                   </button>
                 ))}
               </div>
               <button className="button secondary playback" type="button" onClick={() => setPlaying((previous) => !previous)}>
                 <span aria-hidden="true">{playing ? "Ⅱ" : "▶"}</span> {playing ? t("Pausar") : t("Reproduzir")}
               </button>
-            </div>
+            </div> : <p className="viewer-hint">
+              {observedLabel}: {formatDate(frame.observed_at_utc, locale)}. {t("Este formato tem uma única época disponível.")}
+            </p>}
+            {example?.preset && canCompare && <p className="viewer-hint">{mode === "rgb"
+              ? t("As composições RGB usam escalas de brilho próprias.")
+              : t("As imagens em tons de cinza usam a mesma escala de brilho entre épocas.")}</p>}
             <div aria-live={playing ? "off" : "polite"} aria-atomic="true" className="sr-only">{observedLabel}: {timestamp(frame.observed_at_utc)}</div>
             {guideTarget ? (
               <div className="viewer-guide" data-tour="explorar-marcar">
-                <p>{guideTarget.slug === "eps-indi-b"
+                {canCompare && <p>{guideTarget.slug === "eps-indi-b"
                   ? t("Procure Epsilon Indi B perto do centro. Ao alternar as épocas, a fonte se desloca ligeiramente para a esquerda e para baixo em relação às estrelas do campo.")
-                  : t("Procure {name} perto do centro e confira qualquer mudança aparente entre as épocas.", { name: guideTarget.name })}</p>
+                  : t("Procure {name} perto do centro e confira qualquer mudança aparente entre as épocas.", { name: guideTarget.name })}</p>}
                 <button className="button secondary" type="button" aria-pressed={showGuide} aria-controls="sky-field" onClick={() => setShowGuide((visible) => !visible)}>
                   {t("Marcar {name}", { name: guideTarget.name })}
                 </button>
@@ -366,20 +403,22 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
               <summary>{t("Descrição da comparação")}</summary>
               <p>{exampleDescription}</p>
             </details>}
-            {!example && <ComparisonReadout key={sequence.sequence_id} frames={sequence.frames} />}
-            <p className="viewer-hint">{t("Deslize na horizontal ou use ← → no visor para alternar.")}<Help id="epoca" label={t("uma época")} /></p>
+            {!example && frames[1] && <ComparisonReadout key={sequence.sequence_id} frames={[frames[0], frames[1]]} />}
+            {canCompare && <p className="viewer-hint">{t("Deslize na horizontal ou use ← → no visor para alternar.")}<Help id="epoca" label={t("uma época")} /></p>}
             <details className="sources" data-tour="explorar-origem">
               <summary>{t("Origem e processamento")}</summary>
               <dl>
                 <dt>{observedLabel}</dt><dd>{timestamp(frame.observed_at_utc)}</dd>
                 <dt>{t("Coleção e detector")}</dt><dd>{frame.collection} · {frame.detector}</dd>
-                <dt>{example ? t("Faixa no centro") : t("Faixa do detector")}<Help id="comprimento-de-onda" label={t("a faixa de comprimento de onda")} /></dt><dd>{number.format(frame.wavelength_um)} µm · {t("largura")} {number.format(frame.bandwidth_um)} µm</dd>
-                <dt>{t("Cobertura válida")}</dt><dd>{number.format(frame.valid_fraction * 100)}%</dd>
-                {example ? <><dt>{t("Calibração")}</dt><dd>{frame.calibration_version === "Simulação" ? t("Simulação") : frame.calibration_version}</dd></> :
+                <dt>{frame.wavelength_bands_um ? t("Bandas RGB") : example && !example.preset ? t("Faixa no centro") : t("Faixa do detector")}<Help id="comprimento-de-onda" label={t("a faixa de comprimento de onda")} /></dt>
+                <dd>{frame.wavelength_bands_um?.map(([min, max], i) => `${"RGB"[i]} ${number.format(min)}–${number.format(max)} µm`).join(" · ") ??
+                  <>{number.format(frame.wavelength_um)} µm · {t("largura")} {number.format(frame.bandwidth_um)} µm</>}</dd>
+                {frame.valid_fraction !== null && <><dt>{t("Cobertura válida")}</dt><dd>{number.format(frame.valid_fraction * 100)}%</dd></>}
+                {example && !example.preset ? <><dt>{t("Calibração")}</dt><dd>{frame.calibration_version === "Simulação" ? t("Simulação") : frame.calibration_version}</dd></> :
                   <><dt>{t("ID da observação")}</dt><dd>{frame.frame_id}</dd></>}
                 <dt>{t("Recuperado em")}</dt><dd>{timestamp(sequence.fetched_at_utc)}</dd>
                 <dt>{t("Processamento")}</dt><dd>{sequence.processing_version} · {timestamp(sequence.generated_at_utc)}</dd>
-                {example && <><dt>{t("Produto")}</dt><dd>{source ? <a href={source} target="_blank" rel="noreferrer">{t("Exposição no IRSA ↗")}</a> : t("Sem produto de origem")}</dd></>}
+                {example && !example.preset && <><dt>{t("Produto")}</dt><dd>{source ? <a href={source} target="_blank" rel="noreferrer">{t("Exposição no IRSA ↗")}</a> : t("Sem produto de origem")}</dd></>}
                 {cutout && <><dt>{t("Recorte")}<Help id="fits" label={t("um arquivo FITS")} /></dt><dd><a href={cutout} target="_blank" rel="noreferrer">{t("Arquivo FITS ↗")}</a></dd></>}
               </dl>
             </details>

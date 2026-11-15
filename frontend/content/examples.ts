@@ -8,6 +8,19 @@ export function exampleNames(locale: Locale) {
     ...alvos.map(({ slug, nome }) => [slug, nome] as const),
     ["m101", t("Galáxia M101")],
     ["prototipo", t("Campo simulado")],
+    ["preset-m1", t("M1 · Nebulosa do Caranguejo")],
+    ["preset-m8", t("M8 · Nebulosa da Lagoa")],
+    ["preset-m16", t("M16 · Nebulosa da Águia")],
+    ["preset-m27", t("M27 · Nebulosa do Haltere")],
+    ["preset-m31", t("M31 · Galáxia de Andrômeda")],
+    ["preset-m42", t("M42 · Nebulosa de Órion")],
+    ["preset-m45", t("M45 · Plêiades")],
+    ["preset-m51", t("M51 · Galáxia do Redemoinho")],
+    ["preset-m57", t("M57 · Nebulosa do Anel")],
+    ["preset-m101", t("M101 · Galáxia do Cata-vento")],
+    ["preset-m104", t("M104 · Galáxia do Sombreiro")],
+    ["preset-ngc3372", t("NGC 3372 · Nebulosa da Carina")],
+    ["preset-sgra", t("Sgr A* · Centro Galáctico")],
   ]);
 }
 

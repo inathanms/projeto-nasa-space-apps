@@ -16,7 +16,7 @@ export default function Page({ locale }: { locale: Locale }) {
         <h1>{routes.explorar.title}</h1>
         <p>{routes.explorar.description}</p>
       </header>
-      <Explorer examples={getExamples(locale)} api={apiBase} />
+      <Explorer examples={getExamples(locale, { includePresets: true })} api={apiBase} />
     </main>
   );
 }

@@ -6,7 +6,7 @@ const minSharedCoverage = 0.65;
 
 type BrightnessScale = { min: string; max: string };
 
-export type RenderedExposure = { frame: Frame; png: Blob; scale: BrightnessScale };
+export type RenderedExposure = { frame: Frame & { valid_fraction: number }; png: Blob; scale: BrightnessScale };
 
 export class SpherexApiError extends Error {
   constructor(readonly code: string, readonly status?: number) {

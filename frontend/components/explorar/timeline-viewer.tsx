@@ -253,7 +253,8 @@ export default function TimelineViewer({ timeline, api, savedFrames, onClose }: 
             {selected.observation && !frame && <><dt>{t("Faixa do detector")}</dt><dd>{selected.observation.minWavelength}–{selected.observation.maxWavelength} µm</dd></>}
             {frame && <>
               <dt>{isLiveFrame ? t("Faixa do detector") : t("Faixa no centro")}</dt><dd>{frame.wavelength_um.toFixed(5)} µm · {t("largura")} {frame.bandwidth_um.toFixed(5)} µm</dd>
-              <dt>{t("Cobertura válida")}</dt><dd>{(frame.valid_fraction * 100).toFixed(1)}%</dd></>}
+              {frame.valid_fraction !== null && <><dt>{t("Cobertura válida")}</dt><dd>{(frame.valid_fraction * 100).toFixed(1)}%</dd></>}
+            </>}
             {source && <><dt>{t("FITS original")}</dt><dd><a href={source} target="_blank" rel="noreferrer">{t("Exposição no IRSA ↗")}</a></dd></>}
             {cutout && <><dt>{t("Recorte")}</dt><dd><a href={cutout} target="_blank" rel="noreferrer">{t("Arquivo FITS ↗")}</a></dd></>}
           </dl>
