@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import type { TourStep } from "../../content/tutorial";
 import { localizedHref } from "../../lib/i18n";
+import { reducedMotion } from "../../lib/a11y";
 import { useLocale } from "../ui/LocaleProvider";
 
 type Rect = { top: number; left: number; width: number; height: number };
@@ -58,7 +59,7 @@ export default function SpotlightTour({ steps, start = 0, onClose }: { steps: To
         const firstTime = scrolledFor.current !== index;
         if (firstTime) {
           scrolledFor.current = index;
-          element.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+          element.scrollIntoView({ block: "center", inline: "nearest", behavior: reducedMotion() ? "auto" : "smooth" });
         }
         settle = window.setTimeout(() => {
           if (cancelled) return;

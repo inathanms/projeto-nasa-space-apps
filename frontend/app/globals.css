@@ -317,3 +317,100 @@ body:where(:has(#inicio)) .site-menu nav .landing-links { display: inline-flex; 
 }
 .discovery-links { display: grid; justify-items: start; gap: 2px; }
 .discovery-link.subtle { color: var(--mute); font-weight: 500; font-size: .82rem; }
+
+/* ===== Acessibilidade: preferências escolhidas no painel (atributos data-a11y-* na <html>) ===== */
+/* Tamanho do texto: escala tudo o que é medido em rem. */
+:root[data-a11y-text="lg"] { font-size: 112.5%; }
+:root[data-a11y-text="xl"] { font-size: 125%; }
+
+/* Daltonismo: paleta Okabe–Ito (azul, amarelo, laranja), distinguível em protanopia, deuteranopia e tritanopia. */
+:root[data-a11y-colorblind="true"] {
+  --teal: #0072b2;
+  --teal-light: #56b4e9;
+  --orange: #e69f00;
+  --orange-hover: #f5b83d;
+  --rust: #d55e00;
+  --sun: #f0e442;
+  --selected: #12304a;
+}
+
+/* Alto contraste: fundos pretos, texto branco e bordas claras (não mexe na paleta de cores). */
+:root[data-a11y-contrast="true"] {
+  --night: #000;
+  --night-deep: #000;
+  --night-soft: #050505;
+  --card: #0b0b0b;
+  --rule: #9fb8b2;
+  --control-border: #e0ece8;
+  --cream: #fff;
+  --muted: #e6efec;
+}
+:root[data-a11y-contrast="true"] :focus-visible { outline-width: 3px !important; }
+
+/* Reduzir movimento: mesmo efeito do ajuste do sistema, mas por escolha no site. */
+:root[data-a11y-motion="true"] *, :root[data-a11y-motion="true"] *::before, :root[data-a11y-motion="true"] *::after {
+  animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+  transition-duration: .01ms !important; scroll-behavior: auto !important;
+}
+
+/* Sublinhar links. */
+:root[data-a11y-underline="true"] a { text-decoration: underline !important; text-underline-offset: 3px; }
+
+/* Fonte de leitura fácil: Atkinson Hyperlegible (fallback Verdana) e mais espaço entre linhas e palavras. */
+:root[data-a11y-readable="true"] { --sans: "Atkinson Hyperlegible", Verdana, sans-serif; }
+:root[data-a11y-readable="true"] body { line-height: 1.7; letter-spacing: .02em; word-spacing: .08em; }
+
+/* Botão e painel de acessibilidade no cabeçalho */
+.a11y { position: relative; }
+.a11y-button {
+  display: inline-flex; align-items: center; gap: 8px; min-height: var(--touch); padding: 0 14px 0 8px;
+  border: 1px solid var(--control-border); border-radius: var(--radius-pill); background: transparent;
+  color: var(--ink); font: 600 .85rem var(--sans); cursor: pointer;
+}
+.a11y-button:hover, .a11y-button[aria-expanded="true"] { border-color: var(--accent); background: var(--selected); }
+.a11y-button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.a11y-panel {
+  position: absolute; right: 0; top: calc(100% + 10px); z-index: 1600;
+  width: min(360px, calc(100vw - 24px)); max-height: calc(100dvh - 110px); overflow-y: auto;
+  padding: 16px; border: 1px solid var(--accent); border-radius: var(--radius-card);
+  background: var(--card); color: var(--ink); box-shadow: 0 20px 60px rgb(0 0 0 / .6);
+}
+.a11y-panel[hidden] { display: none; }
+.a11y-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.a11y-head h2 { margin: 0; font-size: 1.15rem; }
+.a11y-close { width: 36px; height: 36px; border: 1px solid var(--control-border); border-radius: 50%; background: transparent; color: var(--ink); font-size: 1.2rem; cursor: pointer; }
+.a11y-intro { margin: 6px 0 14px; color: var(--mute); font-size: .85rem; line-height: 1.5; }
+.a11y-size { margin: 0 0 12px; padding: 0; border: 0; }
+.a11y-size legend { margin-bottom: 6px; font-size: .85rem; font-weight: 600; }
+.a11y-size [role="radiogroup"] { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.a11y-size button {
+  min-height: 44px; padding: 4px; border: 1px solid var(--control-border); border-radius: var(--radius-control);
+  background: var(--night-deep); color: var(--ink); font: .78rem var(--sans); cursor: pointer;
+}
+.a11y-size button span { font-weight: 700; }
+.a11y-size button[data-size="md"] span { font-size: .9rem; }
+.a11y-size button[data-size="lg"] span { font-size: 1.1rem; }
+.a11y-size button[data-size="xl"] span { font-size: 1.3rem; }
+.a11y-size button[aria-checked="true"] { border-color: var(--accent); background: var(--selected); color: var(--accent); }
+.a11y-list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.a11y-list li { padding: 8px 0; border-top: 1px solid var(--rule); }
+.a11y-switch {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 40px;
+  padding: 0; border: 0; background: none; color: var(--ink); font: 600 .9rem var(--sans); text-align: left; cursor: pointer;
+}
+.a11y-switch:disabled { opacity: .5; cursor: not-allowed; }
+.a11y-switch:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; border-radius: 6px; }
+.a11y-switch-track { flex: none; position: relative; width: 44px; height: 24px; border-radius: 12px; border: 1px solid var(--control-border); background: var(--night-deep); }
+.a11y-switch-track span { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--mute); transition: transform .15s ease; }
+.a11y-switch[aria-checked="true"] .a11y-switch-track { border-color: var(--accent); background: var(--accent); }
+.a11y-switch[aria-checked="true"] .a11y-switch-track span { transform: translateX(20px); background: var(--night-deep); }
+.a11y-hint { margin: 2px 0 0; color: var(--mute); font-size: .78rem; line-height: 1.45; }
+.a11y-reset { margin-top: 12px; min-height: 40px; padding: 0 4px; border: 0; background: none; color: var(--accent); font: 600 .85rem var(--sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* Em telas médias o rótulo some visualmente (continua para leitores de tela). */
+@media (max-width: 1160px) {
+  .a11y-button { padding-right: 8px; }
+  .a11y-button-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (max-width: 550px) {
+  .a11y-panel { position: fixed; top: 84px; right: 12px; left: 12px; width: auto; }
+}

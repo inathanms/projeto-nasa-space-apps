@@ -5,6 +5,7 @@ import Footer from "../../components/ui/Footer";
 import Nav from "../../components/ui/Nav";
 import LocaleProvider from "../../components/ui/LocaleProvider";
 import DiscoveryWidget from "../../components/discovery/DiscoveryWidget";
+import { A11Y_BOOT_SCRIPT } from "../../lib/a11y-boot";
 import { getLanding } from "../../content/landing";
 import { languageTag, translators, type Locale } from "../../lib/i18n";
 import "../globals.css";
@@ -37,7 +38,11 @@ export default function Site({ children, locale }: { children: ReactNode; locale
   const t = translators[locale];
 
   return (
-    <html lang={languageTag[locale]} data-type="software" className={geist.variable}>
+    // suppressHydrationWarning: o script abaixo acrescenta data-a11y-* na <html> antes do React assumir.
+    <html lang={languageTag[locale]} data-type="software" className={geist.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: A11Y_BOOT_SCRIPT }} />
+      </head>
       <body>
         <LocaleProvider locale={locale}>
           <a className="skip" href="#conteudo">{t("Ir para o conteúdo")}</a>

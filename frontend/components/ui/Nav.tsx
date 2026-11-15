@@ -6,6 +6,7 @@ import LanguageSwitch from "./LanguageSwitch";
 import Menu from "./Menu";
 import ToolLinks from "./ToolLinks";
 import TutorialButton from "../tour/TutorialButton";
+import AccessibilityMenu from "../a11y/AccessibilityMenu";
 
 export default function Nav({ locale }: { locale: Locale }) {
   const { marca, nav } = getLanding(locale);
@@ -33,6 +34,7 @@ export default function Nav({ locale }: { locale: Locale }) {
           </nav>
         </Menu>
         <TutorialButton />
+        <AccessibilityMenu />
         <LanguageSwitch />
         <Link className="button primary header-cta" href={localizedHref(locale, nav.cta.href)}>
           {nav.cta.label} <span aria-hidden="true">→</span>

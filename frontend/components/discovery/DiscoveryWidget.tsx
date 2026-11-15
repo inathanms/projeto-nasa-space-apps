@@ -8,6 +8,7 @@ import {
   type DiscoveryField, type ReportHeader,
 } from "../../lib/discovery";
 import { localizedHref } from "../../lib/i18n";
+import { reducedMotion } from "../../lib/a11y";
 import { useLocale } from "../ui/LocaleProvider";
 
 type Step = "intro" | "how" | "kind" | "unsure" | "check" | "known" | "bright" | "unknown" | "form" | "report" | "done";
@@ -93,7 +94,7 @@ export default function DiscoveryWidget() {
   const visible = TOOL_ROUTES.some((route) => localizedHref(locale, route) === here);
 
   useEffect(() => {
-    log.current?.scrollTo({ top: log.current.scrollHeight, behavior: "smooth" });
+    log.current?.scrollTo({ top: log.current.scrollHeight, behavior: reducedMotion() ? "auto" : "smooth" });
   }, [history, open]);
 
   useEffect(() => {
