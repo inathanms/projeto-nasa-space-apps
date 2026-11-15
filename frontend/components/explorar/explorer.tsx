@@ -6,6 +6,7 @@ import { forLocales } from "../../lib/i18n";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Help from "../ui/Help";
+import { setDiscoveryField } from "../../lib/discovery";
 import { useEffect, useEffectEvent, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { formatDate, sourceLink, type Example, type Sequence } from "../../lib/sequence";
 import { isTimeline, type CatalogExposure, type LiveTimeline, type Timeline } from "../../lib/timeline";
@@ -76,8 +77,21 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
   const frameCount = frames?.length ?? 0;
   const canCompare = frameCount > 1;
   const epsilon = examples.find((item) => item.slug === "eps-indi-b");
+  const timelineTarget = timeline && examples.find(({ sequence, synthetic }) =>
+    !synthetic && sequence.ra_deg === timeline.ra_deg && sequence.dec_deg === timeline.dec_deg);
   const canUseRgb = Boolean(rgbFrames || (rgbSource && rgbSource.exposures.length > 0));
   const guideName = example && !example.synthetic ? example.name : undefined;
+
+  useEffect(() => {
+    if (timeline) return;
+    setDiscoveryField(sequence && !example?.synthetic ? {
+      name: example?.name,
+      ra: sequence.ra_deg,
+      dec: sequence.dec_deg,
+      times: frames?.map((item) => item.observed_at_utc) ?? [],
+    } : null);
+  }, [example, frames, sequence, timeline]);
+  useEffect(() => () => setDiscoveryField(null), []);
 
   const openLinkedField = useEffectEvent(() => {
     const params = new URLSearchParams(window.location.search);
@@ -88,7 +102,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     const hasField = requestedRA >= 0 && requestedRA < 360 && requestedDec >= -90 && requestedDec <= 90;
     const mode = params.get("modo");
     if (mode === "epocas" && !hasField && epsilon) {
-      void openEpsilonTimeline();
+      openTargetTimeline(epsilon);
       return;
     }
     const preset = examples.find((item) => item.slug === slug) ??
@@ -169,9 +183,9 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
     void requestField(r, d, catalog, trigger);
   }
 
-  function openEpsilonTimeline(trigger?: HTMLElement) {
-    if (!epsilon || active.current) return;
-    const { ra_deg, dec_deg } = epsilon.sequence;
+  function openTargetTimeline(target: Example, trigger?: HTMLElement) {
+    if (active.current) return;
+    const { ra_deg, dec_deg } = target.sequence;
     setRa(String(ra_deg));
     setDec(String(dec_deg));
     void requestField(ra_deg, dec_deg, true, trigger);
@@ -334,6 +348,10 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             </select>
             <button type="button" className="button secondary" disabled={!selectedPreset} aria-controls="resultado-explorador"
               onClick={(event) => { if (selectedPreset) applyExample(selectedPreset, event.currentTarget); }}>{t("Abrir exemplo")} <span aria-hidden="true">↗</span></button>
+            {api && selectedPreset && <button type="button" className="button secondary" aria-disabled={busy} aria-controls="resultado-explorador"
+              onClick={(event) => openTargetTimeline(selectedPreset, event.currentTarget)}>
+              {t("Todas as épocas de {name}", { name: selectedPreset.name })}
+            </button>}
           </div>
           <form data-tour="explorar-busca" onSubmit={(event) => void search(event, (event.nativeEvent as SubmitEvent).submitter?.id !== "compare-pair")} noValidate>
             <h2>{t("Buscar por coordenadas")}</h2>
@@ -357,8 +375,6 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
             <button className="button primary" type="submit" aria-disabled={busy} aria-controls="resultado-explorador">{t("Buscar épocas no IRSA")}<span aria-hidden="true">↗</span></button>
             {api && <button id="compare-pair" className="button secondary" type="submit" aria-disabled={busy}
               aria-controls="resultado-explorador">{t("Buscar par para comparação")}</button>}
-            <button type="button" className="button secondary" aria-disabled={busy} aria-controls="resultado-explorador"
-              onClick={(event) => openEpsilonTimeline(event.currentTarget)}>{t("Épocas de Epsilon Indi B")}</button>
             {!api && <p className="muted offline-note">{t("A busca ao vivo requer uma API configurada neste ambiente.")}</p>}
             <p role="status" className="muted search-feedback">{busy ? t("Carregando observações…") : ""}</p>
             <p id="search-error" className="error search-feedback" role="alert">{error}</p>
@@ -368,7 +384,7 @@ export default function Explorer({ examples, api }: { examples: [Example, ...Exa
         <div id="resultado-explorador" className="viewer" ref={results} tabIndex={-1} role="group" aria-label={t("Resultado do Explorador")}>
           {timeline ? <TimelineViewer key={timelineVersion}
             timeline={timeline} api={timeline.source === "live" ? api : undefined}
-            targetName={timeline.ra_deg === epsilon?.sequence.ra_deg && timeline.dec_deg === epsilon.sequence.dec_deg ? epsilon.name : undefined}
+            targetName={timelineTarget?.name}
             savedFrames={timeline.source === "live" ? [] : epsilon?.sequence.frames ?? []}
             onClose={closeTimeline} />
           : sequence && frames && frame ? <section aria-label={t("Visor de comparação")} className="viewer">

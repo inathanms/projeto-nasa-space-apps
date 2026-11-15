@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Footer from "../../components/ui/Footer";
 import Nav from "../../components/ui/Nav";
 import LocaleProvider from "../../components/ui/LocaleProvider";
+import DiscoveryWidget from "../../components/discovery/DiscoveryWidget";
 import { getLanding } from "../../content/landing";
 import { languageTag, translators, type Locale } from "../../lib/i18n";
 import "../globals.css";
@@ -43,6 +44,7 @@ export default function Site({ children, locale }: { children: ReactNode; locale
           <Nav locale={locale} />
           {children}
           <Footer locale={locale} />
+          <DiscoveryWidget />
         </LocaleProvider>
       </body>
     </html>

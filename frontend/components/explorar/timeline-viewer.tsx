@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale } from "../ui/LocaleProvider";
+import { setDiscoveryField } from "../../lib/discovery";
 import { forLocales } from "../../lib/i18n";
 
 import Image from "next/image";
@@ -67,6 +68,15 @@ export default function TimelineViewer({ timeline, api, savedFrames, targetName,
   const playable = mode === "single" && selected && api && frame && byDetector.get(selected.detector)?.some(
     (item) => item.collection === selected.collection && item.observed_at_utc !== selected.observed_at_utc,
   );
+
+  useEffect(() => {
+    setDiscoveryField({
+      name: targetName,
+      ra: timeline.ra_deg,
+      dec: timeline.dec_deg,
+      times: frame ? [frame.observed_at_utc] : [],
+    });
+  }, [frame, targetName, timeline]);
 
   const openInitial = useEffectEvent(() => {
     if (api && targetName && selected) void choose(selected);

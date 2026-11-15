@@ -280,7 +280,6 @@ export const englishMessages = {
   " · Crédito: NASA/JPL-Caltech.": " · Credit: NASA/JPL-Caltech.",
   "ÉPOCA {index}": "EPOCH {index}",
   "Época exibida": "Displayed epoch",
-  "Épocas de Epsilon Indi B": "Epsilon Indi B epochs",
   "órbita a 700 km": "700 km orbit",
   "arquivo NASA": "NASA archive",
   "alinha e mostra": "aligns and displays",
@@ -345,5 +344,6 @@ export const englishMessages = {
   "Pular": "Skip",
   "Voltar": "Back",
   "Concluir": "Finish",
-  "Próximo": "Next"
+  "Próximo": "Next",
+  "Todas as épocas de {name}": "All epochs of {name}"
 } as const;
