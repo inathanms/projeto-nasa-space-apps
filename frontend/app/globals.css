@@ -97,7 +97,10 @@ body:where(:has(#inicio)) .site-header { position: absolute; inset: 0 0 auto; bo
 .site-menu summary::after { content: ""; width: 6px; height: 6px; border: solid currentColor; border-width: 0 1px 1px 0; transform: translateY(-2px) rotate(45deg); }
 .site-menu[open] summary::after { transform: translateY(2px) rotate(225deg); }
 .site-menu nav {
+  /* Acima dos botões do cabeçalho (tutorial, acessibilidade, idioma), que no celular quebram para a linha de baixo. */
   position: absolute;
+  z-index: 1700;
+  box-shadow: 0 14px 32px rgb(0 0 0 / .45);
   right: 0;
   top: calc(100% + 8px);
   inline-size: min(16rem, calc(100vw - 2 * var(--gutter)));

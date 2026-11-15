@@ -178,7 +178,13 @@
   /* A última linha (cena) absorve a altura extra da barra lateral; sem isso os painéis de RA e Dec esticavam. */
   .orbital-workspace { grid-template-columns: minmax(0, 1fr) minmax(240px, 24%); grid-template-rows: auto auto 1fr; }
   .orbital-time, .orbital-pointing, .orbital-stage { grid-column: 1; }
-  .orbital-sidebar { grid-column: 2; grid-row: 2 / 4; }
+  /* contain: size faz o conteúdo da barra lateral não influenciar a altura das linhas da grade:
+     ela ocupa a altura de RA/Dec + cena e rola por dentro quando o diário, as curiosidades ou a ficha crescem. */
+  .orbital-sidebar {
+    grid-column: 2; grid-row: 2 / 4; align-self: stretch; align-content: start;
+    contain: size; overflow-y: auto; overscroll-behavior: contain;
+    scrollbar-width: thin; scrollbar-color: var(--rule) transparent;
+  }
 }
 @media (max-width: 820px) {
   .orbital-stage { min-height: min(72vw, 385px); }
