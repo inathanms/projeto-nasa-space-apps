@@ -1,51 +1,51 @@
 # SPHEREye
 
-O SPHEREye é um aplicativo educacional da equipe **OxenTech** para o NASA Space Apps Challenge 2026. A experiência parte das fotografias que levaram à descoberta de Plutão e propõe a mesma pergunta com imagens do telescópio infravermelho SPHEREx: o que mudou no céu entre duas observações?
+SPHEREye is an educational app built by **OxenTech** for the 2026 NASA Space Apps Challenge. It starts with the photographs that led to the discovery of Pluto and asks the same question about images from the SPHEREx infrared telescope: what changed in the sky between two observations?
 
-[**Abra o SPHEREye**](https://sphereye.earth/) · [**Acesse em português**](https://sphereye.earth/pt/) · [Desafio Planet X and SPHEREx](https://www.spaceappschallenge.org/2026/challenges/planet-x-and-spherex/?tab=details)
+[**Open SPHEREye**](https://sphereye.earth/) · [**Visit the Portuguese site**](https://sphereye.earth/pt/) · [Planet X and SPHEREx challenge](https://www.spaceappschallenge.org/2026/challenges/planet-x-and-spherex/?tab=details)
 
-![Página inicial do SPHEREye com duas fotografias históricas de Plutão e o botão para explorar o céu](docs/screenshots/home.jpg)
+![SPHEREye homepage with two historical photographs of Pluto and a button to explore the sky](docs/screenshots/home.jpg)
 
-## Experimente em três passos
+## Try it in three steps
 
-1. No [Explorador](https://sphereye.earth/explore/), a galáxia **M51** abre por padrão. Selecione duas épocas e alterne entre elas. Use o zoom e o marcador para inspecionar a mesma região das imagens. O contexto do alvo e as curiosidades acompanham os exemplos salvos.
-2. No [Observatório orbital](https://sphereye.earth/observatory/), ajuste a ascensão reta e a declinação e controle o tempo da simulação. Ao encontrar um alvo, a ficha abre automaticamente com seus dados e curiosidades. Use o diário de bordo para rever a ficha ou importe as coordenadas para o Explorador.
-3. No [Laboratório de apontamento](https://sphereye.earth/lab/), arraste o globo ou edite os valores de RA e Dec para entender como as duas coordenadas orientam a linha de visão. Importe o ponto escolhido para buscar observações no Explorador.
+1. The [Explorer](https://sphereye.earth/explore/) opens on **M51**, the Whirlpool Galaxy. Select two epochs and switch between them. Use the zoom and target marker to inspect the same area in both images. Saved examples include background information and fun facts about each target.
+2. In the [Orbital Observatory](https://sphereye.earth/observatory/), adjust right ascension and declination, then control the simulation time. When you find a target, its details and fun facts open automatically. Revisit the details from the logbook or import the coordinates into the Explorer.
+3. In the [Telescope Pointing Lab](https://sphereye.earth/lab/), drag the globe or edit the RA and Dec values to see how each coordinate affects the line of sight. Import the selected position to look up observations in the Explorer.
 
-### Explorador de imagens
+### Image Explorer
 
-Os presets incluem alvos como M51, M101, a Nebulosa de Órion e a galáxia de Andrômeda. Eles ficam disponíveis sem depender de uma consulta ao IRSA. A busca por coordenadas em graus decimais consulta as épocas observadas pelo SPHEREx. Quando há dados compatíveis, é possível comparar imagens em escala de cinza ou em cores falsas de infravermelho. O assistente de descoberta ajuda a reunir o contexto da região observada em um relato copiável.
+Offline presets include M51, M101, the Orion Nebula, and the Andromeda Galaxy. To search for other fields, enter coordinates in decimal degrees and the app will look up SPHEREx observations in IRSA. Depending on the data available, you can compare grayscale images or false-color infrared composites. The discovery assistant helps you gather context about the observed region in a report you can copy.
 
-![Explorador comparando observações da galáxia M51, com controles de época e zoom](docs/screenshots/explorer.jpg)
+![Explorer comparing observations of M51, with epoch and zoom controls](docs/screenshots/explorer.jpg)
 
-### Observatório orbital
+### Orbital Observatory
 
-A cena didática combina o modelo do telescópio, os controles de tempo em UTC ou MJD e o diário de bordo. A prévia mostra o campo apontado quando há uma imagem disponível.
+The teaching model combines a simulated telescope, time controls in UTC or Modified Julian Date (MJD), and a logbook. When an image is available, the observatory previews the field the telescope is pointing at.
 
-![Observatório com globo terrestre, telescópio, controles de apontamento e diário de bordo](docs/screenshots/observatory.jpg)
+![Observatory with the Earth, a telescope, pointing controls, and a logbook](docs/screenshots/observatory.jpg)
 
-### Laboratório de apontamento
+### Telescope Pointing Lab
 
-![Laboratório com globo interativo, linha de visão e controles de ascensão reta e declinação](docs/screenshots/pointing-lab.jpg)
+![Pointing lab with an interactive globe, a line of sight, and controls for right ascension and declination](docs/screenshots/pointing-lab.jpg)
 
-### Idiomas e acessibilidade
+### Languages and accessibility
 
-O site abre em inglês e oferece português pelo seletor no cabeçalho. O menu **Accessibility** reúne opções de tamanho do texto, contraste e redução de movimento. As principais interações aceitam teclado e os visores também oferecem gestos de toque.
+The site opens in English. Use the language selector in the header to switch to Portuguese. The **Accessibility** menu offers controls for text size, contrast, and reduced motion. The main interactions support keyboard input, and the image viewers also support touch gestures.
 
-<img src="docs/screenshots/home-mobile.jpg" alt="Página inicial do SPHEREye em português na tela de um celular" width="390">
+<img src="docs/screenshots/home-mobile.jpg" alt="SPHEREye homepage in Portuguese on a phone" width="390">
 
-*Capturas da versão de produção.*
+*Screenshots from the production site.*
 
-## Links dos ambientes
+## Environment links
 
-| Ambiente | Frontend | API |
+| Environment | Frontend | API |
 | --- | --- | --- |
-| Produção (`main`) | [sphereye.earth](https://sphereye.earth/) | [Saúde](https://api.sphereye.earth/health) · [Swagger](https://api.sphereye.earth/docs) |
-| Desenvolvimento (`develop`) | [Preview na Vercel](https://sphereye-git-develop-igormonts-projects.vercel.app/) | [Saúde](https://api.dev.sphereye.earth/health) · [Swagger](https://api.dev.sphereye.earth/docs) |
+| Production (`main`) | [sphereye.earth](https://sphereye.earth/) | [Health check](https://api.sphereye.earth/health) · [Swagger](https://api.sphereye.earth/docs) |
+| Development (`develop`) | [Vercel preview](https://sphereye-git-develop-igormonts-projects.vercel.app/) | [Health check](https://api.dev.sphereye.earth/health) · [Swagger](https://api.dev.sphereye.earth/docs) |
 
-## Rodar localmente
+## Run locally
 
-Requisitos para o frontend: **Node.js 22+** e npm. Os presets podem ser usados só com o frontend.
+The frontend requires **Node.js 22+** and npm. You can use the offline presets with only the frontend running.
 
 ```bash
 cd frontend
@@ -53,7 +53,7 @@ npm ci
 npm run dev
 ```
 
-Abra [localhost:3000](http://localhost:3000). Em desenvolvimento, o frontend usa o proxy da API de desenvolvimento por padrão. Para rodar toda a aplicação localmente, instale **Python 3.12** e **uv** e suba o backend em outro terminal, a partir da raiz do repositório.
+Open [localhost:3000](http://localhost:3000). The local frontend uses the development API proxy by default. To run the full app locally, install **Python 3.12** and **uv**, then start the backend in a separate terminal from the repository root.
 
 ```bash
 cd backend
@@ -61,35 +61,35 @@ uv sync --frozen
 uv run uvicorn app.main:app --reload --port 8000
 ```
 
-Para apontar o frontend para a API local, reinicie o Next.js com `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev`. A [documentação interativa local](http://localhost:8000/docs) descreve os parâmetros da API. Para personalizar o backend, use [`backend/.env.example`](backend/.env.example) como referência e autorize a origem do frontend em `CORS_ALLOWED_ORIGINS`.
+To use the local API, restart the frontend with `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev`. The [local interactive API docs](http://localhost:8000/docs) describe the request parameters. Use [`backend/.env.example`](backend/.env.example) as a reference for backend configuration and allow the frontend origin in `CORS_ALLOWED_ORIGINS`.
 
-### Build e testes
+### Build and test
 
 ```bash
-# Frontend (execute na raiz do repositório)
+# Frontend (run from the repository root)
 (cd frontend && npm run build && npm run typecheck)
 
-# Backend, com as dependências do uv já instaladas
+# Backend (after installing dependencies with uv)
 (cd backend && uv run pytest)
 ```
 
-A exportação estática fica em `frontend/out`. Em produção na Vercel, `NEXT_PUBLIC_API_BASE_URL=https://api.sphereye.earth` precisa estar disponível durante o build. A `develop` aponta para a API de desenvolvimento pelas regras de [`vercel.json`](vercel.json).
+The static export is written to `frontend/out`. On Vercel, the production build requires `NEXT_PUBLIC_API_BASE_URL=https://api.sphereye.earth`. The `develop` branch connects to the development API through the rewrites in [`vercel.json`](vercel.json).
 
-## Arquitetura e API
+## Architecture and API
 
-| Caminho | Responsabilidade |
+| Path | Responsibility |
 | --- | --- |
-| [`frontend/`](frontend/) | Next.js App Router, React e TypeScript. Rotas, componentes, textos traduzidos e imagens dos presets. |
-| [`backend/`](backend/) | FastAPI e Python. Consulta observações ao IRSA, processa recortes FITS e gera imagens para comparação. O cache em armazenamento compatível com S3 é opcional. |
+| [`frontend/`](frontend/) | Next.js App Router, React, and TypeScript. Contains routes, components, translations, and preset images. |
+| [`backend/`](backend/) | FastAPI and Python. Queries IRSA, processes FITS cutouts, and renders images for comparison. Caching in S3-compatible storage is optional. |
 
-- `GET /health` informa o estado da API.
-- `GET /epochs` lista visitas e observações para uma ascensão reta e declinação.
-- `GET /image` gera o recorte de uma observação, com opções por detector ou composição RGB em cores falsas.
+- `GET /health` reports API status.
+- `GET /epochs` lists visits and observations for a given right ascension and declination.
+- `GET /image` renders an observation cutout for one detector or as a false-color RGB composite.
 
-Consulte o [README do backend](backend/README.md) para exemplos de consultas, configuração, cache e deploy.
+See the [backend README](backend/README.md) for example requests and details on configuration, caching, and deployment.
 
-## Dados, créditos e licenças
+## Data, credits, and licenses
 
-Os dados do SPHEREx vêm do [NASA/IPAC Infrared Science Archive](https://irsa.ipac.caltech.edu/Missions/spherex.html). O SPHEREx é um projeto do JPL e do Caltech financiado pela NASA. A demonstração identifica exemplos simulados quando presentes, e as cenas de apontamento são modelos didáticos.
+SPHEREx data comes from the [NASA/IPAC Infrared Science Archive](https://irsa.ipac.caltech.edu/Missions/spherex.html). SPHEREx is a joint project of JPL and Caltech funded by NASA. The app labels simulated examples where they appear. The pointing scenes are teaching models.
 
-As bibliotecas, fontes, imagens e demais recursos de terceiros estão registrados na [página de licenças](https://sphereye.earth/pt/licencas/). Os [avisos de terceiros](frontend/public/licenses/third-party-notices.txt) também estão disponíveis neste repositório.
+The [open-source licenses page](https://sphereye.earth/licenses/) lists third-party libraries, fonts, images, and other resources. The [third-party notices](frontend/public/licenses/third-party-notices.txt) are also available in this repository.
